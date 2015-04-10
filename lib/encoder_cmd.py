@@ -90,7 +90,7 @@ class Encoder_prop:
   __common_path = "d:/workspace/"
   __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/Release_WithTrace/"
   __paths["x265"]=__common_path+"arcsoft_codes/HEVC_Codec/HEVC_Encoder/tool_X265_stable_2015_02_14_b6be305a2f99_modified_for_performance_test/build/vc10-x86_64/Release/"
-  __paths["x264"] = __common_path + "src.x264/x264_latest/bin/Release/"
+  __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/Release/"
 
   @staticmethod
   def __format_path(path):
