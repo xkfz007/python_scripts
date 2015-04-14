@@ -4,12 +4,12 @@ import os
 
 enc = lib.Encoder_prop()
 
-seq_list = ('BasketballPass_416x240_50',)
+seq_list = ('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
 br_list = (1000, 1500, 2000, 3000)
 param_list = lib.get_default_param_list()
 
 param_list['eRcType'] = 3
-param_list['frame_num_to_encode'] = -1
+param_list['frame_num_to_encode'] =100
 param_list['output_path'] = "F:/encoder_test_output/output0"
 param_list['input_path'] = "E:/sequences/"
 param_list['nIntraPicInterval'] = 30

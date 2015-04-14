@@ -44,9 +44,9 @@ class TaskManager:
       # Wait until TaskKeeper has free space
       while True:
         time.sleep(0.1)
-        for command, task in self.TaskKeeper.items():
-          if task.poll() != None:  # Means task has terminated
-            self.TaskKeeper.pop(command)
+        for cmd, tsk in self.TaskKeeper.items():
+          if tsk.poll() != None:  # Means task has terminated
+            self.TaskKeeper.pop(cmd)
 
         if (len(self.TaskKeeper) < self.m_maxTaskNumber):
           break
@@ -69,27 +69,7 @@ class TaskManager:
       time.sleep(0.1)
 
 
-
-  #def getCommandInfo(self, command):
-  #  '''
-  #  Given a command, tell which commandList it belongs to in m_cmdListsAndLogFiles and also return the idx.
-  #  '''
-  #  for cmdListAndFileList in self.m_cmdListsAndLogFiles:
-  #    cmdIndex = 0
-  #    for cmd in cmdListAndFileList[0]:
-  #      if cmd == command:
-  #        return (cmdIndex, cmdListAndFileList[0], cmdListAndFileList[1])
-  #      cmdIndex = cmdIndex + 1
-  #  return None
-
-
   def __del__(self):
+    self.clearAllTask()
 
-    while True:
-      if (len(self.TaskKeeper) == 0): # wait until all task finished
-        break
-      for command, task in self.TaskKeeper.items():
-        if task.poll() != None:
-          self.TaskKeeper.pop(command)
-      time.sleep(0.1)
-            
+

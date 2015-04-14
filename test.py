@@ -69,5 +69,11 @@ def get_total_frame_num(filename,width,height):
 
 print "num_frames=%s" % get_total_frame_num("e:/sequences/navyflight_1920x1080_30_2973.yuv",1920,1080)
 
+a=100
+for a in range(10):
+  print a
+
+print a
+
 
 
