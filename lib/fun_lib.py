@@ -1,9 +1,33 @@
+import sys
 def get_reso_info(seq_name):
+  common_reso_list=('176x144','352x288','416x240','832x480','1024x768',
+                    '1280x720','1920x1080','2560x1600','3840x2160',
+                    '640x480','448x336',)
+  common_fps_list=(15,20,23,24,25,30,50,60)
+  #seq_name format: name_widthxheight_fps or
+  #                 name_widthxheight_bitdepth_fps_totalframes
   tmp_list = seq_name.split('_')
+  if tmp_list[1] not in common_reso_list:
+    print "maybe the resolution is invalid, please check"
+    sys.exit()
   reso = tmp_list[1].split('x')
-  width = reso[0]
-  height = reso[1]
-  fps = tmp_list[2]
+  width = int(reso[0])
+  height = int(reso[1])
+  #if len(tmp_list)==3:
+  #  fps=int(tmp_list[2])
+  #elif len(tmp_list)==5:
+  #  fps= int(tmp_list[3])
+  #else:
+  #  fps=30 #default fps
+  fps=int(tmp_list[2])
+  if fps<15:
+    if len(tmp_list)==5:
+      fps=int(tmp_list[3])
+    else:
+      fps=30 #default fps
+  if fps not in common_fps_list:
+    print "maybe the fps is invalid, please check"
+    sys.exit()
   return (width, height, fps)
 
 
@@ -44,7 +68,7 @@ def get_bitrate_for_rc(eRcType, nSrcWidth, nSrcHeight, fFrameRate, factor=2):
   if eRcType != 8:  #not ABR
     if eRcType == 1:  #CBR
       nMaxBitrate = nBitrate
-    elif rc_type == "VBR":
+    elif eRcType == "VBR":
       nMaxBitrate = 3 * nBitrate
     vbv_buffer_size = 1 * nMaxBitrate
 

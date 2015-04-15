@@ -28,8 +28,10 @@ param_list['rc_b_cutree'] = 0
 param_list['rc_i_lowres'] = 1
 
 #encoder_list = ("as265", "x265")
-#encoder_list = ("as265", )
-encoder_list = ("x265", )
+encoder_list = ("as265", )
+#encoder_list = ("x265", )
+
+lib.remove_some_tmp_files(param_list['output_path'])
 
 for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)

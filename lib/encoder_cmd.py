@@ -274,6 +274,7 @@ def parse_cl(enc):
 
 def format_path(path):
   path=path.strip()
+  path=os.path.normpath(path)
   if path[-1]!="/" and path[-1]!="\\":
     if path.find("/")>=0:
       path+="/"
@@ -282,20 +283,69 @@ def format_path(path):
   return path
 
 def check_path(path):
-    path=path.strip()
+    path=path.strip()#delete the blankspace before or after the path
     path=path.strip('\\')
     path=path.strip('/')
     #chech whether the path exists or creat it
     if not os.path.exists(path):
       os.makedirs(path)
-def check_file(filename):
-  if not os.path.isfile(filename):
+
+def delete_files(path,ext_list):
+  path=os.path.normpath(path)
+  for root,dirs,files in os.walk(path):
+    for fname in files:
+      full_name=os.path.join(root,fname)
+      ext=os.path.splitext(full_name)[1]
+      if ext in ext_list:
+        os.remove(full_name)
+
+def remove_some_tmp_files(path):
+  ext_list=(".bin",".rcstat",".pinfo",".log")
+  delete_files(path,ext_list)
+
+def check_files(param_list):
+  #check the input file
+  input_fullname=os.path.join(param_list['input_path'],param_list['input_filename'])
+  if not os.path.exists(input_fullname):
+    print "input file (%s) does not exist. Please check"%input_fullname
     sys.exit()
 
-#def check_param_paths(param_list):
-    #param_list['output_path'] = "d:/reserved/"
-    #param_list['input_path'] = "d:/reserved/"
-    #param_list['input_filename'] = "BlowingBubbles_416x240_50.yuv"
+  #check the outputfiles: if exists, delete it
+  output_fullname=os.path.join(param_list['output_path'],param_list['output_filename'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_cabac'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_general'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_prd_y'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_prd_uv'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_cabacrdo'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
+  output_fullname=os.path.join(param_list['output_path'],param_list['trace_file_arch1rdo'])
+  if os.path.exists(output_fullname):
+    os.remove(output_fullname)
+    print "Deleted output file: %s"%output_fullname
+
 
 def get_total_frame_num(filename,width,height):
   size=os.path.getsize(filename)
@@ -308,10 +358,10 @@ def check_params(param_list):
   param_list['input_path']=format_path(param_list['input_path'])
 
   check_path(param_list['output_path'])
-  check_file(param_list['input_path']+param_list['input_filename'])
+  check_files(param_list)
 
   if param_list['frame_num_to_encode']<=0:
-    param_list['frame_num_to_encode']=get_total_frame_num(param_list['input_path']+param_list['input_filename'],
+    param_list['frame_num_to_encode']=get_total_frame_num(os.path.join(param_list['input_path'],param_list['input_filename']),
                                                           param_list['nSrcWidth'],param_list['nSrcHeight'])
   return
 
@@ -344,7 +394,7 @@ def configure_rc_param(param_list,tmp_list):
 def configure_param(enc,param_list):
   tag_str=""
   tmp_list=dict()
-  tmp_list['seq_name']=param_list['input_filename'].replace(".yuv","")
+  tmp_list['seq_name']=os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
   tmp_list['tmp_nBitrate'] = -1
   tmp_list['tmp_nMaxBitrate'] = -1
   tmp_list['tmp_vbv_buffer_size'] = -1

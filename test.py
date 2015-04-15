@@ -75,5 +75,32 @@ for a in range(10):
 
 print a
 
+path="c:/aa/kk"
+for i in [ "  c://a//kk","c:\\dfa\\asf\\   ","c://adfa\\adsf   \\","c:/fasdf\\fasdf/  "]:
+  print "%s@@@@%s"%(i,os.path.normpath(i))
+
+path="c:/aa/kkk"
+path=os.path.normpath(path)
+filename="a.txt"
+fullname=os.path.join(path,filename)
+print fullname
+
+
+#path="F:\\tmp"
+#for root,dirs,files in os.walk(path):
+#  #print "[root=%s dirs=%s files=%s]"%(root,dirs,files)
+#  for i in files:
+#    print "FILE=%s"%os.path.join(root,i)
+
+import lib.fun_lib
+seq_name=( 'Apeopleonstreet_2560x1600_8_30_150','Atraffic_2560x1600_8_30_150','Bbasketballdrive_1920x1080_8_50_500',
+'Bbqterrace_1920x1080_8_60_600','Bcactus_1920x1080_8_50_500','Bkimono_1920x1080_8_24_240','RaceHorses_416x240_30',
+'RaceHorses_832x480_30','SlideEditing_1280x720_30','SlideShow_1280x720_20','Tennis_1920x1080_24',
+'Traffic_2560x1600_30_crop','vidyo1_1280x720_60','vidyo3_1280x720_60','vidyo4_1280x720_60','walk_640x480_30',
+'xtslf_1920x1080_25_1854',  )
+for i in seq_name:
+  width,height,fps=lib.fun_lib.get_reso_info(i)
+  print "%s:%d %d %d"%(i,width,height,fps)
+
 
 

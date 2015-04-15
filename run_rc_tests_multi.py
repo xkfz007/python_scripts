@@ -8,7 +8,7 @@ seq_list = ('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
 br_list = (1000, 1500, 2000, 3000)
 param_list = lib.get_default_param_list()
 
-param_list['eRcType'] = 3
+param_list['eRcType'] = 1
 param_list['frame_num_to_encode'] =100
 param_list['output_path'] = "F:/encoder_test_output/output0"
 param_list['input_path'] = "E:/sequences/"
@@ -37,6 +37,8 @@ encoder_list = ("as265", "x265")
 max_task_num=4
 tm=lib.TaskManager(max_task_num)
 
+lib.remove_some_tmp_files(param_list['output_path'])
+
 
 for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)
@@ -47,7 +49,7 @@ for encoder_id in encoder_list:
       lib.check_params(param_list)
       lib.set_rc_related_param_manual(param_list, bitrate, bitrate, bitrate)
       cmd = lib.get_full_cmd(enc, param_list)
-      print cmd
+      print "%s\n"%cmd
       regression_file=param_list['output_path']+seq_name+tags+"_cons.log"
       #os.system(cmd)
       tm.newTask(cmd,regression_file)
