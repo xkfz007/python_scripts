@@ -17,10 +17,10 @@ param_list=lib.get_default_param_list()
 
 cons="tmp_cons.log"
 #if len(sys.argv)> 1:
-cons=lib.configure_param(enc,param_list)
+cons,extra_cls=lib.configure_param(enc,param_list)
 
 cmd_line=lib.get_full_cmd(enc,param_list)
-
+cmd_line+=" "+extra_cls
 
 if lib.determin_sys()=="cygwin":
   cmd_line+=(" 2>&1 |tee -a "+cons)

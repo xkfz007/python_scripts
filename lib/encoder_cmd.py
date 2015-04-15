@@ -69,6 +69,7 @@ def usage():
    -R ref number
    -t use vbv-init-time
    -y dump-yuv
+   -C extra command lines
    -O Lowres:0 auto, 1 semi, 2 quater
    -p rc pass:0~3
    -P qp step
@@ -76,7 +77,9 @@ def usage():
    -E resolution: widthxheight
    -c scenecut value
    -G open-gop
-   -D bframe adaptive'''
+   -D bframe adaptive
+   -N show the version info
+   '''
   print help_msg
   return
 
@@ -84,8 +87,10 @@ class Encoder_prop:
   id=""
   exe=""
   help_exe=""
+  version_exe=""
   __executors={"as265":"cli_ashevc.exe", "x265":"x265.exe", "x264": "x264.exe"}
   __helps={"as265": "","x265": "--log-level full --help", "x264" : "--fullhelp"}
+  __versions={"as265":"","x265":"--version","x264":"--version"}
   __paths = dict()
   __common_path = "d:/workspace/"
   __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/Release_WithTrace/"
@@ -95,7 +100,7 @@ class Encoder_prop:
   @staticmethod
   def __format_path(path):
     path=path.strip()
-    path = path.replace("\\", "/")
+    path = os.path.normpath(path)#path.replace("\\", "/")
     if path[-1]!="/":
       path+="/"
     return path
@@ -108,6 +113,7 @@ class Encoder_prop:
       exe_str = "/cygdrive/" + exe_str.replace(":", "")
     self.exe=exe_str
     self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
+    self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
 
   def __init__(self, id="as265"):
     self.id = id
@@ -148,7 +154,7 @@ def parse_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:Ma:s:R:e:t:yO:p:P:AE:c:GD:')
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:Ma:s:R:e:t:yC:O:p:P:AE:c:GD:N')
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -163,6 +169,7 @@ def parse_cl(enc):
   #tmp_vbv_buffer_size = -1
 
   Help_flag=0
+  Version_flag=0
 
   for opt, arg in opts:
     if opt == "-i":
@@ -234,8 +241,9 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt == "-y":
       opt_list["trace_flag"] |= 2
-    # elif opt == "-C":
-    #  opt_list["extra_cls"]=arg
+    elif opt == "-C":
+      opt_list["extra_cls"]=arg
+      tag_str +=get_tag(opt,"")
     elif opt == "-O":
       opt_list["rc_i_lowres"] = int(arg)
       tag_str += get_tag(opt, arg)
@@ -262,11 +270,17 @@ def parse_cl(enc):
     elif opt == "-D":
       opt_list["i_bframe_adaptive"] = int(arg)
       tag_str += get_tag(opt, arg)
+    elif opt == "-N":
+      Version_flag=1
     else:
       assert False, "unknown option"
 
   if Help_flag==1:
     os.system(enc.help_exe)
+    sys.exit()
+
+  if Version_flag==1:
+    os.system(enc.version_exe)
     sys.exit()
 
   #return (opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
@@ -398,6 +412,7 @@ def configure_param(enc,param_list):
   tmp_list['tmp_nBitrate'] = -1
   tmp_list['tmp_nMaxBitrate'] = -1
   tmp_list['tmp_vbv_buffer_size'] = -1
+  tmp_list['extra_cls']=""
   param_len=len(param_list)
   tmp_list_len=len(tmp_list)
 
@@ -425,9 +440,7 @@ def configure_param(enc,param_list):
 
   cons_log=tmp_list['seq_name']+tag_str+"_cons.log"
 
-
-
-  return cons_log
+  return (cons_log,tmp_list['extra_cls'])
 
 
 def get_full_cmd(enc,param_list):
