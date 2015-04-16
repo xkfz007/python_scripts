@@ -2,6 +2,7 @@
 import os
 import sys
 import lib
+import subprocess
 encoder_id="as265"
 enc=lib.Encoder_prop(encoder_id)
 
@@ -28,5 +29,6 @@ if lib.determin_sys()=="cygwin":
   print >>pf,"%s" %cmd_line
   pf.close()
 
-os.system(cmd_line)
+#os.system(cmd_line)
+subprocess.call(cmd_line,shell=True)
 

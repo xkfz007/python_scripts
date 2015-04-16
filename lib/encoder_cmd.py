@@ -100,21 +100,22 @@ class Encoder_prop:
   __paths["x265"] =__common_path+"src.x265/trunk/multicoreware-x265-9f0324125f53/build/vc10-x86_64/Release/"
   __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/Release/"
 
-  @staticmethod
-  def __format_path(path):
-    path=path.strip()
-    path = os.path.normpath(path)#path.replace("\\", "/")
-    if path[-1]!="/":
-      path+="/"
-    return path
+  #@staticmethod
+  #def __format_path(path):
+  #  path=path.strip()
+  #  path = os.path.normpath(path)#path.replace("\\", "/")
+  #  if path[-1]!="/":
+  #    path+="/"
+  #  return path
   def __set_encoder_prop(self):
-    Encoder_prop.__paths[self.id]=Encoder_prop.__format_path(Encoder_prop.__paths[self.id])
-    exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
+    Encoder_prop.__paths[self.id]=common_lib.format_path(Encoder_prop.__paths[self.id])
+    #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
+    exe_str=os.path.join(Encoder_prop.__paths[self.id],Encoder_prop.__executors[self.id])
     #exe_str = exe_str.replace("\\", "/")
-    sys_str = common_lib.determin_sys()
-    if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
-      exe_str = "/cygdrive/" + exe_str.replace(":", "")
-    self.exe=exe_str
+    #sys_str = common_lib.determin_sys()
+    #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
+    #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
+    self.exe=common_lib.format_file_path(exe_str)
     self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
     self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
 
@@ -297,18 +298,6 @@ def parse_cl(enc):
   #return (opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
   return (opt_list, tag_str)
 
-def format_path(path):
-  path=path.strip()
-  path=os.path.normpath(path)
-  #if path==".":
-  #  path=os.getcwd()
-  #path=os.path.abspath(path)
-  if path[-1]!="/" and path[-1]!="\\":
-    if path.find("/")>=0:
-      path+="/"
-    elif path.find("\\")>=0:
-      path+="\\"
-  return path
 
 def check_path(path):
     path=path.strip()#delete the blankspace before or after the path
@@ -382,8 +371,8 @@ def get_total_frame_num(filename,width,height):
   return num_frames
 
 def check_params(param_list):
-  param_list['output_path']=format_path(param_list['output_path'])
-  param_list['input_path']=format_path(param_list['input_path'])
+  param_list['output_path']=common_lib.format_path(param_list['output_path'])
+  param_list['input_path']=common_lib.format_path(param_list['input_path'])
 
   check_path(param_list['output_path'])
   check_files(param_list)

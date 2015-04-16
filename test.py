@@ -3,6 +3,7 @@ import platform
 import os
 import sys
 import getopt
+import subprocess
 #abr=[(1,2), (0,3,4), (0.10,0.25,0.33), (1.0,1.1), (1.0,), (0.9,0.8,0.7,0.6,0.3)]
 #length=len(abr)
 #print abr
@@ -107,8 +108,16 @@ print b
 #print p.stdout
 
 path="F:\\encoder_test_output\\x265_output"
-print os.path.abspath(path)
+#print os.path.abspath(path)
 print os.path.normpath(path)
-print os.path.normpath(os.path.abspath(path))
-print os.path.relpath(".")
-print os.path.splitdrive(path)
+#print os.path.normpath(os.path.abspath(path))
+#print os.path.relpath(".")
+#print os.path.splitdrive(path)
+print os.sep
+#
+#dictString = "{'Define1':[[63.3,0.00,0.5,0.3,0.0],[269.3,0.034,1.0,1.0,0.5],[332.2,0.933,0.2,0.99920654296875,1],[935.0,0.990,0.2,0.1,1.0]],'Define2':[[63.3,0.00,0.5,0.2,1.0],[269.3,0.034,1.0,0.3,0.5],[332.2,0.933,0.2, 0.4,0.6],[935.0,0.990,1.0, 0.5,0.0]],}"
+#dict = eval(dictString)
+#print "keys:", dict.keys()
+#print "Define1 value ", dict['Define1']
+
+
