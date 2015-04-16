@@ -102,8 +102,13 @@ print b
 #  width,height,fps=lib.fun_lib.get_reso_info(i)
 #  print "%s:%d %d %d"%(i,width,height,fps)
 
-import subprocess
-p=subprocess.Popen('ls')
-print p.stdout
+#import subprocess
+#p=subprocess.Popen('ls')
+#print p.stdout
 
-
+path="F:\\encoder_test_output\\x265_output"
+print os.path.abspath(path)
+print os.path.normpath(path)
+print os.path.normpath(os.path.abspath(path))
+print os.path.relpath(".")
+print os.path.splitdrive(path)

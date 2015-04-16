@@ -4,7 +4,7 @@ import common_lib
 def get_default_param_list():
   param_list = dict()  # create a dictinary
   #param_list['encder_exe'] = "cli_ashevc.exe"
-  param_list['output_path'] = "F:/encoder_test_output/as265_output  "
+  param_list['output_path'] ="F:/encoder_test_output/as265_output  "
   param_list['output_filename'] = "as265_str.bin"
   param_list['input_path'] = "E:/sequences/"
   param_list['input_filename'] = "BlowingBubbles_416x240_50.yuv"

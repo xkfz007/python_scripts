@@ -8,8 +8,10 @@ def set_seq_related_param(param_list, seq_name, tags=""):
   param_list['nSrcHeight'] = int(tmp_height)
   param_list['fFrameRate'] = int(tmp_fps)
 
-  param_list['output_filename'] = seq_name + tags + "_str.bin"
+  if tags!="":
+    tags="_"+tags
   param_list['input_filename'] = seq_name + ".yuv"
+  param_list['output_filename'] = seq_name + tags + "_str.bin"
   param_list['trace_file_cabac'] = seq_name + tags + "_cabac.log"
   param_list['trace_file_general'] = seq_name + tags + "_general.log"
   param_list['dump_file_rec'] = seq_name + tags + "_rec.yuv"
@@ -17,7 +19,8 @@ def set_seq_related_param(param_list, seq_name, tags=""):
   param_list['trace_file_prd_uv'] = seq_name + tags + "_prduv.log"
   param_list['trace_file_cabacrdo'] = seq_name + tags + "_cabacrdo.log"
   param_list['trace_file_arch1rdo'] = seq_name + tags + "_arch1rdo.log"
-  return
+
+  return seq_name+tags+"_cons.log"
 
 
 def set_rc_related_param_auto(param_list, factor=2):
@@ -162,7 +165,7 @@ def parse_cl(enc):
     print e
 
   opt_list = dict()
-  tag_str = "_"
+  tag_str = ""
   #seq_name = ""
   #tmp_nBitrate = -1
   #tmp_nMaxBitrate = -1
@@ -170,6 +173,7 @@ def parse_cl(enc):
 
   Help_flag=0
   Version_flag=0
+  Encoder_flag=0
 
   for opt, arg in opts:
     if opt == "-i":
@@ -236,6 +240,7 @@ def parse_cl(enc):
     elif opt == "-e":
       #opt_list["encoder_id"] = arg
       enc.set_encoder_id(arg)
+      Encoder_flag=1
     elif opt == "-t":
       opt_list["vbv_buffer_init_time"] = int(arg)
       tag_str += get_tag(opt, arg)
@@ -283,12 +288,21 @@ def parse_cl(enc):
     os.system(enc.version_exe)
     sys.exit()
 
+  if Encoder_flag==1:
+    if tag_str=="":
+      tag_str=enc.id
+    else:
+      tag_str=enc.id+"_"+tag_str
+
   #return (opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
   return (opt_list, tag_str)
 
 def format_path(path):
   path=path.strip()
   path=os.path.normpath(path)
+  #if path==".":
+  #  path=os.getcwd()
+  #path=os.path.abspath(path)
   if path[-1]!="/" and path[-1]!="\\":
     if path.find("/")>=0:
       path+="/"
@@ -432,13 +446,11 @@ def configure_param(enc,param_list):
       print "dict(tmp_list) has been changed somewhere. Please fix this bug."
       sys.exit()
 
-  set_seq_related_param(param_list, tmp_list['seq_name'], tag_str)
+  cons_log=set_seq_related_param(param_list, tmp_list['seq_name'], tag_str)
 
   check_params(param_list)
 
   configure_rc_param(param_list,tmp_list)
-
-  cons_log=tmp_list['seq_name']+tag_str+"_cons.log"
 
   return (cons_log,tmp_list['extra_cls'])
 
