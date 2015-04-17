@@ -75,6 +75,17 @@ class Codec_analysis:
   __func_list["x265"]=get_cl_x265
   __func_list["x264"]=get_cl_x264
 
+  def get_full_cmd(self,input_file,idx=0):
+    cl_list=Codec_analysis.__func_list[self.id](self,input_file,idx)
+    full_cl="|".join(cl_list)
+    return full_cl
+
+  def get_qp_fcmd(self,input_file):
+    return self.get_full_cmd(input_file,self.qp_idx)
+
+  def get_bits_fcmd(self,input_file):
+    return self.get_full_cmd(input_file,self.bits_idx)
+
   def get_col_vals(self,input_file,idx=0):
     #if lib.determin_sys()=="windows":
     #  return
@@ -102,11 +113,75 @@ class Codec_analysis:
 #  full_cl=grep_cl+"|"+awk_cl+"|"+tr_cl
 #  output=subprocess.check_output(full_cl,shell=True)
 #  return output
+def run_cmd(cmd,filename=''):
+  if filename=='':
+    outFile=None
+  else:
+    outFile=open(filename,'w')
+  subprocess.call(cmd,stdout=outFile,shell=True)
 
-cdc=Codec_analysis("ashevcd")
+import sys
+import getopt
+def obtain_data():
 
+  if len(sys.argv) == 1:
+    #usage()
+    sys.exit()
+
+  try:
+    opts, args = getopt.getopt(sys.argv[1:],'e:i:',['bits=','qps=','qp='])
+  except getopt.GetoptError as err:
+    print str(err)
+    sys.exit(2)
+  except Exception, e:
+    print e
+
+  cdc=Codec_analysis()
+
+  bits_flag=0
+  qp_flag=0
+  qps_flag=0
+  input_file=""
+  bits_output=""
+  qp_output=""
+  qps_output=""
+  for opt, arg in opts:
+    if opt in ('--bits',):
+      bits_flag=1
+      bits_output=arg
+    elif opt in ('--qp',):
+      qp_flag=1
+      qp_output=arg
+    elif opt in ('--qps',):
+      qps_flag=1
+      qps_output=arg
+    elif opt in ('-i',):
+      input_file=arg
+    elif opt in ('-e',):
+      cdc.set_codec_id(arg.strip())
+    else:
+      assert False, "unknown option"
+
+  if bits_flag==1:
+    cmd=cdc.get_qp_fcmd(input_file)
+    run_cmd(cmd,bits_output)
+
+  if qp_flag==1:
+    cmd=cdc.get_qp_fcmd(input_file)
+    run_cmd(cmd,qp_output)
+
+
+obtain_data()
+#parse_cl()
+#cdc=Codec_analysis("ashevcd")
+
+#input_file="F:\\tmp\\2015.04.13\\cons.log"
 #output_str=cdc.get_qp_vals(lib.format_file_path("F:\\tmp\\2015.04.13\\cons.log"))
-output_str=cdc.get_qp_vals("F:\\tmp\\2015.04.13\\cons.log")
-print output_str
+#output_str=cdc.get_qp_vals()
+#print output_str
+#full_cmd=cdc.get_qp_fcmd(input_file)
+#output_file="f:\\tmp\\2015.04.13\\aaa.txt"
+#outFile = open(output_file, 'w')
+#subprocess.call(full_cmd,stdout=outFile,shell=True)
 
 

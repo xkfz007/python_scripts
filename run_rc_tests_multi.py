@@ -49,7 +49,7 @@ for encoder_id in encoder_list:
       lib.check_params(param_list)
       lib.set_rc_related_param_manual(param_list, bitrate, bitrate, bitrate)
       cmd = lib.get_full_cmd(enc, param_list)
-      print "%s\n"%cmd
+      #print "%s\n"%cmd
       regression_file=param_list['output_path']+seq_name+tags+"_cons.log"
       #os.system(cmd)
       tm.newTask(cmd,regression_file)

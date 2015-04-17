@@ -241,7 +241,7 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt == "-e":
       #opt_list["encoder_id"] = arg
-      enc.set_encoder_id(arg)
+      enc.set_encoder_id(arg.strip())
       Encoder_flag=1
     elif opt == "-t":
       opt_list["vbv_buffer_init_time"] = int(arg)
