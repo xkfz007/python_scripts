@@ -56,8 +56,10 @@ def get_param_cmd_x265(param_list):
   if param_list['wpp_threads'] < param_list['lookahead_threads']:
     param_list['wpp_threads'] = param_list['lookahead_threads']
   cmd += " --pool %s"%param_list['wpp_threads']
-  if param_list['wpp_threads'] > 1:
+  if param_list['wpp_threads'] > 1 or param_list['vbv_buffer_size']>0:#VBV requires wave-front parallelism
     cmd += " --wpp"
+  else:
+    cmd += " --no-wpp"
 
   cmd += " --lookahead-slices %s" % param_list['lookahead_threads']
 
@@ -121,8 +123,8 @@ def get_param_cmd_x264(param_list):
   if tmp_flag == 2:
     cmd += " --dump-yuv %s" % param_list['dump_file_rec']
 
-  #headers = ("--global-hader", "--repeat-headers")
-  #cmd += " %s" % headers[param_list['b_repeat_headers']]
+  headers = ("--global-header", "--repeat-headers")
+  cmd += " %s" % headers[param_list['b_repeat_headers']]
 
   if param_list['b_open_gop']==1:
     cmd +=" --open-gop"
