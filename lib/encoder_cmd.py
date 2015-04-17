@@ -82,6 +82,7 @@ def usage():
    -G open-gop
    -D bframe adaptive
    -N show the version info
+   -k seek frame
    '''
   print help_msg
   return
@@ -97,7 +98,7 @@ class Encoder_prop:
   __paths = dict()
   __common_path = "d:/workspace/"
   __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/Release_WithTrace/"
-  __paths["x265"] =__common_path+"src.x265/trunk/multicoreware-x265-9f0324125f53/build/vc10-x86_64/Release/"
+  __paths["x265"] =__common_path+"src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/Release/"
   __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/Release/"
 
   #@staticmethod
@@ -115,7 +116,7 @@ class Encoder_prop:
     #sys_str = common_lib.determin_sys()
     #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
     #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
-    self.exe=common_lib.format_file_path(exe_str)
+    self.exe=common_lib.normalize_path(exe_str)
     self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
     self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
 
@@ -278,6 +279,9 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt == "-N":
       Version_flag=1
+    elif opt == "-s":
+      opt_list["first_frame"] = int(arg)
+      tag_str += get_tag(opt, arg)
     else:
       assert False, "unknown option"
 

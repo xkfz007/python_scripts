@@ -1,6 +1,7 @@
 def get_param_cmd_x26x(param_list):
   cmd=""
 
+  cmd += " --seek %s"% param_list['first_frame']
   cmd += " --rc-lookahead %s" % param_list['rc_i_lookahead']
   cmd += " -b %s" % param_list['nBframe']
   cmd += " --ref %s" % param_list['nMaxRefNum']
@@ -52,14 +53,13 @@ def get_param_cmd_x26x(param_list):
 def get_param_cmd_x265(param_list):
   cmd=""
   cmd += " --frame-threads %s" % param_list['frame_threads']
-  if param_list['wpp_threads'] >= param_list['lookahead_threads']:
-    cmd += " --threads %s" % param_list['wpp_threads']
-  else:
-    cmd += " --threads %s" % param_list['lookahead_threads']
+  if param_list['wpp_threads'] < param_list['lookahead_threads']:
     param_list['wpp_threads'] = param_list['lookahead_threads']
-
+  cmd += " --pool %s"%param_list['wpp_threads']
   if param_list['wpp_threads'] > 1:
     cmd += " --wpp"
+
+  cmd += " --lookahead-slices %s" % param_list['lookahead_threads']
 
   bpyr_cl = ("--no-b-pyramid", "--b-pyramid")
   mbtree_cl = ("--no-cutree", "--cutree")
@@ -87,6 +87,12 @@ def get_param_cmd_x265(param_list):
 
   gop_cl=("--no-open-gop","--open-gop")
   cmd +=" %s" % gop_cl[param_list['b_open_gop']]
+
+  cmd +=" --ctu %s"% param_list["nMaxCUSize"]
+  cmd += " --min-cu-size %s" % (param_list["nMaxCUSize"]>>(param_list['nMaxCUDepth']-1))
+  cmd += " --max-tu-size %s" % (1<<param_list['nQuadtreeTULog2MaxSize'])
+  cmd += " --tu-intra-depth %s" % param_list['nQuadtreeTUMaxDepthIntra']
+  cmd += " --tu-inter-depth %s" % param_list['nQuadtreeTUMaxDepthInter']
 
   cmd += get_param_cmd_x26x(param_list)
 

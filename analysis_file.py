@@ -40,32 +40,32 @@ class Codec_analysis:
 
   def get_cl_ashevcd(self,input_file,idx=0):
     cl_list=[]
-    cl_list.append('grep -o "'+self.fstr+'" '+input_file)
-    cl_list.append("awk '{print $"+str(idx)+"}'")
+    cl_list.append('grep -o "'+self.fstr+'" "'+input_file+'"')
+    cl_list.append('awk \'{print $'+str(idx)+'}\'')
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
   def get_cl_as265(self,input_file,idx=0):
     cl_list=[]
-    cl_list.append('grep -o "'+self.fstr+'" '+input_file)
-    cl_list.append("awk '{print $"+str(idx)+"}'")
-    cl_list.append("awk -F\( '{print \$1}'")
+    cl_list.append('grep -o "'+self.fstr+'" "'+input_file+'"')
+    cl_list.append('awk \'{print $'+str(idx)+'}\'')
+    cl_list.append('awk -F\( \'{print $1}\'')
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
   def get_cl_x265(self,input_file,idx=0):
     cl_list=[]
-    cl_list.append('grep -o "'+self.fstr+'" '+input_file)
-    cl_list.append("awk '{print $"+str(idx)+"}'")
-    cl_list.append("awk -F\( '{print \$1}'")
+    cl_list.append('grep -o "'+self.fstr+'" "'+input_file+'"')
+    cl_list.append('awk \'{print $'+str(idx)+'}\'')
+    cl_list.append('awk -F\( \'{print $1}\'')
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
   def get_cl_x264(self,input_file,idx=0):
     cl_list=[]
-    cl_list.append('grep -o "'+self.fstr+'" '+input_file)
-    cl_list.append("awk '{print $"+str(idx)+"}'")
-    cl_list.append("awk -F\= '{print \$2}'")
+    cl_list.append('grep -o "'+self.fstr+'" "'+input_file+'"')
+    cl_list.append('awk \'{print $'+str(idx)+'}\'')
+    cl_list.append('awk -F\= \'{print $2}\'')
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
@@ -105,7 +105,8 @@ class Codec_analysis:
 
 cdc=Codec_analysis("ashevcd")
 
-output_str=cdc.get_qp_vals(lib.format_file_path("F:\\tmp\\2015.04.13\\cons.log"))
+#output_str=cdc.get_qp_vals(lib.format_file_path("F:\\tmp\\2015.04.13\\cons.log"))
+output_str=cdc.get_qp_vals("F:\\tmp\\2015.04.13\\cons.log")
 print output_str
 
 

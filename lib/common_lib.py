@@ -16,6 +16,12 @@ def determin_sys():
 
   return str
 
+def convert2drivepath(path):
+  if path.find("cygdrive")>=0:
+    path=path.replace("/cygdrive/","")
+    path=path[0]+":"+path[1:]
+  return path
+
 def normalize_path(path):
   path=path.strip()
   path=os.path.normpath(path)
@@ -23,13 +29,16 @@ def normalize_path(path):
     path=path.replace("/",os.path.sep)
   elif os.path.sep=="/" and path.find("\\")>=0:
     path=path.replace("\\",os.path.sep)
+  path=convert2drivepath(path)
 
   return path
+
 
 def format_path(path):
   #if path==".":
   #  path=os.getcwd()
-  #path=os.path.abspath(path)
+  if path==os.curdir or path==os.pardir:# currend dir(.) or parent dir(..)
+    path=os.path.abspath(path)
   #if path[-1]!="/" and path[-1]!="\\":
   #  if path.find("/")>=0:
   #    path+="/"
@@ -40,13 +49,13 @@ def format_path(path):
     path+=os.path.sep
   return path
 
-def format_file_path(file_path):
-  file_path=normalize_path(file_path)
-  sys_str = determin_sys()
-  print file_path
-  if sys_str == "cygwin" and file_path.find("cygdrive") < 0:
-    file_path = "/cygdrive/" + file_path.replace(":", "")
-  elif sys_str=="linux" and len(os.path.splitdrive(file_path)[0])>0:
-    file_path=os.path.expanduser("~")+os.path.splitdrive(file_path)[1]
-
-  return file_path
+#def format_file_path(file_path):
+#  file_path=normalize_path(file_path)
+#  sys_str = determin_sys()
+#  #print file_path
+#  if sys_str == "cygwin" and file_path.find("cygdrive") < 0:
+#    file_path = "/cygdrive/" + file_path.replace(":", "")
+#  elif sys_str=="linux" and len(os.path.splitdrive(file_path)[0])>0:
+#    file_path=os.path.expanduser("~")+os.path.splitdrive(file_path)[1]
+#
+#  return file_path

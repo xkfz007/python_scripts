@@ -120,4 +120,9 @@ print os.sep
 #print "keys:", dict.keys()
 #print "Define1 value ", dict['Define1']
 
+print os.getcwd()
+print os.curdir
+print os.pardir
+print os.path.abspath('\\\\172.21.40.64\\h265\\xml')
+
 
