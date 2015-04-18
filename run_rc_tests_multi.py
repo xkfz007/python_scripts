@@ -2,9 +2,10 @@
 import lib
 import os
 
+
 enc = lib.Encoder_prop()
 
-seq_list = ('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
+seq_list = lib.class_special#('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
 br_list = (1000, 1500, 2000, 3000)
 param_list = lib.get_default_param_list()
 

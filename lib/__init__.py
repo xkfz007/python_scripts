@@ -10,4 +10,5 @@ from encoder_cmd import *
 from common_lib import *
 from x26x_cmd_init import *
 from TaskManager import *
+from seq_list import *
 
