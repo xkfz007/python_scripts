@@ -1,10 +1,10 @@
 
-classA=('Traffic_2560x1600_30_crop','PeopleOnStreet_2560x1600_30_crop')
-classB=('Kimono1_1920x1080_24','ParkScene_1920x1080_24','Cactus_1920x1080_50','BasketballDrive_1920x1080_50','BQTerrace_1920x1080_60')
-classC=('BasketballDrill_832x480_50','BQMall_832x480_60','PartyScene_832x480_50','RaceHorses_832x480_30')
-classD=('BasketballPass_416x240_50','BQSquare_416x240_60','BlowingBubbles_416x240_50','RaceHorses_416x240_30')
-classE=('FourPeople_1280x720_60','Johnny_1280x720_60','KristenAndSara_1280x720_60')
-classF=('BasketballDrillText_832x480_50','SlideEditing_1280x720_30','SlideShow_1280x720_20')
+#classA=('Traffic_2560x1600_30_crop','PeopleOnStreet_2560x1600_30_crop')
+#classB=('Kimono1_1920x1080_24','ParkScene_1920x1080_24','Cactus_1920x1080_50','BasketballDrive_1920x1080_50','BQTerrace_1920x1080_60')
+#classC=('BasketballDrill_832x480_50','BQMall_832x480_60','PartyScene_832x480_50','RaceHorses_832x480_30')
+#classD=('BasketballPass_416x240_50','BQSquare_416x240_60','BlowingBubbles_416x240_50','RaceHorses_416x240_30')
+#classE=('FourPeople_1280x720_60','Johnny_1280x720_60','KristenAndSara_1280x720_60')
+#classF=('BasketballDrillText_832x480_50','SlideEditing_1280x720_30','SlideShow_1280x720_20')
 
 class_a=('Apeopleonstreet_2560x1600_8_30_150', 'Atraffic_2560x1600_8_30_150')
 class_b=('Bbasketballdrive_1920x1080_8_50_500', 'Bbqterrace_1920x1080_8_60_600',
@@ -24,4 +24,15 @@ class_i=('Iduckstakeoff_1280x720_8_25_500', 'Ifcwr_1920x1080_8_25_6987',
 'Ixtslf_1920x1080_8_25_1854')
 class_special=('Ifcwr_1920x1080_8_25_6987','Ixtslf_1920x1080_8_25_1854','Inavyflight_1920x1080_8_30_2973')
 class_x=('Xclownlogoed_3840x2160_8_25_640', 'Xsnake_3840x2160_8_25_353', 'Xsusielogoed_3840x2160_8_25_588')
+
+class_std2=class_b+class_c+class_d+class_e+class_f
+class_std=class_a+class_b+class_c+class_d+class_e+class_f
+
+def get_seqname(name):
+  seq_list=class_a+class_b+class_c+class_d+class_e+class_f+class_special+class_x
+  for i in seq_list:
+    if i.upper().find(name.upper().split('_')[0])>=0:
+      return i
+
+  return name
 

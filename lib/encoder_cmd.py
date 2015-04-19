@@ -1,8 +1,9 @@
 import getopt, sys, os
-import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init
+import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list
 
 
-def set_seq_related_param(param_list, seq_name, tags=""):
+def set_seq_related_param(param_list, name, tags=""):
+  seq_name=seq_list.get_seqname(name)
   tmp_width, tmp_height, tmp_fps = fun_lib.get_reso_info(seq_name)
   param_list['nSrcWidth'] = int(tmp_width)
   param_list['nSrcHeight'] = int(tmp_height)
@@ -22,28 +23,44 @@ def set_seq_related_param(param_list, seq_name, tags=""):
 
   return seq_name+tags+"_cons.log"
 
-
-def set_rc_related_param_auto(param_list, factor=2):
-  rc_param = fun_lib.get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'], param_list['fFrameRate'], factor)
-  param_list['nBitrate'] = rc_param[0]
-  param_list['nMaxBitrate'] = rc_param[1]
-  param_list['vbv_buffer_size'] = rc_param[2]
-  return
-
-
 def set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, vbv_buffer_size):
   param_list['nBitrate'] = bitrate
   param_list['nMaxBitrate'] = vbv_maxrate
   param_list['vbv_buffer_size'] = vbv_buffer_size
-  if bitrate == 0:
-    param_list['eRcType'] = 0
-  elif vbv_maxrate == 0 or vbv_buffer_size == 0:
-    param_list['eRcType'] = 8
-  elif vbv_maxrate <= bitrate:
-    param_list['eRcType'] = 1
-  else:
-    param_list['eRcType'] = 9
+  #if bitrate == 0:
+  #  param_list['eRcType'] = 0
+  #elif vbv_maxrate == 0 or vbv_buffer_size == 0:
+  #  param_list['eRcType'] = 8
+  #elif vbv_maxrate <= bitrate:
+  #  param_list['eRcType'] = 1
+  #else:
+  #  param_list['eRcType'] = 9
 
+  return
+
+def set_rc_related_param_auto(param_list, factor=2):
+  rc_param = fun_lib.get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'], param_list['fFrameRate'], factor)
+  #param_list['nBitrate'] = rc_param[0]
+  #param_list['nMaxBitrate'] = rc_param[1]
+  #param_list['vbv_buffer_size'] = rc_param[2]
+  set_rc_related_param_manual(param_list,rc_param[0],rc_param[1],rc_param[2])
+  return
+
+
+def set_rc_related_param_semi_auto(param_list, bitrate):
+  if bitrate<=0:
+    #param_list['eRcType']=0
+    set_rc_related_param_auto(param_list)
+    return
+  if bitrate<=1.0:
+    bitrate*=param_list['nSrcWidth']*param_list['nSrcHeight']*param_list['fFrameRate']/1000
+  vbv_maxrate=0
+  if param_list['eRcType']==1:
+    vbv_maxrate=bitrate
+  elif param_list['eRcType']==3:
+    vbv_maxrate=3*bitrate
+  vbv_bufsize=vbv_maxrate*1
+  set_rc_related_param_manual(param_list,bitrate,vbv_maxrate,vbv_bufsize)
   return
 
 
@@ -81,7 +98,7 @@ def usage():
    -c scenecut value
    -G open-gop
    -D bframe adaptive
-   -N show the version info
+   --version show the version info
    -k seek frame
    '''
   print help_msg
@@ -159,7 +176,7 @@ def parse_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:Ma:s:R:e:t:yC:O:p:P:AE:c:GD:N')
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:Ma:s:R:e:t:yC:O:p:P:AE:c:GD:N',['version',])
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -277,7 +294,7 @@ def parse_cl(enc):
     elif opt == "-D":
       opt_list["i_bframe_adaptive"] = int(arg)
       tag_str += get_tag(opt, arg)
-    elif opt == "-N":
+    elif opt in ('--version',):
       Version_flag=1
     elif opt == "-s":
       opt_list["first_frame"] = int(arg)

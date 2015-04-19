@@ -56,6 +56,7 @@ def get_param_cmd_x265(param_list):
   if param_list['wpp_threads'] < param_list['lookahead_threads']:
     param_list['wpp_threads'] = param_list['lookahead_threads']
   cmd += " --pool %s"%param_list['wpp_threads']
+  #cmd += " --threads %s"%param_list['wpp_threads']
   if param_list['wpp_threads'] > 1 or param_list['vbv_buffer_size']>0:#VBV requires wave-front parallelism
     cmd += " --wpp"
   else:

@@ -6,13 +6,14 @@ import os
 enc = lib.Encoder_prop()
 
 seq_list = lib.class_special#('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
-br_list = (1000, 1500, 2000, 3000)
+#br_list = (1000, 1500, 2000, 3000)
+br_list=(0.0193,0.0289,0.0386,0.0579)
 param_list = lib.get_default_param_list()
 
 param_list['eRcType'] = 1
 param_list['frame_num_to_encode'] =100
 param_list['output_path'] = "F:/encoder_test_output/output0"
-param_list['input_path'] = "E:/sequences/"
+param_list['input_path'] = "f:/sequences/"
 param_list['nIntraPicInterval'] = 30
 param_list['nMaxRefNum'] = 1
 param_list['bExistRefB'] = 1
@@ -43,12 +44,13 @@ lib.remove_some_tmp_files(param_list['output_path'])
 
 for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)
-  for seq_name in seq_list:
+  for name in seq_list:
+    seq_name=lib.get_seqname(name)
     for bitrate in br_list:
       tags="_"+encoder_id+"_bitrate"+str(bitrate)
       lib.set_seq_related_param(param_list, seq_name,tags)
       lib.check_params(param_list)
-      lib.set_rc_related_param_manual(param_list, bitrate, bitrate, bitrate)
+      lib.set_rc_related_param_semi_auto(param_list, bitrate)
       cmd = lib.get_full_cmd(enc, param_list)
       #print "%s\n"%cmd
       regression_file=param_list['output_path']+seq_name+tags+"_cons.log"
