@@ -54,6 +54,7 @@ def set_rc_related_param_semi_auto(param_list, bitrate):
     return
   if bitrate<=1.0:
     bitrate*=param_list['nSrcWidth']*param_list['nSrcHeight']*param_list['fFrameRate']/1000
+  bitrate=int(bitrate)
   vbv_maxrate=0
   if param_list['eRcType']==1:
     vbv_maxrate=bitrate
@@ -109,14 +110,18 @@ class Encoder_prop:
   exe=""
   help_exe=""
   version_exe=""
+  conf="r"
   __executors={"as265":"cli_ashevc.exe", "x265":"x265.exe", "x264": "x264.exe"}
   __helps={"as265": "","x265": "--log-level full --help", "x264" : "--fullhelp"}
   __versions={"as265":"","x265":"--version","x264":"--version"}
+  __confs={'as265':{'d':'Debug','r':'Release','R':'Release_WithTrace'},
+          'x265':{'d':'Debug','r':'Release','R':'RelWithDebInfo'},
+          'x264':{'d':'Debug','r':'Release','R':'Release'}}
   __paths = dict()
   __common_path = "d:/workspace/"
-  __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/Release_WithTrace/"
-  __paths["x265"] =__common_path+"src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/Release/"
-  __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/Release/"
+  __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/"
+  __paths["x265"] =__common_path+"src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/"
+  __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/"
 
   #@staticmethod
   #def __format_path(path):
@@ -128,7 +133,7 @@ class Encoder_prop:
   def __set_encoder_prop(self):
     Encoder_prop.__paths[self.id]=common_lib.format_path(Encoder_prop.__paths[self.id])
     #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
-    exe_str=os.path.join(Encoder_prop.__paths[self.id],Encoder_prop.__executors[self.id])
+    exe_str=os.path.join(Encoder_prop.__paths[self.id],Encoder_prop.__confs[self.id][self.conf],Encoder_prop.__executors[self.id])
     #exe_str = exe_str.replace("\\", "/")
     #sys_str = common_lib.determin_sys()
     #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
@@ -137,13 +142,25 @@ class Encoder_prop:
     self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
     self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
 
+  def __set_id(self,id):
+    tmp=id[-1]
+    if tmp in ('d','r','R'):
+      self.conf=tmp
+      self.id=id[:-1]
+    else:
+      self.conf='r'
+      self.id=id
+
+
   def __init__(self, id="as265"):
-    self.id = id
+    #self.id = id
+    self.__set_id(id)
     self.__set_encoder_prop()
 
 
   def set_encoder_id(self,id):
-    self.id=id
+    #self.id=id
+    self.__set_id(id)
     self.__set_encoder_prop()
 
   def set_encoder_path(self,path):
