@@ -2,12 +2,18 @@ import getopt, sys, os
 import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list
 
 
-def set_seq_related_param(param_list, name, tags=""):
-  seq_name=seq_list.get_seqname(name)
-  tmp_width, tmp_height, tmp_fps = fun_lib.get_reso_info(seq_name)
-  param_list['nSrcWidth'] = int(tmp_width)
-  param_list['nSrcHeight'] = int(tmp_height)
-  param_list['fFrameRate'] = int(tmp_fps)
+def configure_seq_param(param_list, tmp_list, tags=""):
+  seq_name=seq_list.get_seqname(tmp_list['seq_name'])
+  org_width, org_height, org_fps = fun_lib.get_reso_info(seq_name)
+  tmp_width=tmp_list['tmp_nSrcWidth']
+  tmp_height=tmp_list['tmp_nSrcHeight']
+  if tmp_width<=0 or tmp_height<=0:
+    param_list['nSrcWidth'] = int(org_width)
+    param_list['nSrcHeight'] = int(org_height)
+  else:
+    param_list['nSrcWidth'] = int(tmp_width)
+    param_list['nSrcHeight'] = int(tmp_height)
+  param_list['fFrameRate'] = int(org_fps)
 
   if tags!="":
     tags="_"+tags
@@ -299,8 +305,8 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt == "-E":
       tmp_width, tmp_height = arg.split('x')
-      opt_list["nSrcWidth"] = int(tmp_width)
-      opt_list["nSrcHeight"] = int(tmp_height)
+      opt_list["tmp_nSrcWidth"] = int(tmp_width)
+      opt_list["tmp_nSrcHeight"] = int(tmp_height)
       tag_str += get_tag(opt, arg)
     elif opt == "-c":
       opt_list["i_scenecut_threshold"] = int(arg)
@@ -446,14 +452,20 @@ def configure_rc_param(param_list,tmp_list):
     set_rc_related_param_manual(param_list, tmp_list['tmp_nBitrate'], tmp_list['tmp_nMaxBitrate'], tmp_list['tmp_vbv_buffer_size'])
     return
 
-def configure_param(enc,param_list):
-  tag_str=""
+def get_default_tmp_list():
   tmp_list=dict()
-  tmp_list['seq_name']=os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
+  tmp_list['seq_name']=""#os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
   tmp_list['tmp_nBitrate'] = -1
   tmp_list['tmp_nMaxBitrate'] = -1
   tmp_list['tmp_vbv_buffer_size'] = -1
   tmp_list['extra_cls']=""
+  tmp_list['tmp_nSrcWidth']=-1
+  tmp_list['tmp_nSrcHeight']=-1
+  return tmp_list
+
+def configure_param(enc,param_list):
+  tag_str=""
+  tmp_list=get_default_tmp_list()
   param_len=len(param_list)
   tmp_list_len=len(tmp_list)
 
@@ -473,11 +485,11 @@ def configure_param(enc,param_list):
       print "dict(tmp_list) has been changed somewhere. Please fix this bug."
       sys.exit()
 
-  cons_log=set_seq_related_param(param_list, tmp_list['seq_name'], tag_str)
-
-  check_params(param_list)
+  cons_log=configure_seq_param(param_list, tmp_list, tag_str)
 
   configure_rc_param(param_list,tmp_list)
+
+  check_params(param_list)
 
   return (cons_log,tmp_list['extra_cls'])
 

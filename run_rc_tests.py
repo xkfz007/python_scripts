@@ -42,7 +42,7 @@ for encoder_id in encoder_list:
   for seq_name in seq_list:
     for bitrate in br_list:
       tags="_"+encoder_id+"_bitrate"+str(bitrate)
-      lib.set_seq_related_param(param_list, seq_name,tags)
+      lib.configure_seq_param(param_list, seq_name,tags)
       lib.check_params(param_list)
       lib.set_rc_related_param_semi_auto(param_list, bitrate)
       cmd = lib.get_full_cmd(enc, param_list)
