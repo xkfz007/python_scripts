@@ -1,3 +1,4 @@
+import os.path
 def get_param_cmd_x26x(param_list):
   cmd=""
 
@@ -26,7 +27,7 @@ def get_param_cmd_x26x(param_list):
 
   cmd += " --pass %s" % param_list['rc_i_pass']
 
-  cmd += " -o %s%s %s%s" % (param_list['output_path'],param_list['output_filename'], param_list['input_path'], param_list['input_filename'])
+  cmd += " -o %s %s" % (os.path.join(param_list['output_path'],param_list['output_filename']), os.path.join(param_list['input_path'], param_list['input_filename']))
   cmd += " --input-res %sx%s" % (param_list['nSrcWidth'], param_list['nSrcHeight'])
   cmd += " --fps %s" % param_list['fFrameRate']
   cmd += " -I %s" % param_list['nIntraPicInterval']
@@ -75,7 +76,7 @@ def get_param_cmd_x265(param_list):
 
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
-    cmd += " --recon %s" % param_list['dump_file_rec']
+    cmd += " --recon %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
 
   cmd += " --no-signhide"
 
@@ -122,7 +123,7 @@ def get_param_cmd_x264(param_list):
 
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
-    cmd += " --dump-yuv %s" % param_list['dump_file_rec']
+    cmd += " --dump-yuv %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
 
   headers = ("--global-header", "--repeat-headers")
   cmd += " %s" % headers[param_list['b_repeat_headers']]

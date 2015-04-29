@@ -1,5 +1,99 @@
 import getopt, sys, os
-import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list
+import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init
+
+class Encoder_prop:
+  id=''
+  exe=''
+  help_exe=''
+  version_exe=''
+  conf='r'
+  platform='x64'
+  get_param_cmd=""
+  __executors={'as265':'cli_ashevc.exe',
+               'x265':'x265.exe',
+               'x264': 'x264.exe',
+               'hm':'hm.exe'}
+  __helps={'as265': '',
+           'x265': '--log-level full --help',
+           'x264' : '--fullhelp',
+           'hm':'--help'}
+  __versions={'as265':'',
+              'x265':'--version',
+              'x264':'--version',
+              'hm':'--version'}
+  __confs={'as265':{'d':'Debug','r':'Release','R':'Release_WithTrace'},
+           'x265':{'d':'Debug','r':'Release','R':'RelWithDebInfo'},
+           'x264':{'d':'Debug','r':'Release','R':'Release'},
+           'hm':{'d':'Debug','r':'Release','R':'Release'}}
+  __platforms={'as265':{'x86':'x64','x64':'x64'},
+               'x265':{'x86':'vc10-x86','x64':'vc10-x86_64'},
+               'x264':{'x86':'Win32','x64':'x64'},
+               'hm':{'x86':'Win32','x64':'x64'}}
+  __cmd_func_list={
+    "as265": as265_cmd_init.get_param_cmd_as265,
+    "x265": x26x_cmd_init.get_param_cmd_x265,
+    "x264": x26x_cmd_init.get_param_cmd_x264,
+    "hm": hm_cmd_init.get_param_cmd_hm
+  }
+  #__paths = dict()
+  #__paths['as265'] =
+  #__paths['x265'] =
+  #__paths['x264'] =
+  __common_path = 'd:/workspace/'
+  __paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/',
+           'x265':__common_path+'src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/',
+           'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
+           'hm':__common_path + 'src.hm/trunk/hm-16.5rc1/bin/vc10/x64/'}
+
+  #@staticmethod
+  #def __format_path(path):
+  #  path=path.strip()
+  #  path = os.path.normpath(path)#path.replace("\\", "/")
+  #  if path[-1]!="/":
+  #    path+="/"
+  #  return path
+  def __set_encoder_prop(self):
+    Encoder_prop.__paths[self.id]=common_lib.format_path(Encoder_prop.__paths[self.id])
+    #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
+    exe_str=os.path.join(Encoder_prop.__paths[self.id],Encoder_prop.__confs[self.id][self.conf],Encoder_prop.__executors[self.id])
+    #exe_str = exe_str.replace("\\", "/")
+    #sys_str = common_lib.determin_sys()
+    #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
+    #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
+    self.exe=common_lib.normalize_path(exe_str)
+    self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
+    self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
+    self.get_param_cmd=Encoder_prop.__cmd_func_list[self.id]
+
+  def __set_id(self,id):
+    tmp=id[-1]
+    if tmp in ('d','r','R'):
+      self.conf=tmp
+      self.id=id[:-1]
+    else:
+      self.conf='r'
+      self.id=id
+
+
+  def __init__(self, id="as265"):
+    #self.id = id
+    self.__set_id(id)
+    self.__set_encoder_prop()
+
+
+  def set_encoder_id(self,id):
+    #self.id=id
+    self.__set_id(id)
+    self.__set_encoder_prop()
+
+  def set_encoder_path(self,path):
+    Encoder_prop.__paths[self.id]=path
+    self.__set_encoder_prop()
+
+  @staticmethod
+  def SET_PATH(id,path):
+    Encoder_prop.__paths[id]=path
+
 
 
 def configure_seq_param(param_list, tmp_list, tags=""):
@@ -107,84 +201,11 @@ def usage():
    -D bframe adaptive
    --version show the version info
    -k seek frame
+   -j 0 enable sao, 1 disable sao
+   -J 0 enable deblock, 1 disable deblock
    '''
   print help_msg
   return
-
-class Encoder_prop:
-  id=""
-  exe=""
-  help_exe=""
-  version_exe=""
-  conf="r"
-  __executors={"as265":"cli_ashevc.exe", "x265":"x265.exe", "x264": "x264.exe"}
-  __helps={"as265": "","x265": "--log-level full --help", "x264" : "--fullhelp"}
-  __versions={"as265":"","x265":"--version","x264":"--version"}
-  __confs={'as265':{'d':'Debug','r':'Release','R':'Release_WithTrace'},
-          'x265':{'d':'Debug','r':'Release','R':'RelWithDebInfo'},
-          'x264':{'d':'Debug','r':'Release','R':'Release'}}
-  __paths = dict()
-  __common_path = "d:/workspace/"
-  __paths["as265"] = __common_path + "arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/"
-  __paths["x265"] =__common_path+"src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/"
-  __paths["x264"] = __common_path + "src.x264/trunk/x264_latest/build/"
-
-  #@staticmethod
-  #def __format_path(path):
-  #  path=path.strip()
-  #  path = os.path.normpath(path)#path.replace("\\", "/")
-  #  if path[-1]!="/":
-  #    path+="/"
-  #  return path
-  def __set_encoder_prop(self):
-    Encoder_prop.__paths[self.id]=common_lib.format_path(Encoder_prop.__paths[self.id])
-    #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
-    exe_str=os.path.join(Encoder_prop.__paths[self.id],Encoder_prop.__confs[self.id][self.conf],Encoder_prop.__executors[self.id])
-    #exe_str = exe_str.replace("\\", "/")
-    #sys_str = common_lib.determin_sys()
-    #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
-    #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
-    self.exe=common_lib.normalize_path(exe_str)
-    self.help_exe= self.exe + " "+Encoder_prop.__helps[self.id]
-    self.version_exe=self.exe+" "+Encoder_prop.__versions[self.id]
-
-  def __set_id(self,id):
-    tmp=id[-1]
-    if tmp in ('d','r','R'):
-      self.conf=tmp
-      self.id=id[:-1]
-    else:
-      self.conf='r'
-      self.id=id
-
-
-  def __init__(self, id="as265"):
-    #self.id = id
-    self.__set_id(id)
-    self.__set_encoder_prop()
-
-
-  def set_encoder_id(self,id):
-    #self.id=id
-    self.__set_id(id)
-    self.__set_encoder_prop()
-
-  def set_encoder_path(self,path):
-    Encoder_prop.__paths[self.id]=path
-    self.__set_encoder_prop()
-
-  @staticmethod
-  def SET_PATH(id,path):
-    Encoder_prop.__paths[id]=path
-
-
-
-
-
-#def get_encoder(encoder_id):
-#  enc=Encoder_prop(encoder_id)
-#  return enc
-
 
 
 def get_tag(opt, arg):
@@ -199,7 +220,7 @@ def parse_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:Ma:s:R:e:t:yC:O:p:P:AE:c:GD:N',['version',])
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:j:J:',['version',])
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -268,7 +289,7 @@ def parse_cl(enc):
       opt_list["nBframe"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-M":
-      opt_list["bExistRefB"] = 1
+      opt_list["bExistRefB"] =int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-a":
       opt_list["rc_i_aq_mode"] = int(arg)
@@ -301,7 +322,7 @@ def parse_cl(enc):
       opt_list["rc_i_qp_step"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-A":
-      opt_list["rc_b_cutree"] = 1
+      opt_list["rc_b_cutree"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-E":
       tmp_width, tmp_height = arg.split('x')
@@ -312,15 +333,21 @@ def parse_cl(enc):
       opt_list["i_scenecut_threshold"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-G":
-      opt_list["b_open_gop"] = 1
+      opt_list["b_open_gop"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-D":
       opt_list["i_bframe_adaptive"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt in ('--version',):
       Version_flag=1
-    elif opt == "-s":
+    elif opt in ("-s",):
       opt_list["first_frame"] = int(arg)
+      tag_str += get_tag(opt, arg)
+    elif opt in ("-j",):
+      opt_list["b_sao"] = int(arg)
+      tag_str += get_tag(opt, arg)
+    elif opt in ("-J",):
+      opt_list["b_dbl"] = int(arg)
       tag_str += get_tag(opt, arg)
     else:
       assert False, "unknown option"
@@ -452,9 +479,9 @@ def configure_rc_param(param_list,tmp_list):
     set_rc_related_param_manual(param_list, tmp_list['tmp_nBitrate'], tmp_list['tmp_nMaxBitrate'], tmp_list['tmp_vbv_buffer_size'])
     return
 
-def get_default_tmp_list():
+def get_default_tmp_list(param_list):
   tmp_list=dict()
-  tmp_list['seq_name']=""#os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
+  tmp_list['seq_name']=os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
   tmp_list['tmp_nBitrate'] = -1
   tmp_list['tmp_nMaxBitrate'] = -1
   tmp_list['tmp_vbv_buffer_size'] = -1
@@ -465,7 +492,7 @@ def get_default_tmp_list():
 
 def configure_param(enc,param_list):
   tag_str=""
-  tmp_list=get_default_tmp_list()
+  tmp_list=get_default_tmp_list(param_list)
   param_len=len(param_list)
   tmp_list_len=len(tmp_list)
 
@@ -495,13 +522,14 @@ def configure_param(enc,param_list):
 
 
 def get_full_cmd(enc,param_list):
-  param_cmd=""
-  if enc.id=="as265":
-    param_cmd=as265_cmd_init.get_param_cmd_as265(param_list)
-  elif enc.id=="x265":
-    param_cmd=x26x_cmd_init.get_param_cmd_x265(param_list)
-  elif enc.id=="x264":
-    param_cmd=x26x_cmd_init.get_param_cmd_x264(param_list)
+  #param_cmd=""
+  #if enc.id=="as265":
+  #  param_cmd=as265_cmd_init.get_param_cmd_as265(param_list)
+  #elif enc.id=="x265":
+  #  param_cmd=x26x_cmd_init.get_param_cmd_x265(param_list)
+  #elif enc.id=="x264":
+  #  param_cmd=x26x_cmd_init.get_param_cmd_x264(param_list)
+  param_cmd=enc.get_param_cmd(param_list)
   exe=enc.exe
   full_cmd_line=exe+" "+param_cmd
   return full_cmd_line
