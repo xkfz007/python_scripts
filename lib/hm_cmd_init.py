@@ -83,21 +83,27 @@ def get_param_cmd_hm(param_list):
 
   cmd += " --InternalBitDepth=%s" % 8
 
-  cmd += " --SAO=%s" % param_list['b_sao']
   cmd += " --AMP=%s" % param_list['b_amp']
+  cmd += " --SAO=%s" % param_list['b_sao']
   cmd += " --SAOLcuBoundary=%s" % 0
+  cmd += " --SAOLcuBasedOptimization=%s" % 0
 
   cmd += " --SliceMode=%s" % 0
   cmd += " --SliceArgument=%s" % 0
   cmd += " --LFCrossSliceBoundaryFlag=%s" % 0
 
-  cmd += " --PCMEnabledFlag=%s" % 0
+  cmd += " --PCMEnabledFlag=%s" % param_list['b_pcm']
   #cmd += " --PCMLog2MaxSize=%s"%0
   #cmd += " --PCMLog2MinSize=%s"%0
   #cmd += " --PCMInputBitDepthFlag=%s"%0
   #cmd += " --PCMFilterDisableFlag=%s"%0
 
-  cmd += " --TileUniformSpacing=%s" % 0
+  cmd += " --WeightedPredP=%s" % param_list['b_weightp']
+  cmd += " --TransformSkip=%s" % param_list['b_tskip']
+  cmd += " --TransformSkipFast=%s" % param_list['b_tskip_fast']
+  cmd += " --SignHideFlag=%s" % param_list['b_signhide']
+
+  #cmd += " --TileUniformSpacing=%s" % 0
   #cmd += " --NumTileColumnsMinus1=%s"%0
   #cmd += " --TileColumnWidthArray=%s"%0
   #cmd += " --NumTileRowsMinus1=%s"%0
@@ -112,9 +118,11 @@ def get_param_cmd_hm(param_list):
   #cmd += " --TransquantBypassEnableFlag=%s"%0
   #cmd += " --CUTransquantBypassFlagForce=%s"%0
 
+  cmd += " --SEIDecodedPictureHash=%s"%param_list['bEnableAccessUnitDelimiters']
+
   cmd += " --RateControl=%s" % param_list['eRcType']
   cmd += " --TargetBitrate=%s" % param_list['nBitrate']
-  cmd += " --KeepHierarchicalBit=%s" % 2
+  cmd += " --KeepHierarchicalBit=%s" % 1
   cmd += " --LCULevelRateControl=%s" % 1
   cmd += " --RCLCUSeparateModel=%s" % 1
   cmd += " --InitialQP=%s" % 0

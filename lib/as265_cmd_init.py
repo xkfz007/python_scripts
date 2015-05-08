@@ -47,12 +47,17 @@ def get_default_param_list():
   param_list['b_open_gop'] = 0
   param_list['i_scenecut_threshold'] = 0
   param_list['i_bframe_adaptive'] = 0
-  param_list['b_repeat_headers'] = 0
 
   #feature
   param_list['b_amp'] = 0
   param_list['b_dbl'] = 1
   param_list['b_sao'] = 0
+
+  param_list['b_tskip']=0
+  param_list['b_tskip_fast']=0
+  param_list['b_weightp']=0
+  param_list['b_signhide']=0
+  param_list['b_pcm']=0
 
   #rc
   param_list['eRcType'] = 0
@@ -70,7 +75,7 @@ def get_default_param_list():
   param_list['random_cost'] = 0
   param_list['force_tu_split'] = 0
   param_list['force_one_intra_mode'] = 0
-  param_list['b_enable_cfg'] = 1
+  param_list['b_enable_cfg'] = 0
 
   #asm
   param_list['b_asm'] = 1
@@ -93,6 +98,14 @@ def get_default_param_list():
   param_list['i_me_range'] = 32
   param_list['i_subpel_refine'] = 5
   param_list['b_chroma_me'] = 1
+
+  # stream
+  param_list['iInterlaceMode']=0
+  param_list['b_repeat_headers'] = 0
+  param_list['bEnableAccessUnitDelimiters']=0
+  param_list['bEmitHRDSEI']=1
+  param_list['bEmitInfoSEI']=1
+  param_list['iDecodedPictureHashSEI']=0
 
   param_list['rc_f_rate_tolerance'] = 1.0
   param_list['rc_f_rf_constant'] = 23
@@ -135,8 +148,9 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['fFrameRate']
   cmd += " %s" % param_list['frame_num_to_encode']
 
-  # cu pu tu 
-  cmd += " %s" % param_list['nMaxCUSize']
+  # cu pu tu
+  tmp_power={64:6,32:5,16:4,8:3,4:2}
+  cmd += " %s" % tmp_power[param_list['nMaxCUSize']]
   cmd += " %s" % param_list['nMaxCUDepth']
   cmd += " %s" % param_list['nQuadtreeTULog2MaxSize']
   cmd += " %s" % param_list['nQuadtreeTULog2MinSize']
@@ -159,6 +173,12 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['b_amp']
   cmd += " %s" % param_list['b_dbl']
   cmd += " %s" % param_list['b_sao']
+
+  cmd+=" %s" % param_list['b_tskip']
+  cmd+=" %s" % param_list['b_tskip_fast']
+  cmd+=" %s" % param_list['b_weightp']
+  cmd+=" %s" % param_list['b_signhide']
+  cmd+=" %s" % param_list['b_pcm']
 
   # rc 
   cmd += " %s" % param_list['eRcType']
@@ -204,6 +224,14 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['i_me_range']
   cmd += " %s" % param_list['i_subpel_refine']
   cmd += " %s" % param_list['b_chroma_me']
+
+  # stream
+  cmd += " %s" % param_list['iInterlaceMode']
+  cmd += " %s" % param_list['b_repeat_headers']
+  cmd += " %s" % param_list['bEnableAccessUnitDelimiters']
+  cmd += " %s" % param_list['bEmitHRDSEI']
+  cmd += " %s" % param_list['bEmitInfoSEI']
+  cmd += " %s" % param_list['iDecodedPictureHashSEI']
 
   # rc 
   cmd += " %s" % param_list['rc_f_rate_tolerance']

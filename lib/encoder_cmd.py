@@ -43,7 +43,7 @@ class Encoder_prop:
   __paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/',
            'x265':__common_path+'src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/',
            'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
-           'hm':__common_path + 'src.hm/trunk/hm-16.5rc1/bin/vc10/x64/'}
+           'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
 
   #@staticmethod
   #def __format_path(path):

@@ -128,6 +128,8 @@ print os.path.abspath('\\\\172.21.40.64\\h265\\xml')
 import lib
 a=lib.get_total_frame_num("f:/sequences/kldby_1920x1080_25.yuv",200,200)
 print a
+print __file__
+print os.path.realpath(__file__)
 
 
 

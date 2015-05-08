@@ -43,6 +43,9 @@ def get_param_cmd_x26x(param_list):
   cmd += " --merange %s" % param_list['i_me_range']
   cmd += " --subme %s" % param_list['i_subpel_refine']
 
+  if param_list['b_dbl']==0:
+    cmd += " --no-deblock"
+
   #cmd+=" --tune psnr"
   cmd += " --psnr"
   cmd += " --ssim"
@@ -71,14 +74,9 @@ def get_param_cmd_x265(param_list):
   cmd += " %s" % bpyr_cl[param_list['bExistRefB']]
   cmd += " %s" % mbtree_cl[param_list['rc_b_cutree']]
 
-  cmd += " --no-weightp"
-  cmd += " --info"
-
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
     cmd += " --recon %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
-
-  cmd += " --no-signhide"
 
   sao_cl = ("--no-sao", "--sao")
   cmd += " %s" % sao_cl[param_list['b_sao']]
@@ -86,8 +84,6 @@ def get_param_cmd_x265(param_list):
   amp_cl = ("--no-amp", "--amp")
   cmd += " %s" % amp_cl[param_list['b_amp']]
 
-  headers = ("--no-repeat-headers", "--repeat-headers")
-  cmd += " %s" % headers[param_list['b_repeat_headers']]
 
   gop_cl=("--no-open-gop","--open-gop")
   cmd +=" %s" % gop_cl[param_list['b_open_gop']]
@@ -97,6 +93,35 @@ def get_param_cmd_x265(param_list):
   cmd += " --max-tu-size %s" % (1<<param_list['nQuadtreeTULog2MaxSize'])
   cmd += " --tu-intra-depth %s" % param_list['nQuadtreeTUMaxDepthIntra']
   cmd += " --tu-inter-depth %s" % param_list['nQuadtreeTUMaxDepthInter']
+
+
+  tskip_cl=('--no-tskip','--tskip')
+  cmd +=" %s" % tskip_cl[param_list['b_tskip']]
+
+  tskip_fast_cl=('--no-tskip-fast','--tskip-fast')
+  cmd +=" %s" % tskip_fast_cl[param_list['b_tskip_fast']]
+
+  weightp_cl=('--no-weightp','--weightp')
+  cmd +=" %s" % weightp_cl[param_list['b_weightp']]
+
+  signhide_cl=('--no-signhide','--signhide')
+  cmd +=" %s" % signhide_cl[param_list['b_signhide']]
+
+  cmd +=" --interlace %s" % param_list['iInterlaceMode']
+
+  header_cl = ("--no-repeat-headers", "--repeat-headers")
+  cmd += " %s" % header_cl[param_list['b_repeat_headers']]
+
+  aud_cl = ("--no-aud", "--aud")
+  cmd += " %s" % aud_cl[param_list['bEnableAccessUnitDelimiters']]
+
+  hrd_cl = ("--no-hrd", "--hrd")
+  cmd += " %s" % hrd_cl[param_list['bEmitHRDSEI']]
+
+  info_cl = ("--no-info", "--info")
+  cmd += " %s" % info_cl[param_list['bEmitInfoSEI']]
+
+  cmd += " --hash %s" % param_list['iDecodedPictureHashSEI']
 
   cmd += get_param_cmd_x26x(param_list)
 
@@ -113,23 +138,38 @@ def get_param_cmd_x264(param_list):
   cmd += " %s" % bpyr_cl[param_list['bExistRefB']]
   cmd += " %s" % mbtree_cl[param_list['rc_b_cutree']]
 
-  cmd += " --weightp 0"
   cmd += " --no-psy"
-
-  if param_list['eRcType'] == 1:
-    cmd += " --nal-hrd cbr"
-  elif param_list['eRcType'] == 3:
-    cmd += " --nal-hrd vbr"
 
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
     cmd += " --dump-yuv %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
 
+  if param_list['b_open_gop']>0:
+    cmd +=" --open-gop"
+
+  cmd += " --weightp %s"%param_list['b_weightp']
+
   headers = ("--global-header", "--repeat-headers")
   cmd += " %s" % headers[param_list['b_repeat_headers']]
 
-  if param_list['b_open_gop']==1:
-    cmd +=" --open-gop"
+  if param_list['iInterlaceMode']>0:
+    interlace_cl=('','--tff','--bff')
+    cmd += " %s" % interlace_cl[param_list['iInterlaceMode']]
+
+  if param_list['bEnableAccessUnitDelimiters']>0:
+    cmd += " --aud"
+
+  if param_list['bEnableAccessUnitDelimiters']>0:
+    cmd += " --aud"
+
+  if param_list['bEmitHRDSEI']>0:
+    if param_list['eRcType'] == 1:
+      cmd += " --nal-hrd cbr"
+    elif param_list['eRcType'] == 3:
+      cmd += " --nal-hrd vbr"
+
+  # the version info is always included in x264
+
 
   cmd += get_param_cmd_x26x(param_list)
   return cmd
