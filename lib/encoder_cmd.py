@@ -1,5 +1,6 @@
 import getopt, sys, os
 import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init
+import global_vars
 
 class Encoder_prop:
   id=''
@@ -40,8 +41,11 @@ class Encoder_prop:
   #__paths['x265'] =
   #__paths['x264'] =
   __common_path = 'd:/workspace/'
+  __x265_path="x265_v1.5_20150211"
+  if global_vars.x265_ver=="v1.6":
+    __x265_path="x265_v1.6_20150403"
   __paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/',
-           'x265':__common_path+'src.x265/trunk/x265_v1.6_20150403/build/vc10-x86_64/',
+           'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
            'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
            'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
 
@@ -168,41 +172,42 @@ def set_rc_related_param_semi_auto(param_list, bitrate):
 def usage():
   help_msg = '''Usage:./test.py [option] [value]...
   options:
-   -i input_path
-   -o output_path
-   -I I frame interval
-   -f frames to be encoded
-   -F frame parallelism threads
-   -W WPP threads
-   -L Lookahead threads
-   -l number of lookahead frames
+   -i <string> input_path
+   -o <string> output_path
+   -I <integer> I frame interval
+   -f <integer> frames to be encoded
+   -F <integer> frame parallelism threads
+   -W <integer> WPP threads
+   -L <integer> Lookahead threads
+   -l <integer> number of lookahead frames
    -h print this help
    -H print the help of encoder
-   -q qp
-   -r ratecontrol method
-   -B bitrate
-   -V vbv_max_bitrate
-   -S vbv_buffer_size
-   -b bframes
-   -M bref/b-pyramid/hierarchical
-   -a aq-mode:0 disabled, 1 Variance AQ, Auto-Variance AQ
-   -s seqname
-   -R ref number
-   -t use vbv-init-time
+   -q <integer> qp
+   -r <integer> ratecontrol method
+   -B <integer> bitrate
+   -V <integer> vbv_max_bitrate
+   -S <integer> vbv_buffer_size
+   -b <integer> bframes
+   -M <integer> bref/b-pyramid/hierarchical:0 disabled, 1 enabled
+   -a <integer> aq-mode:0 disabled, 1 Variance AQ, Auto-Variance AQ
+   -s <string> seqname
+   -R <string> ref number
+   -t <integer> use vbv-init-time
    -y dump-yuv
-   -C extra command lines
-   -O Lowres:0 auto, 1 semi, 2 quater
-   -p rc pass:0~3
-   -P qp step
-   -A cu tree
-   -E resolution: widthxheight
-   -c scenecut value
-   -G open-gop
-   -D bframe adaptive
+   -C <string> extra command lines
+   -O <integer> Lowres:0 auto, 1 semi, 2 quater
+   -p <integer> rc pass:0~3
+   -g <string> the 2pass log file
+   -P <integer> qp step
+   -A <integer> cu tree:0 disabled, 1 enabled
+   -E <intxint> resolution: widthxheight
+   -c <integer> scenecut value
+   -G <integer> open-gop:0 disabled, 1 enabled
+   -D <integer> bframe adaptive
    --version show the version info
-   -k seek frame
-   -j 0 enable sao, 1 disable sao
-   -J 0 enable deblock, 1 disable deblock
+   -k <integer> seek frame
+   -j <integer> sao: 0 disabled, 1 enabled
+   -J <integer> deblock: 0 disabled, 1 enabled
    '''
   print help_msg
   return
@@ -220,14 +225,14 @@ def parse_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:j:J:',['version',])
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:g:P:A:E:c:G:D:j:J:',['version',])
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
   except Exception, e:
     print e
 
-  opt_list = dict()
+  opt_list = {}#dict()
   tag_str = ""
   #seq_name = ""
   #tmp_nBitrate = -1
@@ -317,6 +322,9 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt == "-p":
       opt_list["rc_i_pass"] = int(arg)
+      tag_str += get_tag(opt, arg)
+    elif opt == "-g":
+      opt_list["rc_s_stats"] = arg
       tag_str += get_tag(opt, arg)
     elif opt == "-P":
       opt_list["rc_i_qp_step"] = int(arg)
@@ -480,7 +488,7 @@ def configure_rc_param(param_list,tmp_list):
     return
 
 def get_default_tmp_list(param_list):
-  tmp_list=dict()
+  tmp_list={}#dict()
   tmp_list['seq_name']=os.path.splitext(param_list['input_filename'])[0]#param_list['input_filename'].replace(".yuv","")
   tmp_list['tmp_nBitrate'] = -1
   tmp_list['tmp_nMaxBitrate'] = -1

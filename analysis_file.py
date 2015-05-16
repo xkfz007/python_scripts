@@ -4,21 +4,21 @@ import lib
 class Codec_analysis:
   id=""
   fstr=""
-  __format_strs=dict()
+  __format_strs={}#dict()
   __format_strs["ashevcd"]="Frm.*"
   __format_strs["as265"]="POC.*bits"
   __format_strs["x265"]="POC.*bits"
   __format_strs["x264"]="frame=.*bits"
 
   qp_idx=0
-  __qp_idxs=dict()
+  __qp_idxs={}#dict()
   __qp_idxs["ashevcd"]=20
   __qp_idxs["as265"]=7
   __qp_idxs["x265"]=4
   __qp_idxs["x264"]=3
 
   bits_idx=0
-  __bits_idxs=dict()
+  __bits_idxs={}#dict()
   __bits_idxs["ashevcd"]=3
   __bits_idxs["as265"]=8
   __bits_idxs["x265"]=5
@@ -69,7 +69,7 @@ class Codec_analysis:
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
-  __func_list=dict()
+  __func_list={}#dict()
   __func_list["ashevcd"]=get_cl_ashevcd
   __func_list["as265"]=get_cl_as265
   __func_list["x265"]=get_cl_x265

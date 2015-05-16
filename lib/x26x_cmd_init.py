@@ -1,4 +1,5 @@
 import os.path
+import global_vars
 def get_param_cmd_x26x(param_list):
   cmd=""
 
@@ -52,6 +53,10 @@ def get_param_cmd_x26x(param_list):
   cmd += " --no-progress"
   cmd += "  --log-level debug"
 
+  if param_list['rc_i_pass']>0:
+    cmd += " --pass %s"%param_list['rc_i_pass']
+    cmd += " --stats %s"%param_list['rc_s_stats']
+
   return cmd
 
 def get_param_cmd_x265(param_list):
@@ -59,14 +64,18 @@ def get_param_cmd_x265(param_list):
   cmd += " --frame-threads %s" % param_list['frame_threads']
   if param_list['wpp_threads'] < param_list['lookahead_threads']:
     param_list['wpp_threads'] = param_list['lookahead_threads']
-  cmd += " --pool %s"%param_list['wpp_threads']
-  #cmd += " --threads %s"%param_list['wpp_threads']
+  if global_vars.x265_ver=="v1.5":
+    cmd += " --threads %s"%param_list['wpp_threads']
+  elif global_vars.x265_ver=="v1.6":
+    cmd += " --pool %s"%param_list['wpp_threads']
+
   if param_list['wpp_threads'] > 1 or param_list['vbv_buffer_size']>0:#VBV requires wave-front parallelism
     cmd += " --wpp"
   else:
     cmd += " --no-wpp"
 
-  cmd += " --lookahead-slices %s" % param_list['lookahead_threads']
+  if global_vars.x265_ver=="v1.6":
+    cmd += " --lookahead-slices %s" % param_list['lookahead_threads']
 
   bpyr_cl = ("--no-b-pyramid", "--b-pyramid")
   mbtree_cl = ("--no-cutree", "--cutree")
@@ -89,8 +98,9 @@ def get_param_cmd_x265(param_list):
   cmd +=" %s" % gop_cl[param_list['b_open_gop']]
 
   cmd +=" --ctu %s"% param_list["nMaxCUSize"]
-  cmd += " --min-cu-size %s" % (param_list["nMaxCUSize"]>>(param_list['nMaxCUDepth']-1))
-  cmd += " --max-tu-size %s" % (1<<param_list['nQuadtreeTULog2MaxSize'])
+  if global_vars.x265_ver=="v1.6":
+    cmd += " --min-cu-size %s" % (param_list["nMaxCUSize"]>>(param_list['nMaxCUDepth']-1))
+    cmd += " --max-tu-size %s" % (1<<param_list['nQuadtreeTULog2MaxSize'])
   cmd += " --tu-intra-depth %s" % param_list['nQuadtreeTUMaxDepthIntra']
   cmd += " --tu-inter-depth %s" % param_list['nQuadtreeTUMaxDepthInter']
 

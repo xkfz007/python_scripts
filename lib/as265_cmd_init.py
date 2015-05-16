@@ -2,7 +2,7 @@ import common_lib
 
 
 def get_default_param_list():
-  param_list = dict()  # create a dictinary
+  param_list = {}#dict()  # create a dictinary
   #param_list['encder_exe'] = "cli_ashevc.exe"
   param_list['output_path'] ="."#"F:/encoder_test_output/as265_output  "
   param_list['output_filename'] = "as265_str.bin"
@@ -120,6 +120,8 @@ def get_default_param_list():
   param_list['rc_b_cutree'] = 0
   param_list['rc_i_lowres'] = 1
   param_list['rc_i_pass'] = 0
+  param_list['rc_s_stats'] = "as265_2pass.log"
+
 
   return param_list
 
@@ -247,6 +249,7 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['rc_b_cutree']
   cmd += " %s" % param_list['rc_i_lowres']
   cmd += " %s" % param_list['rc_i_pass']
+  #cmd += " %s" % param_list['rc_s_stats']
 
   return cmd
 
