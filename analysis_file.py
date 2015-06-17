@@ -163,7 +163,7 @@ def obtain_data():
       assert False, "unknown option"
 
   if bits_flag==1:
-    cmd=cdc.get_qp_fcmd(input_file)
+    cmd=cdc.get_bits_fcmd(input_file)
     run_cmd(cmd,bits_output)
 
   if qp_flag==1:

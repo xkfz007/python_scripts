@@ -44,10 +44,17 @@ class Encoder_prop:
   __x265_path="x265_v1.5_20150211"
   if global_vars.x265_ver=="v1.6":
     __x265_path="x265_v1.6_20150403"
-  __paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/HEVC_Encoder/bin/x64/',
-           'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
-           'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
-           'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
+
+  hevc_path='hevc_enc'
+  #hevc_path='HEVC_Encoder'
+  #__paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/'+hevc_path+'/bin/x64/',
+  #         'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
+  #         'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
+  #         'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
+  __paths={'as265':os.path.join(__common_path , 'arcsoft_codes/HEVC_Codec/',hevc_path,'bin/x64/'),
+           'x265':os.path.join(__common_path,'src.x265/trunk/',__x265_path,'build/vc10-x86_64/'),
+           'x264':os.path.join(__common_path , 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/'),
+           'hm':os.path.join(__common_path , 'src.hm/trunk/hm-10.0/bin/vc10/x64/')}
 
   #@staticmethod
   #def __format_path(path):
@@ -197,6 +204,7 @@ def usage():
    -C <string> extra command lines
    -O <integer> Lowres:0 auto, 1 semi, 2 quater
    -p <integer> rc pass:0~3
+   -T <string>  stats file
    -g <string> the 2pass log file
    -P <integer> qp step
    -A <integer> cu tree:0 disabled, 1 enabled
@@ -225,7 +233,7 @@ def parse_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:g:P:A:E:c:G:D:j:J:',['version',])
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:T:g:P:A:E:c:G:D:k:j:J:',['version',])
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -348,7 +356,7 @@ def parse_cl(enc):
       tag_str += get_tag(opt, arg)
     elif opt in ('--version',):
       Version_flag=1
-    elif opt in ("-s",):
+    elif opt in ("-k",):
       opt_list["first_frame"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt in ("-j",):

@@ -26,7 +26,7 @@ def get_param_cmd_x26x(param_list):
       vbv_buffer_init = 0.9
     cmd += " --vbv-init %s" % vbv_buffer_init
 
-  cmd += " --pass %s" % param_list['rc_i_pass']
+  #cmd += " --pass %s" % param_list['rc_i_pass']
 
   cmd += " -o %s %s" % (os.path.join(param_list['output_path'],param_list['output_filename']), os.path.join(param_list['input_path'], param_list['input_filename']))
   cmd += " --input-res %sx%s" % (param_list['nSrcWidth'], param_list['nSrcHeight'])
@@ -159,8 +159,8 @@ def get_param_cmd_x264(param_list):
 
   cmd += " --weightp %s"%param_list['b_weightp']
 
-  headers = ("--global-header", "--repeat-headers")
-  cmd += " %s" % headers[param_list['b_repeat_headers']]
+  #headers = ("--global-header", "--repeat-headers")
+  #cmd += " %s" % headers[param_list['b_repeat_headers']]
 
   if param_list['iInterlaceMode']>0:
     interlace_cl=('','--tff','--bff')
