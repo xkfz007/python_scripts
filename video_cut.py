@@ -4,7 +4,47 @@ import getopt
 import os
 import subprocess
 import lib.common_lib
+import re
 
+class codec_t:
+  name=''
+  ext=''
+  codec=''
+  def __init__(self,name,ext,codec):
+    self.name=name
+    self.ext=ext
+    self.codec=codec
+
+audio_codecs={'mp3':codec_t('mp3','.mp3','libmp3lame'),
+              'aac':codec_t('aac','.aac','libvo_aacenc'),
+              'vorbis':codec_t('vorbis','.ogg','libvorbis')
+              }
+
+def get_audio_codec(opt_list):
+  cmd_line = "%s" % opt_list['ffmpeg.exe']
+  cmd_line += " -i %s " % opt_list['input_file']
+  p = subprocess.Popen(cmd_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  p.wait()
+  datalines = []
+  for a in p.stdout.readlines():
+    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+      datalines.append(a)
+  for a in p.stderr.readlines():
+    #print a
+    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+      datalines.append(a)
+  p.stdout.close()
+  p.stderr.close()
+
+  assert len(datalines) == 1
+  str_list = datalines[0].strip().replace(',', ' ').split(' ')
+  idx = 0
+  for i in str_list:
+    if i == "Audio:":
+      break
+    idx += 1
+  audio_c = str_list[idx + 1].lower()
+  return audio_c
 
 def usage():
   help_msg = '''Usage:./test.py [option] [value]...
@@ -12,11 +52,15 @@ def usage():
    -i <string> input_path
    -o <string> output_path
    -s 00:00:00 start time offset
-   -t 00:00:00 duration
+   -t <int>or<hh:mm:ss> duration be a number in seconds, or in hh:mm:ss[.xxx] form.
+   -T <int>or<hh:mm:ss> duration be a number in seconds, or in hh:mm:ss[.xxx] form.
    -h show this help
    -H show the ffmpeg help
    -O 0: cut video
       1: get audio from video
+   -y overwrite the exist files
+   -n do not overwrite the exist files
+
    '''
   print help_msg
   return
@@ -26,10 +70,12 @@ def get_default_opts():
   opt_list['ffmpeg.exe']='ffmpeg.exe'
   opt_list['input_file']='a.mp4'
   opt_list['output_file']=''
-  opt_list['start_time']='00:00:00'
-  opt_list['duration']='00:10:00'
+  opt_list['start_time']='-1'
+  opt_list['duration']='-1'
+  opt_list['position']='-1'
   opt_list['help']=0
   opt_list['operation']=-1
+  opt_list['overwrite']='u'
   return opt_list
 
 def parse_cl(opt_list):
@@ -38,7 +84,7 @@ def parse_cl(opt_list):
     sys.exit()
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:o:s:t:hHO:')
+    opts, args = getopt.getopt(sys.argv[1:], 'i:o:s:t:T:hHO:yn')
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -54,8 +100,14 @@ def parse_cl(opt_list):
       opt_list["start_time"] = arg
     elif opt == "-t":
       opt_list["duration"] = arg
+    elif opt == "-T":
+      opt_list["position"] = arg
     elif opt == "-O":
       opt_list["operation"] = int(arg)
+    elif opt == "-y":
+      opt_list["overwrite"] = 'y'
+    elif opt == "-n":
+      opt_list["overwrite"] = 'n'
     elif opt == "-h":
       usage()
       sys.exit()
@@ -66,8 +118,13 @@ def parse_cl(opt_list):
 
 def get_cmd_line(opt_list):
   cmd_line=""
-  cmd_line += " -ss %s" % opt_list['start_time']
-  cmd_line += " -t %s" % opt_list['duration']
+  if opt_list['start_time']!='-1':
+    cmd_line += " -ss %s" % opt_list['start_time']
+  if opt_list['duration']!='-1':
+    cmd_line += " -t %s" % opt_list['duration']
+  if opt_list['duration']=='-1' and opt_list['position']!='-1':
+    cmd_line += " -T %s" % opt_list['position']
+
   if opt_list['operation']==0:#video cut
     if opt_list['output_file']=='':
       file_name,ext=os.path.splitext(opt_list['input_file'])
@@ -77,10 +134,13 @@ def get_cmd_line(opt_list):
   elif opt_list['operation']==1:#get audio from video
     if opt_list['output_file']=='':
       file_name,ext=os.path.splitext(opt_list['input_file'])
+      ac=get_audio_codec(opt_list)
+      ext=audio_codecs[ac].ext
       opt_list['output_file']=file_name+"_audio"+ext
-    cmd_line += " -i %s -acodec copy" % opt_list['input_file']
-    #cmd_line += " -i %s -acodec libmp3lame" % opt_list['input_file']
+    cmd_line += " -i %s" % opt_list['input_file']
     cmd_line += " -vn"#disable video output
+    cmd_line += " -acodec copy"
+    #cmd_line += " -acodec %s"% audio_codecs[ac].codec
     cmd_line += " %s" % opt_list['output_file']
 
   return cmd_line
@@ -104,6 +164,8 @@ if __name__=='__main__':
     cmd_line+=" -h long"
     os.system(cmd_line)
   else:
+    if opt_list['overwrite']=='y' or opt_list['overwrite']=='n':
+      cmd_line+=" -%s "%opt_list['overwrite']
     if os.path.isfile(opt_list['input_file']):
       cmd_line+=get_cmd_line(opt_list)
       subprocess.call(cmd_line, stdout=None, shell=True)
