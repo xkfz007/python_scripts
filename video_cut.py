@@ -62,7 +62,10 @@ def usage():
    -O 0: cut video
       1: get audio from video
       2: convert the video to pictures
+      3: resize the video
+      4: scale the video
    -e extension of output file
+   -S resize the video
    -y overwrite the exist files
    -n do not overwrite the exist files
 
@@ -81,6 +84,7 @@ def get_default_opts():
   opt_list['help']=0
   opt_list['operation']=-1
   opt_list['extension']=''
+  opt_list['resize']=''
   opt_list['overwrite']='u'
   return opt_list
 
@@ -90,7 +94,7 @@ def parse_cl(opt_list):
     sys.exit()
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:o:s:t:T:hHO:e:yn')
+    opts, args = getopt.getopt(sys.argv[1:], 'i:o:s:t:T:hHO:e:S:yn')
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -112,6 +116,8 @@ def parse_cl(opt_list):
       opt_list["operation"] = int(arg)
     elif opt == "-e":
       opt_list["extension"] = arg
+    elif opt == "-S":
+      opt_list["resize"] = arg
     elif opt == "-y":
       opt_list["overwrite"] = 'y'
     elif opt == "-n":
@@ -169,6 +175,16 @@ def get_cmd_line(opt_list):
       else:
         ext='.png'
       opt_list['output_file']=file_name+"%d"+ext
+  elif opt_list['operation']==3:
+    if opt_list['output_file']=='':
+      if opt_list['extension']!='' and opt_list['extension'] in video_ext_list:
+        ext=opt_list['extension']
+      opt_list['output_file']=file_name+"_out"+ext
+    if opt_list['resize']!="":
+      cmd_line+=  " -s %s"%opt_list['resize']
+    else:
+      cmd_line+=  " -vcodec copy"
+    cmd_line += " -acodec copy"
 
   cmd_line += " %s" % opt_list['output_file']
   return cmd_line
