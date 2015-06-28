@@ -5,6 +5,7 @@ import os
 import subprocess
 import lib.common_lib
 import re
+import argparse
 
 class codec_t:
   name=''
@@ -30,24 +31,26 @@ def get_audio_codec(opt_list):
   p.wait()
   datalines = []
   for a in p.stdout.readlines():
-    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+    if a.find('Stream') >= 0 and a.find('Audio:') >= 0:
       datalines.append(a)
   for a in p.stderr.readlines():
-    #print a
-    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+    print a
+    if a.find('Stream') >= 0 and a.find('Audio:') >= 0:
       datalines.append(a)
   p.stdout.close()
   p.stderr.close()
 
-  assert len(datalines) == 1
-  str_list = datalines[0].strip().replace(',', ' ').split(' ')
-  idx = 0
-  for i in str_list:
-    if i == "Audio:":
-      break
-    idx += 1
-  audio_c = str_list[idx + 1].lower()
-  return audio_c
+  #assert len(datalines) == 1
+  a_str=''
+  if len(datalines)>0:
+    str_list = datalines[0].strip().replace(',', ' ').split(' ')
+    idx = 0
+    for i in str_list:
+      if i == "Audio:":
+        break
+      idx += 1
+    a_str = str_list[idx + 1].lower()
+  return a_str
 
 def usage():
   help_msg = '''Usage:./test.py [option] [value]...
@@ -130,6 +133,24 @@ def parse_cl(opt_list):
     else:
       assert False, "unknown option"
 
+def parse_cl2(opt_list):
+
+  parser = argparse.ArgumentParser()
+
+  parser.add_argument('-i', action="store", default='a.mp4',dest='input_file',help="input file name")
+  parser.add_argument('-ss', action="store", default='-1',dest='time_off',help="set the start time offset")
+  parser.add_argument('-t', action="store", default='-1',dest='duration', help="record or transcode 'duration' seconds of audio/video")
+  parser.add_argument('-to', action="store", default='-1',dest='time_stop',help=" record or transcode stop time")
+  parser.add_argument('-H', action="store_true", default=False,dest='ff_help',help="show the ffmpeg help")
+  parser.add_argument('-o', action="store", default=-1,dest='operation',type=int,
+                      help="operations\n0: cut video\n1: get audio from video\n2: convert the video to pictures\n3: resize the video")
+  parser.add_argument('-e', action="store", default='', dest='extension',help=" extension of output file")
+  parser.add_argument('-s', action="store", default='',dest='size',help="set frame size (WxH or abbreviation)")
+  parser.add_argument('-y', action="store_true", default=False,dest='overwrite',help="overwrite output files")
+  parser.add_argument('-n', action="store_true", default=False,dest='overwrite',help="never overwrite output files")
+  parser.add_argument('output_file', action="store", help="output file name")
+
+  results=parser.parse_args()
 
 def get_cmd_line(opt_list):
   cmd_line=""
@@ -159,14 +180,22 @@ def get_cmd_line(opt_list):
     if opt_list['output_file']=='':
       #file_name,ext=os.path.splitext(opt_list['input_file'])
       ac=get_audio_codec(opt_list)
-      ext=audio_codecs[ac].ext
+      #acdc=audio_codecs['mp3']
+      if not audio_codecs.has_key(ac):
+        #acdc=audio_codecs['mp3']
+        ext=audio_codecs['mp3'].ext
+        cdc_str=audio_codecs['mp3'].codec
+      else:
+        ext=audio_codecs[ac].ext
+        cdc_str='copy'
+
       if opt_list['extension']!='' and opt_list['extension'] in video_ext_list:
         ext=opt_list['extension']
       opt_list['output_file']=file_name+"_audio"+ext
     #cmd_line += " -i %s" % opt_list['input_file']
     cmd_line += " -vn"#disable video output
-    cmd_line += " -acodec copy"
-    #cmd_line += " -acodec %s"% audio_codecs[ac].codec
+    #cmd_line += " -acodec copy"
+    cmd_line += " -acodec %s"% cdc_str
     #cmd_line += " %s" % opt_list['output_file']
   elif opt_list['operation']==2:
     if opt_list['output_file']=='':

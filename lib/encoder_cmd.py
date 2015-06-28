@@ -51,7 +51,7 @@ class Encoder_prop:
   #         'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
   #         'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
   #         'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
-  __paths={'as265':os.path.join(__common_path , 'arcsoft_codes/HEVC_Codec/',hevc_path,'bin/x64/'),
+  __paths={'as265':os.path.join(__common_path , 'arcvideo_codes/HEVC_Codec/',hevc_path,'bin/x64/'),
            'x265':os.path.join(__common_path,'src.x265/trunk/',__x265_path,'build/vc10-x86_64/'),
            'x264':os.path.join(__common_path , 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/'),
            'hm':os.path.join(__common_path , 'src.hm/trunk/hm-10.0/bin/vc10/x64/')}
