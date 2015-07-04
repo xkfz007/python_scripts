@@ -1,5 +1,6 @@
 #!/bin/python
 __author__ = 'hfz2597'
+#concatenate some video files
 import sys
 import os
 import subprocess

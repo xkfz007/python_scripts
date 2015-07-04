@@ -214,6 +214,7 @@ def get_cmd_line(opt_list):
     else:
       cmd_line+=  " -vcodec copy"
     cmd_line += " -acodec copy"
+  #elif opt_list['operation']==4:
 
   cmd_line += " %s" % opt_list['output_file']
   return cmd_line
