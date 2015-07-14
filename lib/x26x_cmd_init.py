@@ -39,10 +39,14 @@ def get_param_cmd_x26x(param_list):
   asm_cl=("--no-asm","--asm auto")
   cmd += " %s" % asm_cl[param_list['b_asm']]
 
+
   me_cl = ("dia", "hex", "umh", "esa", "tesa")
   cmd += " --me %s" % me_cl[param_list['me_method']]
   cmd += " --merange %s" % param_list['i_me_range']
   cmd += " --subme %s" % param_list['i_subpel_refine']
+
+  weightb_cl = ("--no-weightb", "--weightb")
+  cmd += " %s"%weightb_cl[param_list['b_weightb']]
 
   if param_list['b_dbl']==0:
     cmd += " --no-deblock"
@@ -78,9 +82,9 @@ def get_param_cmd_x265(param_list):
     cmd += " --lookahead-slices %s" % param_list['lookahead_threads']
 
   bpyr_cl = ("--no-b-pyramid", "--b-pyramid")
-  mbtree_cl = ("--no-cutree", "--cutree")
-
   cmd += " %s" % bpyr_cl[param_list['bExistRefB']]
+
+  mbtree_cl = ("--no-cutree", "--cutree")
   cmd += " %s" % mbtree_cl[param_list['rc_b_cutree']]
 
   tmp_flag = param_list['trace_flag'] & 2
@@ -92,6 +96,14 @@ def get_param_cmd_x265(param_list):
 
   amp_cl = ("--no-amp", "--amp")
   cmd += " %s" % amp_cl[param_list['b_amp']]
+
+  bintra_cl=("--no-b-intra","--b-intra")
+  cmd+=" %s"% bintra_cl[param_list['b_bintra']]
+
+  brect_cl=("--no-rect","--b-rect")
+  cmd+=" %s"% brect_cl[param_list['b_rect']]
+
+  cmd+=" --max-merge %s"% param_list['i_merge']
 
 
   gop_cl=("--no-open-gop","--open-gop")

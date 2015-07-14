@@ -49,6 +49,10 @@ def get_default_param_list():
   param_list['i_bframe_adaptive'] = 0
 
   #feature
+  param_list['i_merge']=5
+  param_list['b_pintra']=1
+  param_list['b_bintra']=0
+  param_list['b_rect']=1
   param_list['b_amp'] = 0
   param_list['b_dbl'] = 1
   param_list['b_sao'] = 0
@@ -56,6 +60,7 @@ def get_default_param_list():
   param_list['b_tskip']=0
   param_list['b_tskip_fast']=0
   param_list['b_weightp']=0
+  param_list['b_weightb']=0
   param_list['b_signhide']=0
   param_list['b_pcm']=0
 
@@ -172,6 +177,10 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['i_bframe_adaptive']
 
   # feature
+  cmd += " %s" % param_list['i_merge']
+  cmd += " %s" % param_list['b_pintra']
+  cmd += " %s" % param_list['b_bintra']
+  cmd += " %s" % param_list['b_rect']
   cmd += " %s" % param_list['b_amp']
   cmd += " %s" % param_list['b_dbl']
   cmd += " %s" % param_list['b_sao']
@@ -179,6 +188,7 @@ def get_param_cmd_as265(param_list):
   cmd+=" %s" % param_list['b_tskip']
   cmd+=" %s" % param_list['b_tskip_fast']
   cmd+=" %s" % param_list['b_weightp']
+  cmd+=" %s" % param_list['b_weightb']
   cmd+=" %s" % param_list['b_signhide']
   cmd+=" %s" % param_list['b_pcm']
 

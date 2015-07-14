@@ -41,12 +41,13 @@ for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)
   for seq_name in seq_list:
     for bitrate in br_list:
-      tags="_"+encoder_id+"_bitrate"+str(bitrate)
-      lib.configure_seq_param(param_list, seq_name,tags)
+      tag_str="_"+encoder_id+"_bitrate"+str(bitrate)
+      lib.configure_seq_param(param_list, seq_name,tags=tag_str)
       lib.check_params(param_list)
       lib.set_rc_related_param_semi_auto(param_list, bitrate)
       cmd = lib.get_full_cmd(enc, param_list)
       print cmd
       #os.system(cmd)
-      regression_file=param_list['output_path']+seq_name+tags+"_cons.log"
+      reg_file_name=param_list['output_path']+seq_name+tag_str+"_cons.log"
+      regression_file=open(reg_file_name, 'w')
       subprocess.call(cmd,stdout=regression_file,shell=True)

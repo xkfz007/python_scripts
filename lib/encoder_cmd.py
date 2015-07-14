@@ -45,8 +45,8 @@ class Encoder_prop:
   if global_vars.x265_ver=="v1.6":
     __x265_path="x265_v1.6_20150403"
 
-  hevc_path='hevc_enc'
-  #hevc_path='HEVC_Encoder'
+  #hevc_path='hevc_enc'
+  hevc_path='HEVC_Encoder'
   #__paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/'+hevc_path+'/bin/x64/',
   #         'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
   #         'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
@@ -107,11 +107,11 @@ class Encoder_prop:
 
 
 
-def configure_seq_param(param_list, tmp_list, tags=""):
-  seq_name=seq_list.get_seqname(tmp_list['seq_name'])
+def configure_seq_param(param_list, tmp_name,tmp_width=-1,tmp_height=-1,tags=""):
+  seq_name=seq_list.get_seqname(tmp_name)
   org_width, org_height, org_fps = fun_lib.get_reso_info(seq_name)
-  tmp_width=tmp_list['tmp_nSrcWidth']
-  tmp_height=tmp_list['tmp_nSrcHeight']
+  #tmp_width=tmp_list['tmp_nSrcWidth']
+  #tmp_height=tmp_list['tmp_nSrcHeight']
   if tmp_width<=0 or tmp_height<=0:
     param_list['nSrcWidth'] = int(org_width)
     param_list['nSrcHeight'] = int(org_height)
@@ -528,7 +528,7 @@ def configure_param(enc,param_list):
       print "dict(tmp_list) has been changed somewhere. Please fix this bug."
       sys.exit()
 
-  cons_log=configure_seq_param(param_list, tmp_list, tag_str)
+  cons_log=configure_seq_param(param_list, tmp_list['seq_name'],tmp_list['tmp_nSrcWidth'],tmp_list['tmp_nSrcHeight'],tag_str)
 
   configure_rc_param(param_list,tmp_list)
 

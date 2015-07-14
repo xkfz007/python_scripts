@@ -30,5 +30,6 @@ if lib.determin_sys()=="cygwin":
   pf.close()
 
 #os.system(cmd_line)
+print cmd_line
 subprocess.call(cmd_line,shell=True)
 
