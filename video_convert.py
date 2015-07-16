@@ -4,18 +4,10 @@ __author__ = 'hfz2597'
 import lib
 import os
 import subprocess
-def get_file_list(path_dir):
-  path_dir=lib.common_lib.format_path(path_dir)
-  file_list=[]
-  for root,dirs,files in os.walk(path_dir):
-    for i in files:
-      file_list.append(os.path.join(root,i))
-
-  return file_list
 
 if __name__=="__main__":
   dirt="f:/QQDownload/The.Wire"
-  file_list=get_file_list(dirt)
+  file_list=lib.common_lib.get_file_list(dirt)
   cmd_line="ffmpeg.exe -y"
   for i in file_list:
     file_size=os.path.getsize(i)

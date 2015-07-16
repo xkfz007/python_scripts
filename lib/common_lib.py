@@ -59,3 +59,23 @@ def format_path(path):
 #    file_path=os.path.expanduser("~")+os.path.splitdrive(file_path)[1]
 #
 #  return file_path
+
+import sys
+def get_file_list(path_dir,ext=''):
+  if len(ext)!=0:
+    if ext[0]!='.':
+      ext='.'+ext
+    if len(ext)==1:
+      print "invaild extension, please check"
+      sys.exit()
+  path_dir=format_path(path_dir)
+  file_list=[]
+  for root,dirs,files in os.walk(path_dir):
+    for i in files:
+      if len(ext)!=0:
+        t1,t2=os.path.splitext(i)
+        if t2!=ext:
+          continue
+      file_list.append(os.path.join(root,i))
+
+  return file_list

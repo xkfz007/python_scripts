@@ -29,7 +29,7 @@ class_x=('Xclownlogoed_3840x2160_8_25_640', 'Xsnake_3840x2160_8_25_353', 'Xsusie
 class_std2=class_b+class_c+class_d+class_e+class_f
 class_std=class_a+class_b+class_c+class_d+class_e+class_f
 
-def get_seqname(name):
+def guess_seqname(name):
   seq_list=class_a+class_b+class_c+class_d+class_e+class_f+class_special+class_x+class_special2
   for i in seq_list:
     if i.upper().find(name.upper().split('_')[0])>=0:

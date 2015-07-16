@@ -51,7 +51,7 @@ cnt=0
 for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)
   for name in seq_list:
-    seq_name=lib.get_seqname(name)
+    seq_name=lib.guess_seqname(name)
     for bitrate in br_list:
       tag_str="_"+encoder_id+"_bitrate"+str(bitrate)
       lib.configure_seq_param(param_list, seq_name,tags=tag_str)

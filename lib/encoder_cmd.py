@@ -108,7 +108,7 @@ class Encoder_prop:
 
 
 def configure_seq_param(param_list, tmp_name,tmp_width=-1,tmp_height=-1,tags=""):
-  seq_name=seq_list.get_seqname(tmp_name)
+  seq_name=seq_list.guess_seqname(tmp_name)
   org_width, org_height, org_fps = fun_lib.get_reso_info(seq_name)
   #tmp_width=tmp_list['tmp_nSrcWidth']
   #tmp_height=tmp_list['tmp_nSrcHeight']

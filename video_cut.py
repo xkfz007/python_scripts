@@ -219,15 +219,6 @@ def get_cmd_line(opt_list):
   cmd_line += " %s" % opt_list['output_file']
   return cmd_line
 
-def get_file_list(path_dir):
-  path_dir=lib.common_lib.format_path(path_dir)
-  file_list=[]
-  for root,dirs,files in os.walk(path_dir):
-    for i in files:
-      file_list.append(os.path.join(root,i))
-
-  return file_list
-
 if __name__=='__main__':
   opt_list=get_default_opts()
   #opt_list['ffmpeg.exe']='d:/tools/ffmpeg.exe'
@@ -244,7 +235,7 @@ if __name__=='__main__':
       cmd_line+=get_cmd_line(opt_list)
       subprocess.call(cmd_line, stdout=None, shell=True)
     elif os.path.isdir(opt_list['input_file']):
-      file_list=get_file_list(opt_list['input_file'])
+      file_list=lib.common_lib.get_file_list(opt_list['input_file'])
       cmd_list=[]
       for i in file_list:
         cmd_tmp=cmd_line

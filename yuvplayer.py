@@ -19,7 +19,7 @@ for i in sys.argv[1:]:
   if location!=dpath and dpath!="":
     location=dpath
   if not name.endswith(".yuv"):
-    name=lib.seq_list.get_seqname(name)
+    name=lib.seq_list.guess_seqname(name)
     name+=".yuv"
   reso=name.split('_')[1]
   cmd=executor

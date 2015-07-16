@@ -47,7 +47,7 @@ cnt=0
 for encoder_id in encoder_list:
   enc.set_encoder_id(encoder_id)
   for name in seq_list:
-    seq_name=lib.get_seqname(name)
+    seq_name=lib.guess_seqname(name)
     for bitrate in br_list:
       for p in range(1,3):
         param_list['rc_i_pass']=p
