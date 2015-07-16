@@ -12,7 +12,7 @@ seq_list = lib.class_a
 br_list=(0.0193,)#0.0289,0.0386,0.0579)
 param_list = lib.get_default_param_list()
 
-param_list['eRcType'] = 1
+param_list['eRcType'] = 8
 param_list['frame_num_to_encode'] =100
 param_list['output_path'] = "F:/encoder_test_output/output0"
 param_list['input_path'] = "f:/sequences/"
@@ -31,6 +31,7 @@ param_list['rc_i_aq_mode'] = 1
 param_list['rc_i_lookahead'] = 10
 param_list['rc_b_cutree'] = 1
 param_list['rc_i_lowres'] = 1
+param_list['rc_i_pass'] = 1
 
 #encoder_list = ("as265", "x265")
 encoder_list = ("as265", )

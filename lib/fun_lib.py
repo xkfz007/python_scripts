@@ -2,7 +2,7 @@ import sys
 def get_reso_info(seq_name):
   common_reso_list=('176x144','352x288','416x240','832x480','1024x768',
                     '1280x720','1920x1080','2560x1600','3840x2160',
-                    '640x480','448x336',)
+                    '640x480','448x336','720x576')
   common_fps_list=(15,20,23,24,25,30,50,60)
   #seq_name format: name_widthxheight_fps or
   #                 name_widthxheight_bitdepth_fps_totalframes
