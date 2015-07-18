@@ -1,5 +1,5 @@
 import getopt, sys, os
-import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init
+import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init,jm_cmd_init
 import global_vars
 
 class Encoder_prop:
@@ -13,28 +13,39 @@ class Encoder_prop:
   __executors={'as265':'cli_ashevc.exe',
                'x265':'x265.exe',
                'x264': 'x264.exe',
-               'hm':'hm.exe'}
+               'hm':'hm.exe',
+               'jm':'lencod.exe',
+              }
   __helps={'as265': '',
            'x265': '--log-level full --help',
            'x264' : '--fullhelp',
-           'hm':'--help'}
+           'hm':'--help',
+           'jm':'-h'
+           }
   __versions={'as265':'',
               'x265':'--version',
               'x264':'--version',
-              'hm':'--version'}
+              'hm':'--version',
+              'jm':'-V',
+              }
   __confs={'as265':{'d':'Debug','r':'Release','R':'Release_WithTrace'},
            'x265':{'d':'Debug','r':'Release','R':'RelWithDebInfo'},
            'x264':{'d':'Debug','r':'Release','R':'Release'},
-           'hm':{'d':'Debug','r':'Release','R':'Release'}}
+           'hm':{'d':'Debug','r':'Release','R':'Release'},
+           'jm':{'d':'','r':'','R':''},
+           }
   __platforms={'as265':{'x86':'x64','x64':'x64'},
                'x265':{'x86':'vc10-x86','x64':'vc10-x86_64'},
                'x264':{'x86':'Win32','x64':'x64'},
-               'hm':{'x86':'Win32','x64':'x64'}}
+               'hm':{'x86':'Win32','x64':'x64'},
+               'jm':{'x86':'','x64':''},
+               }
   __cmd_func_list={
-    "as265": as265_cmd_init.get_param_cmd_as265,
-    "x265": x26x_cmd_init.get_param_cmd_x265,
-    "x264": x26x_cmd_init.get_param_cmd_x264,
-    "hm": hm_cmd_init.get_param_cmd_hm
+    "as265": as265_cmd_init.get_enc_param_cmd_as265,
+    "x265": x26x_cmd_init.get_enc_param_cmd_x265,
+    "x264": x26x_cmd_init.get_enc_param_cmd_x264,
+    "hm": hm_cmd_init.get_enc_param_cmd_hm,
+    "jm": jm_cmd_init.get_enc_param_cmd_jm,
   }
   #__paths = dict()
   #__paths['as265'] =
@@ -54,7 +65,9 @@ class Encoder_prop:
   __paths={'as265':os.path.join(__common_path , 'arcvideo_codes/HEVC_Codec/',hevc_path,'bin/x64/'),
            'x265':os.path.join(__common_path,'src.x265/trunk/',__x265_path,'build/vc10-x86_64/'),
            'x264':os.path.join(__common_path , 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/'),
-           'hm':os.path.join(__common_path , 'src.hm/trunk/hm-10.0/bin/vc10/x64/')}
+           'hm':os.path.join(__common_path , 'src.hm/trunk/hm-10.0/bin/vc10/x64/'),
+           'jm':os.path.join(__common_path , 'SRC.JM/trunk/jm18.5/bin/'),
+           }
 
   #@staticmethod
   #def __format_path(path):
@@ -179,6 +192,7 @@ def set_rc_related_param_semi_auto(param_list, bitrate):
 def usage():
   help_msg = '''Usage:./test.py [option] [value]...
   options:
+   -e <string> encoder name:as265,x265,x264,hm,jm
    -i <string> input_path
    -o <string> output_path
    -I <integer> I frame interval
@@ -226,7 +240,7 @@ def get_tag(opt, arg):
   return str
 
 
-def parse_cl(enc):
+def parse_enc_cl(enc):
   if len(sys.argv) == 1:
     usage()
     sys.exit()
@@ -506,7 +520,7 @@ def get_default_tmp_list(param_list):
   tmp_list['tmp_nSrcHeight']=-1
   return tmp_list
 
-def configure_param(enc,param_list):
+def configure_enc_param(enc,param_list):
   tag_str=""
   tmp_list=get_default_tmp_list(param_list)
   param_len=len(param_list)
@@ -514,7 +528,7 @@ def configure_param(enc,param_list):
 
   if len(sys.argv)> 1:
     #opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size = parse_cl(enc)
-    opt_list, tag_str = parse_cl(enc)
+    opt_list, tag_str = parse_enc_cl(enc)
     for (k, v) in opt_list.items():
       if param_list.has_key(k):
         param_list[k] = v
@@ -537,7 +551,7 @@ def configure_param(enc,param_list):
   return (cons_log,tmp_list['extra_cls'])
 
 
-def get_full_cmd(enc,param_list):
+def get_full_cdec_cmd(enc,param_list):
   #param_cmd=""
   #if enc.id=="as265":
   #  param_cmd=as265_cmd_init.get_param_cmd_as265(param_list)

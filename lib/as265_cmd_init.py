@@ -1,7 +1,7 @@
 import common_lib
 
 
-def get_default_param_list():
+def get_default_enc_param_list():
   param_list = {}#dict()  # create a dictinary
   #param_list['encder_exe'] = "cli_ashevc.exe"
   param_list['output_path'] ="."#"F:/encoder_test_output/as265_output  "
@@ -131,20 +131,20 @@ def get_default_param_list():
   return param_list
 
 
-def get_param_cmd_as265(param_list):
+def get_enc_param_cmd_as265(param_list):
   cmd = ""
-  cmd += " %s" % param_list['output_path']
-  cmd += " %s" % param_list['output_filename']
-  cmd += " %s" % param_list['input_path']
-  cmd += " %s" % param_list['input_filename']
+  cmd += ' "%s"' % param_list['output_path']
+  cmd += ' "%s"' % param_list['output_filename']
+  cmd += ' "%s"' % param_list['input_path']
+  cmd += ' "%s"' % param_list['input_filename']
 
-  cmd += " %s" % param_list['trace_file_cabac']
-  cmd += " %s" % param_list['trace_file_general']
-  cmd += " %s" % param_list['dump_file_rec']
-  cmd += " %s" % param_list['trace_file_prd_y']
-  cmd += " %s" % param_list['trace_file_prd_uv']
-  cmd += " %s" % param_list['trace_file_cabacrdo']
-  cmd += " %s" % param_list['trace_file_arch1rdo']
+  cmd += ' "%s"' % param_list['trace_file_cabac']
+  cmd += ' "%s"' % param_list['trace_file_general']
+  cmd += ' "%s"' % param_list['dump_file_rec']
+  cmd += ' "%s"' % param_list['trace_file_prd_y']
+  cmd += ' "%s"' % param_list['trace_file_prd_uv']
+  cmd += ' "%s"' % param_list['trace_file_cabacrdo']
+  cmd += ' "%s"' % param_list['trace_file_arch1rdo']
 
   cmd += " %s" % param_list['printf_flag']
   cmd += " %s" % param_list['trace_flag']
@@ -232,7 +232,7 @@ def get_param_cmd_as265(param_list):
   cmd += " %s" % param_list['constrained_intra_pred_flag']
 
   # analyze 
-  cmd += " %s" % param_list['me_method']
+  cmd += " %s" % param_list['me_method']#0:dia 1:hex 2:umh(not yet) 9:full
   cmd += " %s" % param_list['i_me_range']
   cmd += " %s" % param_list['i_subpel_refine']
   cmd += " %s" % param_list['b_chroma_me']

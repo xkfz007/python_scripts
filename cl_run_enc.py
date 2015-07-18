@@ -6,7 +6,7 @@ import subprocess
 encoder_id="as265"
 enc=lib.Encoder_prop(encoder_id)
 
-param_list=lib.get_default_param_list()
+param_list=lib.get_default_enc_param_list()
 #param_list['encder_exe']=lib.get_encoder_exe()
 #param_list['output_path']="F:/encoder_test_output/as265_output/"
 #param_list['input_path']="E:/sequences/"
@@ -18,18 +18,21 @@ param_list=lib.get_default_param_list()
 
 cons="tmp_cons.log"
 #if len(sys.argv)> 1:
-cons,extra_cls=lib.configure_param(enc,param_list)
+cons,extra_cls=lib.configure_enc_param(enc,param_list)
 
-cmd_line=lib.get_full_cmd(enc,param_list)
+cmd_line=lib.get_full_cdec_cmd(enc,param_list)
 cmd_line+=" "+extra_cls
 
+reg_file=None
 if lib.determin_sys()=="cygwin":
   cmd_line+=(" 2>&1 |tee -a "+cons)
   pf=open(cons,"w")
   print >>pf,"%s" %cmd_line
   pf.close()
+else:
+  reg_file=open(cons, 'w')
 
 #os.system(cmd_line)
 print cmd_line
-subprocess.call(cmd_line,shell=True)
+subprocess.call(cmd_line,shell=True,stdout=reg_file,stderr=reg_file)
 

@@ -1,6 +1,6 @@
 import os.path
 import global_vars
-def get_param_cmd_x26x(param_list):
+def get_enc_param_cmd_x26x(param_list):
   cmd=""
 
   cmd += " --seek %s"% param_list['first_frame']
@@ -28,7 +28,7 @@ def get_param_cmd_x26x(param_list):
 
   #cmd += " --pass %s" % param_list['rc_i_pass']
 
-  cmd += " -o %s %s" % (os.path.join(param_list['output_path'],param_list['output_filename']), os.path.join(param_list['input_path'], param_list['input_filename']))
+  cmd += ' -o "%s" "%s"' % (os.path.join(param_list['output_path'],param_list['output_filename']), os.path.join(param_list['input_path'], param_list['input_filename']))
   cmd += " --input-res %sx%s" % (param_list['nSrcWidth'], param_list['nSrcHeight'])
   cmd += " --fps %s" % param_list['fFrameRate']
   cmd += " -I %s" % param_list['nIntraPicInterval']
@@ -40,7 +40,8 @@ def get_param_cmd_x26x(param_list):
   cmd += " %s" % asm_cl[param_list['b_asm']]
 
 
-  me_cl = ("dia", "hex", "umh", "esa", "tesa")
+  me_cl = ("dia", "hex", "umh", "esa", "tesa")#x264
+  #me_cl = ("dia", "hex", "umh", "star", "full")#x265
   cmd += " --me %s" % me_cl[param_list['me_method']]
   cmd += " --merange %s" % param_list['i_me_range']
   cmd += " --subme %s" % param_list['i_subpel_refine']
@@ -58,12 +59,12 @@ def get_param_cmd_x26x(param_list):
   cmd += "  --log-level debug"
 
   if param_list['rc_i_pass']>0:
-    cmd += " --pass %s"%param_list['rc_i_pass']
-    cmd += " --stats %s"%param_list['rc_s_stats']
+    cmd += ' --pass "%s"'%param_list['rc_i_pass']
+    cmd += ' --stats "%s"'%param_list['rc_s_stats']
 
   return cmd
 
-def get_param_cmd_x265(param_list):
+def get_enc_param_cmd_x265(param_list):
   cmd=""
   cmd += " --frame-threads %s" % param_list['frame_threads']
   if param_list['wpp_threads'] < param_list['lookahead_threads']:
@@ -89,7 +90,7 @@ def get_param_cmd_x265(param_list):
 
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
-    cmd += " --recon %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
+    cmd += ' --recon "%s"' % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
 
   sao_cl = ("--no-sao", "--sao")
   cmd += " %s" % sao_cl[param_list['b_sao']]
@@ -100,7 +101,7 @@ def get_param_cmd_x265(param_list):
   bintra_cl=("--no-b-intra","--b-intra")
   cmd+=" %s"% bintra_cl[param_list['b_bintra']]
 
-  brect_cl=("--no-rect","--b-rect")
+  brect_cl=("--no-rect","--rect")
   cmd+=" %s"% brect_cl[param_list['b_rect']]
 
   cmd+=" --max-merge %s"% param_list['i_merge']
@@ -145,16 +146,17 @@ def get_param_cmd_x265(param_list):
 
   cmd += " --hash %s" % param_list['iDecodedPictureHashSEI']
 
-  cmd += get_param_cmd_x26x(param_list)
+  cmd += get_enc_param_cmd_x26x(param_list)
 
   return cmd
 
-def get_param_cmd_x264(param_list):
+def get_enc_param_cmd_x264(param_list):
   cmd = ""
   cmd += " --threads %s" % param_list['frame_threads']
   cmd += " --lookahead-threads %s" % param_list['lookahead_threads']
 
-  bpyr_cl = ("--b-pyramid none", "--b-pyramid strict")
+  #bpyr_cl = ("--b-pyramid none", "--b-pyramid strict")
+  bpyr_cl = ("--b-pyramid none", "--b-pyramid normal")
   mbtree_cl = ("--no-mbtree", "--mbtree")
 
   cmd += " %s" % bpyr_cl[param_list['bExistRefB']]
@@ -164,7 +166,7 @@ def get_param_cmd_x264(param_list):
 
   tmp_flag = param_list['trace_flag'] & 2
   if tmp_flag == 2:
-    cmd += " --dump-yuv %s" % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
+    cmd += ' --dump-yuv "%s"' % os.path.join(param_list['output_path'],param_list['dump_file_rec'])
 
   if param_list['b_open_gop']>0:
     cmd +=" --open-gop"
@@ -193,5 +195,5 @@ def get_param_cmd_x264(param_list):
   # the version info is always included in x264
 
 
-  cmd += get_param_cmd_x26x(param_list)
+  cmd += get_enc_param_cmd_x26x(param_list)
   return cmd

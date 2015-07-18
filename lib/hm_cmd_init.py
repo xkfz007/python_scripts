@@ -1,7 +1,7 @@
 import os.path
 
 
-def get_param_cmd_hm(param_list):
+def get_enc_param_cmd_hm(param_list):
   SOP_listP = (
     'P 1 3 0.4624 0 0 0 4 4 -1 -5 -9 -13 0',
     'P 2 2 0.4624 0 0 0 4 4 -1 -2 -6 -10 1 -1 5 1 1 1 0 1',
@@ -36,16 +36,17 @@ def get_param_cmd_hm(param_list):
     param_list['nIntraPicInterval'] = int(param_list['nIntraPicInterval'] / sop_size) * sop_size
 
   cmd = ""
-  cmd += " --InputFile=%s" % os.path.join(param_list['input_path'], param_list['input_filename'])
+  cmd += ' --InputFile="%s"' % os.path.join(param_list['input_path'], param_list['input_filename'])
   cmd += " --InputBitDepth=8"
+  cmd += " --InputBitDepthC=8"
   cmd += " --FrameRate=%s" % param_list['fFrameRate']
   cmd += " --FrameSkip=%s" % param_list['first_frame']
   cmd += " --SourceWidth=%s" % param_list['nSrcWidth']
   cmd += " --SourceHeight=%s" % param_list['nSrcHeight']
   cmd += " --FramesToBeEncoded=%s" % param_list['frame_num_to_encode']
   # cmd += " --Level=%s"%0
-  cmd += " --BitstreamFile=%s" % os.path.join(param_list['output_path'], param_list['output_filename'])
-  cmd += " --ReconFile=%s" % os.path.join(param_list['output_path'], param_list['dump_file_rec'])
+  cmd += ' --BitstreamFile="%s"' % os.path.join(param_list['output_path'], param_list['output_filename'])
+  cmd += ' --ReconFile="%s"' % os.path.join(param_list['output_path'], param_list['dump_file_rec'])
   cmd += " --Profile=%s" % "main"
 
   cmd += " --MaxCUWidth=%s" % param_list['nMaxCUSize']
@@ -59,7 +60,8 @@ def get_param_cmd_hm(param_list):
   cmd += " --DecodingRefreshType=%s" % param_list['DecodingRefreshType']
   cmd += " --GOPSize=%s" % sop_size
 
-  cmd += " --FastSearch=%s" % param_list['me_method']
+  me_cl=('1','0')#0:full search 1:TZ search
+  cmd += " --FastSearch=%s" % me_cl[param_list['me_method']]
   cmd += " --SearchRange=%s" % param_list['i_me_range']
   cmd += " --BipredSearchRange=%s" % 4
   cmd += " --HadamardME=%s" % 1

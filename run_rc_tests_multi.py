@@ -10,7 +10,7 @@ seq_list = lib.class_a
 #seq_list +=lib.class_x
 #br_list = (1000, 1500, 2000, 3000)
 br_list=(0.0193,)#0.0289,0.0386,0.0579)
-param_list = lib.get_default_param_list()
+param_list = lib.get_default_enc_param_list()
 
 param_list['eRcType'] = 8
 param_list['frame_num_to_encode'] =100
@@ -57,7 +57,7 @@ for encoder_id in encoder_list:
       lib.configure_seq_param(param_list, seq_name,tags=tag_str)
       lib.check_params(param_list)
       lib.set_rc_related_param_semi_auto(param_list, bitrate)
-      cmd = lib.get_full_cmd(enc, param_list)
+      cmd = lib.get_full_cdec_cmd(enc, param_list)
       #print "%s\n"%cmd
       regression_file=param_list['output_path']+seq_name+tag_str+"_cons.log"
       #os.system(cmd)
