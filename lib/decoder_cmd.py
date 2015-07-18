@@ -14,16 +14,16 @@ def get_dec_param_cmd_ashevc(param_list):
 def get_dec_param_cmd_jm(param_list):
   cmd = ""
   cmd += " -d null"
-  cmd += ' -p InputFile="%s"'%param_list['input_filename']
-  if len(param_list['output_filename'])>0:
-    cmd += ' -p OutputFile="%s"'%param_list['output_filename']
-  return
+  cmd += ' -i "%s"'%param_list['input_filename']
+  #if len(param_list['output_filename'])>0:
+  cmd += ' -o "%s"'%param_list['output_filename']
+  return cmd
 def get_dec_param_cmd_hm(param_list):
   cmd = ""
   cmd += ' -b "%s"'%param_list['input_filename']
   if len(param_list['output_filename'])>0:
     cmd += ' -o "%s"'%param_list['output_filename']
-  return
+  return cmd
 
 class Decoder_prop:
   id=''
@@ -32,7 +32,7 @@ class Decoder_prop:
   version_exe=''
   get_param_cmd=""
   __executors={'ashevc':'ashevcd.exe',
-               'jm':'jm18.5.exe',
+               'jm':'jmd18.5.exe',
                'hm': 'hmd14.0.exe',
                }
   __helps={'ashevc': '',
