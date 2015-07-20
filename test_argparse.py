@@ -18,7 +18,11 @@ parser = argparse.ArgumentParser()
 #parser.add_argument('-n', action="store_true", default=False,dest='overwrite',help="never overwrite output files")
 #parser.add_argument('output_file', action="store", help="output file name")
 
-parser.add_argument('-ss', action="store", dest='time_off',help="set the start time offset")
+#parser.add_argument('-ss', action="store", dest='time_off',help="set the start time offset")
+parser.add_argument('-a', action="store_true", default=False,dest='a',help="overwrite output files")
+parser.add_argument('-b', action="store_true", default=False,dest='b',help="overwrite output files")
+parser.add_argument('-c', action="store_true", default=False,dest='c',help="overwrite output files")
+parser.add_argument('-d', action="store_true", default=False,dest='d',help="overwrite output files")
 
 
 #print parser.parse_args(['-a', '-bval', '-c', '3'])
