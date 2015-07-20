@@ -6,7 +6,7 @@ import os
 import subprocess
 
 def usage():
-  help_msg = '''Usage:./test.py [option] [value]...
+  help_msg = '''Usage:pyff.py [option] [value]...
   options:
    -i <string> input file
    -e <string> the output file extension

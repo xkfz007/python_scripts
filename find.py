@@ -44,7 +44,7 @@ for opt, arg in opts:
   elif opt == "-d":
     type_pat="-type d"
   elif opt == "-e":
-    excl_list.append("'"+args+"'")
+    excl_list.append("'"+arg+"'")
   elif opt == "-m":
     maxdep_pat="-maxdepth %s"%arg
   #elif opt == "-r":
