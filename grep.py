@@ -35,7 +35,7 @@ if len(args)<1:
   help()
   sys.exit()
 
-opt_list=""
+opt_list="I"
 for opt, arg in opts:
   #if opt == "-i":
   #  opt_list+="i"
@@ -49,8 +49,9 @@ for opt, arg in opts:
   #  opt_list+="o"
   #elif opt == "-r":
   #  opt_list+="r"
-  if opt[1] in options:
-    opt_list+=opt[1]
+  if opt[1] in options :
+    if not opt[1] in opt_list:
+      opt_list+=opt[1]
   else:
     assert False, "unknown option"
 

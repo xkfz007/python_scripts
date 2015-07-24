@@ -21,12 +21,14 @@ for i in sys.argv[1:]:
   if not name.endswith(".yuv"):
     name=lib.seq_list.guess_seqname(name)
     name+=".yuv"
-  reso=name.split('_')[1]
+  #reso=name.split('_')[1]
+  width,height,fps=lib.fun_lib.get_reso_info(name)
   cmd=executor
   full_path=os.path.join(location,name)
   cmd+=" -i %s"%full_path
   cmd+=" -f rawvideo"
-  cmd+=" -video_size %s"%reso
+  cmd+=" -video_size %sx%s"%(width,height)
+  cmd+=" -framerate %s"%fps
   cmd_list.append(cmd)
 
 print cmd_list

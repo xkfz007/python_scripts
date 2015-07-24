@@ -14,6 +14,7 @@ def get_dec_param_cmd_ashevc(param_list):
 def get_dec_param_cmd_jm(param_list):
   cmd = ""
   cmd += " -d null"
+  cmd += " -p silent=0"
   cmd += ' -i "%s"'%param_list['input_filename']
   #if len(param_list['output_filename'])>0:
   cmd += ' -o "%s"'%param_list['output_filename']
@@ -25,6 +26,8 @@ def get_dec_param_cmd_hm(param_list):
     cmd += ' -o "%s"'%param_list['output_filename']
   return cmd
 
+avc_extension=(".264",".avc")
+hevc_extension=(".265",".hevc")
 class Decoder_prop:
   id=''
   exe=''
@@ -33,6 +36,7 @@ class Decoder_prop:
   get_param_cmd=""
   __executors={'ashevc':'ashevcd.exe',
                'jm':'jmd18.5.exe',
+               #'jm':'ldecod.exe',
                'hm': 'hmd14.0.exe',
                }
   __helps={'ashevc': '',
@@ -94,7 +98,7 @@ def get_default_dec_param_list():
 def usage():
   help_msg = '''Usage:./test.py [option] [value] ...
   options:
-   -e <string> encoder name:ashevcd,hmd,jmd
+   -e <string> encoder name:ashevc,hm,jm
    -i <string> input file name
    -o output the reconstruct file
    -h print this help
@@ -157,6 +161,11 @@ def parse_dec_cl(dec,opt_list):
 
   dir_path,filename=os.path.split(opt_list['input_filename'])
   name,ext=os.path.splitext(filename)
+  if ext in (".264") and dec.id not in ("jm"):
+    dec.set_encoder_id("jm")
+  if ext in (".265","hevc") and dec.id not in ("ashevc","hm"):
+    dec.set_encoder_id("ashevc")
+
   cons_filename=name+"_"+dec.id+"_cons.log"
   cons_full=os.path.join(dir_path,cons_filename)
   if Output_flag==1 and len(opt_list['output_filename'])==0:
