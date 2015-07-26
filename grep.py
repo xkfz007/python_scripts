@@ -59,21 +59,34 @@ for opt, arg in opts:
 #for i in args:
 #  print "args=%s"%i
 
-pattern=args[0]
+#pattern=args[0]
 
 dir_or_file=""
-if len(args)>1:
-  dir_or_file=args[1]
+pattern_list=[]
+for i in args:
+  if not os.path.isdir(i):
+    pattern_list.append(i)
+  else:
+    dir_or_file=i
+
+if len(pattern_list)==0:
+  print "BAD"
+  sys.exit()
+else:
+  pattern="|".join(pattern_list)
+
+#if len(args)>1:
+#  dir_or_file=args[1]
 if len(dir_or_file)==0:
   dir_or_file="."
 if os.path.isdir(dir_or_file):
   if 'r' not in opt_list:
     opt_list+="r"
-BIN="grep --color"
+BIN="grep -E --color"
 #cmd="grep --color -"+opt_list+" "+pattern+" "+dir_or_file
 cmd=BIN
 cmd+=" -%s"%opt_list
-cmd+=" %s"%pattern
+cmd+=" '%s'"%pattern
 cmd+=" %s"%dir_or_file
 print cmd
 os.system(cmd)

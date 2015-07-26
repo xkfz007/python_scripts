@@ -37,7 +37,8 @@ class Decoder_prop:
   __executors={'ashevc':'ashevcd.exe',
                'jm':'jmd18.5.exe',
                #'jm':'ldecod.exe',
-               'hm': 'hmd14.0.exe',
+               #'hm': 'hmd14.0.exe',
+               'hm': 'hmd.exe',
                }
   __helps={'ashevc': '',
            'jm': '-h',
@@ -164,7 +165,7 @@ def parse_dec_cl(dec,opt_list):
   if ext in (".264") and dec.id not in ("jm"):
     dec.set_encoder_id("jm")
   if ext in (".265","hevc") and dec.id not in ("ashevc","hm"):
-    dec.set_encoder_id("ashevc")
+    dec.set_encoder_id("hm")
 
   cons_filename=name+"_"+dec.id+"_cons.log"
   cons_full=os.path.join(dir_path,cons_filename)

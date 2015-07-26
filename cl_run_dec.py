@@ -3,7 +3,7 @@ import os
 import sys
 import lib
 import subprocess
-dec_id="ashevc"
+dec_id="hm"
 dec=lib.Decoder_prop(dec_id)
 
 param_list=lib.get_default_dec_param_list()
