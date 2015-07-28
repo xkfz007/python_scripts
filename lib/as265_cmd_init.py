@@ -2,9 +2,9 @@ import common_lib
 
 
 def get_default_enc_param_list():
-  param_list = {}#dict()  # create a dictinary
-  #param_list['encder_exe'] = "cli_ashevc.exe"
-  param_list['output_path'] ="."#"F:/encoder_test_output/as265_output  "
+  param_list = {}  # dict()  # create a dictinary
+  # param_list['encder_exe'] = "cli_ashevc.exe"
+  param_list['output_path'] = "."  #"F:/encoder_test_output/as265_output  "
   param_list['output_filename'] = "as265_str.bin"
   param_list['input_path'] = "f:/sequences/"
   param_list['input_filename'] = "BlowingBubbles_416x240_50.yuv"
@@ -49,20 +49,20 @@ def get_default_enc_param_list():
   param_list['i_bframe_adaptive'] = 0
 
   #feature
-  param_list['i_merge']=5
-  param_list['b_pintra']=1
-  param_list['b_bintra']=0
-  param_list['b_rect']=1
+  param_list['i_merge'] = 5
+  param_list['b_pintra'] = 1
+  param_list['b_bintra'] = 0
+  param_list['b_rect'] = 1
   param_list['b_amp'] = 0
   param_list['b_dbl'] = 1
   param_list['b_sao'] = 0
 
-  param_list['b_tskip']=0
-  param_list['b_tskip_fast']=0
-  param_list['b_weightp']=0
-  param_list['b_weightb']=0
-  param_list['b_signhide']=0
-  param_list['b_pcm']=0
+  param_list['b_tskip'] = 0
+  param_list['b_tskip_fast'] = 0
+  param_list['b_weightp'] = 0
+  param_list['b_weightb'] = 0
+  param_list['b_signhide'] = 0
+  param_list['b_pcm'] = 0
 
   #rc
   param_list['eRcType'] = 0
@@ -105,12 +105,12 @@ def get_default_enc_param_list():
   param_list['b_chroma_me'] = 1
 
   # stream
-  param_list['iInterlaceMode']=0
+  param_list['iInterlaceMode'] = 0
   param_list['b_repeat_headers'] = 0
-  param_list['bEnableAccessUnitDelimiters']=0
-  param_list['bEmitHRDSEI']=1
-  param_list['bEmitInfoSEI']=1
-  param_list['iDecodedPictureHashSEI']=0
+  param_list['bEnableAccessUnitDelimiters'] = 0
+  param_list['bEmitHRDSEI'] = 1
+  param_list['bEmitInfoSEI'] = 1
+  param_list['iDecodedPictureHashSEI'] = 0
 
   param_list['rc_f_rate_tolerance'] = 1.0
   param_list['rc_f_rf_constant'] = 23
@@ -126,7 +126,6 @@ def get_default_enc_param_list():
   param_list['rc_i_lowres'] = 1
   param_list['rc_i_pass'] = 0
   param_list['rc_s_stats'] = "as265_2pass.log"
-
 
   return param_list
 
@@ -156,7 +155,7 @@ def get_enc_param_cmd_as265(param_list):
   cmd += " %s" % param_list['frame_num_to_encode']
 
   # cu pu tu
-  tmp_power={64:6,32:5,16:4,8:3,4:2}
+  tmp_power = {64: 6, 32: 5, 16: 4, 8: 3, 4: 2}
   cmd += " %s" % tmp_power[param_list['nMaxCUSize']]
   cmd += " %s" % param_list['nMaxCUDepth']
   cmd += " %s" % param_list['nQuadtreeTULog2MaxSize']
@@ -185,12 +184,12 @@ def get_enc_param_cmd_as265(param_list):
   cmd += " %s" % param_list['b_dbl']
   cmd += " %s" % param_list['b_sao']
 
-  cmd+=" %s" % param_list['b_tskip']
-  cmd+=" %s" % param_list['b_tskip_fast']
-  cmd+=" %s" % param_list['b_weightp']
-  cmd+=" %s" % param_list['b_weightb']
-  cmd+=" %s" % param_list['b_signhide']
-  cmd+=" %s" % param_list['b_pcm']
+  cmd += " %s" % param_list['b_tskip']
+  cmd += " %s" % param_list['b_tskip_fast']
+  cmd += " %s" % param_list['b_weightp']
+  cmd += " %s" % param_list['b_weightb']
+  cmd += " %s" % param_list['b_signhide']
+  cmd += " %s" % param_list['b_pcm']
 
   # rc 
   cmd += " %s" % param_list['eRcType']
@@ -232,7 +231,7 @@ def get_enc_param_cmd_as265(param_list):
   cmd += " %s" % param_list['constrained_intra_pred_flag']
 
   # analyze 
-  cmd += " %s" % param_list['me_method']#0:dia 1:hex 2:umh(not yet) 9:full
+  cmd += " %s" % param_list['me_method']  # 0:dia 1:hex 2:umh(not yet) 9:full
   cmd += " %s" % param_list['i_me_range']
   cmd += " %s" % param_list['i_subpel_refine']
   cmd += " %s" % param_list['b_chroma_me']
@@ -259,7 +258,7 @@ def get_enc_param_cmd_as265(param_list):
   cmd += " %s" % param_list['rc_b_cutree']
   cmd += " %s" % param_list['rc_i_lowres']
   cmd += " %s" % param_list['rc_i_pass']
-  #cmd += " %s" % param_list['rc_s_stats']
+  # cmd += " %s" % param_list['rc_s_stats']
 
   return cmd
 

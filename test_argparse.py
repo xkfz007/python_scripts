@@ -2,7 +2,7 @@
 __author__ = 'hfz2597'
 import argparse
 
-#parser = argparse.ArgumentParser(description='Short sample app',usage="Usage:./test.py [option] [value]...")
+# parser = argparse.ArgumentParser(description='Short sample app',usage="Usage:./test.py [option] [value]...")
 parser = argparse.ArgumentParser()
 
 #parser.add_argument('-i', action="store", dest='input_file',help="input file name")
@@ -19,10 +19,10 @@ parser = argparse.ArgumentParser()
 #parser.add_argument('output_file', action="store", help="output file name")
 
 #parser.add_argument('-ss', action="store", dest='time_off',help="set the start time offset")
-parser.add_argument('-a', action="store_true", default=False,dest='a',help="overwrite output files")
-parser.add_argument('-b', action="store_true", default=False,dest='b',help="overwrite output files")
-parser.add_argument('-c', action="store_true", default=False,dest='c',help="overwrite output files")
-parser.add_argument('-d', action="store_true", default=False,dest='d',help="overwrite output files")
+parser.add_argument('-a', action="store_true", default=False, dest='a', help="overwrite output files")
+parser.add_argument('-b', action="store_true", default=False, dest='b', help="overwrite output files")
+parser.add_argument('-c', action="store_true", default=False, dest='c', help="overwrite output files")
+parser.add_argument('-d', action="store_true", default=False, dest='d', help="overwrite output files")
 
 
 #print parser.parse_args(['-a', '-bval', '-c', '3'])

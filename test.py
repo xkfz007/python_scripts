@@ -4,7 +4,7 @@ import os
 import sys
 import getopt
 import subprocess
-#abr=[(1,2), (0,3,4), (0.10,0.25,0.33), (1.0,1.1), (1.0,), (0.9,0.8,0.7,0.6,0.3)]
+# abr=[(1,2), (0,3,4), (0.10,0.25,0.33), (1.0,1.1), (1.0,), (0.9,0.8,0.7,0.6,0.3)]
 #length=len(abr)
 #print abr
 #print length
@@ -29,28 +29,30 @@ print platform.python_version()
 print platform.uname()
 print sys.platform
 #os.system("pause")
-str="cygwin\\"
+str = "cygwin\\"
 print str
-a=str.replace(":","")
+a = str.replace(":", "")
 print str
 print a
 
 print sys.argv
 
-str="hello"
+str = "hello"
 print str
-str+="world"
+str += "world"
 print str
 
-def update_str(str,str2):
-  str+=str2
+
+def update_str(str, str2):
+  str += str2
   return str
 
-print update_str(str,"OK")
 
-a="-12.7"
+print update_str(str, "OK")
+
+a = "-12.7"
 print a
-b=float(a)
+b = float(a)
 print b
 
 #tmp_dict={'a':1,'b':2,'c':3}
@@ -107,7 +109,7 @@ print b
 #p=subprocess.Popen('ls')
 #print p.stdout
 
-path="F:\\encoder_test_output\\x265_output"
+path = "F:\\encoder_test_output\\x265_output"
 #print os.path.abspath(path)
 print os.path.normpath(path)
 #print os.path.normpath(os.path.abspath(path))
@@ -126,7 +128,8 @@ print os.pardir
 print os.path.abspath('\\\\172.21.40.64\\h265\\xml')
 
 import lib
-a=lib.get_total_frame_num("f:/sequences/kldby_1920x1080_25.yuv",200,200)
+
+a = lib.get_total_frame_num("f:/sequences/kldby_1920x1080_25.yuv", 200, 200)
 print a
 print __file__
 print os.path.realpath(__file__)

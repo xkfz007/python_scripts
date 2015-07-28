@@ -6,6 +6,7 @@ import getopt
 import os
 import subprocess
 
+
 def usage():
   help_msg = '''Usage:ffdec.py [option] [value]...
   options:
@@ -14,7 +15,9 @@ def usage():
    '''
   print help_msg
   return
-if __name__=='__main__':
+
+
+if __name__ == '__main__':
   if len(sys.argv) == 1:
     usage()
     sys.exit()
@@ -27,45 +30,44 @@ if __name__=='__main__':
   except Exception, e:
     print e
 
-  FFMPEG_BIN='ffmpeg.exe'
-  input_file=''
-  #extra_cmd=''
+  FFMPEG_BIN = 'ffmpeg.exe'
+  input_file = ''
+  # extra_cmd=''
   #ext=''
-  output_file=''
-  dec_flag=0
+  output_file = ''
+  dec_flag = 0
 
   for opt, arg in opts:
     if opt == "-d":
-      dec_flag=1
+      dec_flag = 1
     elif opt == "-h":
-      cmd_line=FFMPEG_BIN+" -h"
+      cmd_line = FFMPEG_BIN + " -h"
       os.system(cmd_line)
     else:
       assert False, "unknown option"
 
-  if len(args)==0:#'':
+  if len(args) == 0:  #'':
     usage()
     sys.exit()
 
-  input_file=args[0]
+  input_file = args[0]
 
-  if len(args)>1:
-    output_file=args[1]
-  if len(output_file)==0:
-    file_name,file_ext=os.path.splitext(input_file)
-    if dec_flag==0:
-      output_file=file_name+".bin"
+  if len(args) > 1:
+    output_file = args[1]
+  if len(output_file) == 0:
+    file_name, file_ext = os.path.splitext(input_file)
+    if dec_flag == 0:
+      output_file = file_name + ".bin"
     else:
-      output_file=file_name+".yuv"
+      output_file = file_name + ".yuv"
 
-
-  cmd=FFMPEG_BIN
-  cmd+=" -y -i %s"%input_file
-  cmd+=" -an "
-  if dec_flag==0:
-    cmd+=" -c:v copy"
-  cmd+=" -f rawvideo"
-  cmd+=" %s"%output_file
+  cmd = FFMPEG_BIN
+  cmd += " -y -i %s" % input_file
+  cmd += " -an "
+  if dec_flag == 0:
+    cmd += " -c:v copy"
+  cmd += " -f rawvideo"
+  cmd += " %s" % output_file
 
   print cmd
   os.system(cmd)
