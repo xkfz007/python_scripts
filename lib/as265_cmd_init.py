@@ -4,7 +4,7 @@ import common_lib
 def get_default_enc_param_list():
   param_list = {}  # dict()  # create a dictinary
   # param_list['encder_exe'] = "cli_ashevc.exe"
-  param_list['output_path'] = "."  #"F:/encoder_test_output/as265_output  "
+  param_list['output_path'] = "."  # "F:/encoder_test_output/as265_output  "
   param_list['output_filename'] = "as265_str.bin"
   param_list['input_path'] = "f:/sequences/"
   param_list['input_filename'] = "BlowingBubbles_416x240_50.yuv"
@@ -22,13 +22,13 @@ def get_default_enc_param_list():
   param_list['fFrameRate'] = 50
 
   # debug related paramters
-  param_list['printf_flag'] = 1  #225
-  param_list['trace_flag'] = 0  #7
+  param_list['printf_flag'] = 1  # 225
+  param_list['trace_flag'] = 0  # 7
   param_list['measure_quality_flag'] = 1
 
   param_list['frame_num_to_encode'] = -1
 
-  #cu pu tu
+  # cu pu tu
   param_list['nMaxCUSize'] = 64
   param_list['nMaxCUDepth'] = 4
   param_list['nQuadtreeTULog2MaxSize'] = 5

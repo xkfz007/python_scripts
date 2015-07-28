@@ -60,7 +60,7 @@ def get_enc_param_cmd_hm(param_list):
   cmd += " --DecodingRefreshType=%s" % param_list['DecodingRefreshType']
   cmd += " --GOPSize=%s" % sop_size
 
-  me_cl=('1','0')#0:full search 1:TZ search
+  me_cl = ('1', '0')  # 0:full search 1:TZ search
   cmd += " --FastSearch=%s" % me_cl[param_list['me_method']]
   cmd += " --SearchRange=%s" % param_list['i_me_range']
   cmd += " --BipredSearchRange=%s" % 4
@@ -69,7 +69,7 @@ def get_enc_param_cmd_hm(param_list):
   cmd += " --FDM=%s" % 1
 
   cmd += " --QP=%s" % param_list['nQp']
-  #cmd += " --MaxDeltaQP=%s"%0
+  # cmd += " --MaxDeltaQP=%s"%0
   #cmd += " --MaxCuDQPDepth=%s"%0
   #cmd += " --DeltaQpRD=%s"%0
   cmd += " --RDOQ=%s" % 0
@@ -120,7 +120,7 @@ def get_enc_param_cmd_hm(param_list):
   #cmd += " --TransquantBypassEnableFlag=%s"%0
   #cmd += " --CUTransquantBypassFlagForce=%s"%0
 
-  cmd += " --SEIDecodedPictureHash=%s"%param_list['bEnableAccessUnitDelimiters']
+  cmd += " --SEIDecodedPictureHash=%s" % param_list['bEnableAccessUnitDelimiters']
 
   cmd += " --RateControl=%s" % param_list['eRcType']
   cmd += " --TargetBitrate=%s" % param_list['nBitrate']
@@ -132,6 +132,6 @@ def get_enc_param_cmd_hm(param_list):
 
   if sop_size > 1:
     for i in range(0, sop_size):
-      cmd += " --Frame%s=\"%s\"" % (i+1, sop_list[i])
+      cmd += " --Frame%s=\"%s\"" % (i + 1, sop_list[i])
 
   return cmd

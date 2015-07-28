@@ -1,4 +1,4 @@
-#import fun_lib
+# import fun_lib
 #import as265_cmd_init
 #import global_var
 #import encoder_cmd
@@ -13,6 +13,6 @@ from x26x_cmd_init import *
 from TaskManager import *
 from seq_list import *
 from Log import *
-from hm_cmd_init import  *
+from hm_cmd_init import *
 from global_vars import *
 

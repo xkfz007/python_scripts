@@ -8,8 +8,8 @@ import Log
 
 class TaskManager:
   m_maxTaskNumber = 1
-  TaskKeeper = {}     # TaskKeeper is a dictionary
-  #m_cmdListsAndLogFiles = [] # A list to store all the command List
+  TaskKeeper = {}  # TaskKeeper is a dictionary
+  # m_cmdListsAndLogFiles = [] # A list to store all the command List
   m_LogOut = Log.Log()
 
   def __init__(self, maxTN=1):
@@ -61,7 +61,7 @@ class TaskManager:
     '''
 
     while True:
-      if (len(self.TaskKeeper) == 0): # wait until all task finished
+      if (len(self.TaskKeeper) == 0):  # wait until all task finished
         self.m_LogOut.info("All tasks are finished!")
         break
       for command, task in self.TaskKeeper.items():
@@ -70,7 +70,7 @@ class TaskManager:
       time.sleep(0.1)
 
 
-  #def __del__(self):
-  #  self.clearAllTask()
+      #def __del__(self):
+      #  self.clearAllTask()
 
 

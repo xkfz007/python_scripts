@@ -28,7 +28,7 @@ class Log:
   ''''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winprog/winprog/windows_api_reference.asp
   for information on Windows APIs.'''
   if sys.platform == 'linux2':
-    #red_on_cyan = lambda x: colored(x, 'red', 'on_cyan')
+    # red_on_cyan = lambda x: colored(x, 'red', 'on_cyan')
     #print_red_on_cyan = lambda x: cprint(x, 'red', 'on_cyan')
 
     def set_cmd_color(self, color):
@@ -49,7 +49,7 @@ class Log:
       print colored(print_text, 'grey')
       return
 
-  elif sys.platform=="win32":
+  elif sys.platform == "win32":
     std_out_handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
 
     def set_cmd_color(self, color, handle=std_out_handle):
