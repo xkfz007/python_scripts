@@ -1,4 +1,5 @@
 import sys
+import global_vars
 def get_reso_info(seq_name):
   common_reso_list=('176x144','352x288','416x240','832x480','1024x768',
                     '1280x720','1920x1080','2560x1600','3840x2160',
@@ -65,10 +66,10 @@ def get_bitrate_for_rc(eRcType, nSrcWidth, nSrcHeight, fFrameRate, factor=2):
   nMaxBitrate = 0
   vbv_buffer_size = 0
 
-  if eRcType != 8:  #not ABR
-    if eRcType == 1:  #CBR
+  if eRcType != global_vars.HEVC_RC_ABR :  #not ABR or ABR-2
+    if eRcType == global_vars.HEVC_RC_CBR:  #CBR
       nMaxBitrate = nBitrate
-    elif eRcType == "VBR":
+    elif eRcType == global_vars.HEVC_RC_VBR:#"VBR":
       nMaxBitrate = 3 * nBitrate
     vbv_buffer_size = 1 * nMaxBitrate
 

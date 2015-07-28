@@ -2,6 +2,25 @@ import getopt, sys, os
 import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init,jm_cmd_init
 import global_vars
 
+#RC modes, enum type simple implementation
+#HEVC_RC_FIXQUANT=0
+#HEVC_RC_CBR=1
+#HEVC_RC_QUALITY_RANK=2
+#HEVC_RC_VBR=3
+#HEVC_RC_CONFERENCE=4
+#HEVC_RC_ABR_TWOPASS_ANAlYSE=5
+#HEVC_RC_ABR_TWOPASS_ENC=6
+#HEVC_RC_VBR_Q=7
+#HEVC_RC_ABR=8
+#HEVC_RC_CQP=9
+#HEVC_RC_CRF=10
+#HEVC_RC_VBR_TWOPASS_ANAlYSE=11
+#HEVC_RC_VBR_TWOPASS_ENC=12
+#
+#RC_STRING=( 'HEVC_RC_FIXQUANT', 'HEVC_RC_CBR', 'HEVC_RC_QUALITY_RANK', 'HEVC_RC_VBR',
+#'HEVC_RC_CONFERENCE', 'HEVC_RC_ABR_TWOPASS_ANAlYSE', 'HEVC_RC_ABR_TWOPASS_ENC', 'HEVC_RC_VBR_Q',
+#'HEVC_RC_ABR', 'HEVC_RC_CQP', 'HEVC_RC_CRF', 'HEVC_RC_VBR_TWOPASS_ANAlYSE', 'HEVC_RC_VBR_TWOPASS_ENC'  )
+
 class Encoder_prop:
   id=''
   exe=''
@@ -180,9 +199,9 @@ def set_rc_related_param_semi_auto(param_list, bitrate):
     bitrate*=param_list['nSrcWidth']*param_list['nSrcHeight']*param_list['fFrameRate']/1000
   bitrate=int(bitrate)
   vbv_maxrate=0
-  if param_list['eRcType']==1:
+  if param_list['eRcType']==global_vars.HEVC_RC_CBR:#1:
     vbv_maxrate=bitrate
-  elif param_list['eRcType']==3:
+  elif param_list['eRcType']==global_vars.HEVC_RC_VBR:#3:
     vbv_maxrate=3*bitrate
   vbv_bufsize=vbv_maxrate*1
   set_rc_related_param_manual(param_list,bitrate,vbv_maxrate,vbv_bufsize)
@@ -238,6 +257,14 @@ def usage():
 def get_tag(opt, arg):
   str = opt[1:] + arg
   return str
+
+def get_rc_type(arg):
+  rc_type=0
+  if arg.isdigit():
+    rc_type=int(arg)
+  elif global_vars.RC_DICT.has_key(arg.upper()):
+    rc_type=global_vars.RC_DICT[arg.upper()]
+  return rc_type
 
 
 def parse_enc_cl(enc):
@@ -298,7 +325,7 @@ def parse_enc_cl(enc):
       opt_list["nQp"] = int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-r":
-      opt_list["eRcType"] = int(arg)
+      opt_list["eRcType"] = get_rc_type(arg)#int(arg)
       tag_str += get_tag(opt, arg)
     elif opt == "-B":
       #tmp_nBitrate = int(arg)
@@ -484,23 +511,37 @@ def check_params(param_list):
   return
 
 def configure_rc_param(param_list,tmp_list):
-  rc_type = param_list['eRcType']
+  #check if it is 2pass
+  if param_list['eRcType'] ==global_vars.HEVC_RC_ABR_TWOPASS_ANAlYSE:
+    param_list['eRcType']=global_vars.HEVC_RC_ABR
+    param_list['rc_i_pass']=1
+  elif param_list['eRcType']==global_vars.HEVC_RC_VBR_TWOPASS_ANAlYSE:
+    param_list['eRcType']=global_vars.HEVC_RC_VBR
+    param_list['rc_i_pass']=1
 
-  if rc_type != 0 and rc_type != 9:
+  rc_type = param_list['eRcType']
+  if param_list['rc_i_pass']!=0:
+    if rc_type in (global_vars.HEVC_RC_CBR, global_vars.HEVC_RC_CQP,global_vars.HEVC_RC_FIXQUANT):
+      print "WARNING:2pass is incompatible with %s"%global_vars.RC_STRING[rc_type]
+      #sys.exit()
+    elif rc_type not in (global_vars.HEVC_RC_ABR,global_vars.HEVC_RC_VBR):
+      print "WARNING:2pass is incompatible with %s"%global_vars.RC_STRING[rc_type]
+
+  if rc_type != global_vars.HEVC_RC_FIXQUANT and rc_type != global_vars.HEVC_RC_CQP:
     if tmp_list['tmp_nBitrate'] <= 0:
       set_rc_related_param_auto(param_list)
       return
-    elif rc_type == 8 and tmp_list['tmp_nBitrate'] > 0:
+    elif rc_type == global_vars.HEVC_RC_ABR and tmp_list['tmp_nBitrate'] > 0:
       tmp_list['tmp_nMaxBitrate']=0
       tmp_list['tmp_vbv_buffer_size']=0
       #set_rc_related_param_manual(param_list, tmp_nBitrate, 0, 0)
-    elif rc_type == 1 and tmp_list['tmp_nBitrate'] > 0:
+    elif rc_type == global_vars.HEVC_RC_CBR and tmp_list['tmp_nBitrate'] > 0:
       if tmp_list['tmp_nMaxBitrate'] <= 0:
         tmp_list['tmp_nMaxBitrate'] = tmp_list['tmp_nBitrate']
       if tmp_list['tmp_vbv_buffer_size'] <= 0:
         tmp_list['tmp_vbv_buffer_size'] = tmp_list['tmp_nMaxBitrate']
         #set_rc_related_param_manual(param_list, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
-    elif rc_type == 3 and tmp_list['tmp_nBitrate'] > 0:
+    elif rc_type == global_vars.HEVC_RC_VBR and tmp_list['tmp_nBitrate'] > 0:
       if tmp_list['tmp_nMaxBitrate'] <= 0:
         tmp_list['tmp_nMaxBitrate'] = 3 * tmp_list['tmp_nBitrate']
       if tmp_list['tmp_vbv_buffer_size'] <= 0:

@@ -14,4 +14,5 @@ from TaskManager import *
 from seq_list import *
 from Log import *
 from hm_cmd_init import  *
+from global_vars import *
 
