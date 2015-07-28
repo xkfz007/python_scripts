@@ -1,5 +1,5 @@
 import getopt, sys, os
-import fun_lib,common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init,jm_cmd_init
+import common_lib,as265_cmd_init,x26x_cmd_init,seq_list,hm_cmd_init,jm_cmd_init
 import global_vars
 
 #RC modes, enum type simple implementation
@@ -141,7 +141,7 @@ class Encoder_prop:
 
 def configure_seq_param(param_list, tmp_name,tmp_width=-1,tmp_height=-1,tags=""):
   seq_name=seq_list.guess_seqname(tmp_name)
-  org_width, org_height, org_fps = fun_lib.get_reso_info(seq_name)
+  org_width, org_height, org_fps = seq_list.get_reso_info(seq_name)
   #tmp_width=tmp_list['tmp_nSrcWidth']
   #tmp_height=tmp_list['tmp_nSrcHeight']
   if tmp_width<=0 or tmp_height<=0:
@@ -182,11 +182,47 @@ def set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, vbv_buffer_siz
   return
 
 def set_rc_related_param_auto(param_list, factor=2):
-  rc_param = fun_lib.get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'], param_list['fFrameRate'], factor)
+  #rc_param = fun_lib.get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'], param_list['fFrameRate'], factor)
+
+  reso = '%sx%s'%(param_list['nSrcWidth'],param_list['nSrcHeight'])
+  if reso == "2560x1600":
+    base_rate = 3200
+  elif reso == "1920x1080":
+    base_rate = 1500
+  elif reso == "1280x720":
+    base_rate = 600
+  elif reso == "1024x768":
+    base_rate = 568
+  elif reso == "832x480":
+    base_rate = 300
+  elif reso == "416x240":
+    base_rate = 75
+  elif reso == "640x480":
+    base_rate = 222
+  elif reso == "352x288":
+    base_rate = 73
+  elif reso == "448x336":
+    base_rate = 110
+  elif reso == "3840x2160":
+    base_rate = 8000
+  else:
+    base_rate = 5000
+
+  brate = param_list['fFrameRate'] * base_rate / 30
+  nBitrate = brate * factor
+  nMaxBitrate = 0
+  vbv_buffer_size = 0
+
+  if param_list['eRcType'] != global_vars.HEVC_RC_ABR :  #not ABR or ABR-2
+    if param_list['eRcType'] == global_vars.HEVC_RC_CBR:  #CBR
+      nMaxBitrate = nBitrate
+    elif param_list['eRcType'] == global_vars.HEVC_RC_VBR:#"VBR":
+      nMaxBitrate = 3 * nBitrate
+    vbv_buffer_size = 1 * nMaxBitrate
   #param_list['nBitrate'] = rc_param[0]
   #param_list['nMaxBitrate'] = rc_param[1]
   #param_list['vbv_buffer_size'] = rc_param[2]
-  set_rc_related_param_manual(param_list,rc_param[0],rc_param[1],rc_param[2])
+  set_rc_related_param_manual(param_list,nBitrate,nMaxBitrate,vbv_buffer_size)
   return
 
 
@@ -426,27 +462,9 @@ def parse_enc_cl(enc):
   #return (opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
   return (opt_list, tag_str)
 
-
-def check_path(path):
-    path=path.strip()#delete the blankspace before or after the path
-    path=path.strip('\\')
-    path=path.strip('/')
-    #chech whether the path exists or creat it
-    if not os.path.exists(path):
-      os.makedirs(path)
-
-def delete_files(path,ext_list):
-  path=os.path.normpath(path)
-  for root,dirs,files in os.walk(path):
-    for fname in files:
-      full_name=os.path.join(root,fname)
-      ext=os.path.splitext(full_name)[1]
-      if ext in ext_list:
-        os.remove(full_name)
-
 def remove_some_tmp_files(path):
   ext_list=(".bin",".rcstat",".pinfo",".log")
-  delete_files(path,ext_list)
+  common_lib.delete_files(path,ext_list)
 
 def check_files(param_list):
   #check the input file
@@ -502,7 +520,7 @@ def check_params(param_list):
   param_list['output_path']=common_lib.format_path(param_list['output_path'])
   param_list['input_path']=common_lib.format_path(param_list['input_path'])
 
-  check_path(param_list['output_path'])
+  common_lib.check_path(param_list['output_path'])
   check_files(param_list)
 
   if param_list['frame_num_to_encode']<=0:

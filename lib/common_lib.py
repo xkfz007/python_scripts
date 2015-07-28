@@ -79,3 +79,21 @@ def get_file_list(path_dir,ext=''):
       file_list.append(os.path.join(root,i))
 
   return file_list
+
+def check_path(path):
+    path=path.strip()#delete the blankspace before or after the path
+    path=path.strip('\\')
+    path=path.strip('/')
+    #chech whether the path exists or creat it
+    if not os.path.exists(path):
+      os.makedirs(path)
+
+
+def delete_files(path,ext_list):
+  path=os.path.normpath(path)
+  for root,dirs,files in os.walk(path):
+    for fname in files:
+      full_name=os.path.join(root,fname)
+      ext=os.path.splitext(full_name)[1]
+      if ext in ext_list:
+        os.remove(full_name)
