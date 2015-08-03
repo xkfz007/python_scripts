@@ -260,7 +260,7 @@ def usage():
    -h print this help
    -H print the help of encoder
    -q <integer> qp
-   -r <integer> ratecontrol method
+   -r <integer> or <string> ratecontrol method
    -B <integer> bitrate
    -V <integer> vbv_max_bitrate
    -S <integer> vbv_buffer_size
@@ -273,9 +273,13 @@ def usage():
    -y dump-yuv
    -C <string> extra command lines
    -O <integer> Lowres:0 auto, 1 semi, 2 quater
-   -p <integer> rc pass:0~3
-   -T <string>  stats file
-   -g <string> the 2pass log file
+   -p <integer> rc pass: 0: single pass encoding,
+                         1: 2pass encoding(including first pass and second pass)
+                         2: 2pass encoding with clipping
+                         3: first pass of 2pass encoding (only for x26x)
+                         4: second pass of 2pass encoding (only for x26x)
+   -T <string>  stats file (not supported yet)
+   -g <string> the 2pass log file (not supported yet)
    -P <integer> qp step
    -A <integer> cu tree:0 disabled, 1 enabled
    -E <intxint> resolution: widthxheight
@@ -312,7 +316,7 @@ def parse_enc_cl(enc):
 
   try:
     opts, args = getopt.getopt(sys.argv[1:],
-                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:T:g:P:A:E:c:G:D:k:j:J:', ['version', ])
+                               'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:k:j:J:', ['version', ])
   except getopt.GetoptError as err:
     print str(err)
     sys.exit(2)
@@ -410,9 +414,9 @@ def parse_enc_cl(enc):
     elif opt == "-p":
       opt_list["rc_i_pass"] = int(arg)
       tag_str += get_tag(opt, arg)
-    elif opt == "-g":
-      opt_list["rc_s_stats"] = arg
-      tag_str += get_tag(opt, arg)
+    #elif opt == "-g":
+    #  opt_list["rc_s_stats"] = arg
+    #  tag_str += get_tag(opt, arg)
     elif opt == "-P":
       opt_list["rc_i_qp_step"] = int(arg)
       tag_str += get_tag(opt, arg)

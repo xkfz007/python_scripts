@@ -60,7 +60,7 @@ def get_enc_param_cmd_x26x(param_list):
   cmd += "  --log-level debug"
 
   if param_list['rc_i_pass'] > 0:
-    cmd += ' --pass "%s"' % param_list['rc_i_pass']
+    cmd += ' --pass %s' % param_list['rc_i_pass']
     cmd += ' --stats "%s"' % param_list['rc_s_stats']
     cmd += ' --slow-firstpass'
 
