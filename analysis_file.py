@@ -7,24 +7,36 @@ class Codec_analysis:
   id = ""
   fstr = ""
   __format_strs = {}  # dict()
-  __format_strs["ashevcd"] = "Frm.*"
   __format_strs["as265"] = "POC.*bits"
   __format_strs["x265"] = "POC.*bits"
   __format_strs["x264"] = "frame=.*bits"
+  __format_strs["hm"] = ""
+  __format_strs["jm"] = ""
+  __format_strs["ashevcd"] = "Frm.*"
+  __format_strs["hmd"] = ""
+  __format_strs["jmd"] = ""
 
   qp_idx = 0
-  __qp_idxs = {}  # dict()
-  __qp_idxs["ashevcd"] = 20
+  __qp_idxs = {}
   __qp_idxs["as265"] = 7
   __qp_idxs["x265"] = 4
   __qp_idxs["x264"] = 3
+  __qp_idxs["hm"] = -1
+  __qp_idxs["jm"] = -1
+  __qp_idxs["ashevcd"] = 20
+  __qp_idxs["hmd"] = -1
+  __qp_idxs["jmd"] = -1
 
   bits_idx = 0
-  __bits_idxs = {}  # dict()
-  __bits_idxs["ashevcd"] = 3
+  __bits_idxs = {}
   __bits_idxs["as265"] = 8
   __bits_idxs["x265"] = 5
   __bits_idxs["x264"] = 10
+  __bits_idxs["hm"] = -1
+  __bits_idxs["jm"] = -1
+  __bits_idxs["ashevcd"] = 3
+  __bits_idxs["hmd"] = -1
+  __bits_idxs["jmd"] = -1
 
   def __set_codec_prop(self):
     self.fstr = Codec_analysis.__format_strs[self.id]
@@ -45,6 +57,12 @@ class Codec_analysis:
     cl_list.append('grep -o "' + self.fstr + '" "' + input_file + '"')
     cl_list.append('awk \'{print $' + str(idx) + '}\'')
     cl_list.append('tr -t "\\n" " "')
+    return cl_list
+  def get_cl_hmd(self, input_file, idx=0):
+    cl_list = []
+    return cl_list
+  def get_cl_jmd(self, input_file, idx=0):
+    cl_list = []
     return cl_list
 
   def get_cl_as265(self, input_file, idx=0):
@@ -71,11 +89,23 @@ class Codec_analysis:
     cl_list.append('tr -t "\\n" " "')
     return cl_list
 
+  def get_cl_hm(self, input_file, idx=0):
+    cl_list = []
+    return cl_list
+
+  def get_cl_jm(self, input_file, idx=0):
+    cl_list = []
+    return cl_list
+
   __func_list = {}  # dict()
   __func_list["ashevcd"] = get_cl_ashevcd
+  __func_list["hmd"] = get_cl_hmd
+  __func_list["jmd"] = get_cl_jmd
   __func_list["as265"] = get_cl_as265
   __func_list["x265"] = get_cl_x265
   __func_list["x264"] = get_cl_x264
+  __func_list["hm"] = get_cl_hm
+  __func_list["jm"] = get_cl_jm
 
   def get_full_cmd(self, input_file, idx=0):
     cl_list = Codec_analysis.__func_list[self.id](self, input_file, idx)
@@ -88,20 +118,20 @@ class Codec_analysis:
   def get_bits_fcmd(self, input_file):
     return self.get_full_cmd(input_file, self.bits_idx)
 
-  def get_col_vals(self, input_file, idx=0):
-    # if lib.determin_sys()=="windows":
-    #  return
-    cl_list = Codec_analysis.__func_list[self.id](self, input_file, idx)
-    full_cl = "|".join(cl_list)
-    print full_cl
-    output = subprocess.check_output(full_cl, shell=True)
-    return output
+  #def get_col_vals(self, input_file, idx=0):
+  #  # if lib.determin_sys()=="windows":
+  #  #  return
+  #  cl_list = Codec_analysis.__func_list[self.id](self, input_file, idx)
+  #  full_cl = "|".join(cl_list)
+  #  print full_cl
+  #  output = subprocess.check_output(full_cl, shell=True)
+  #  return output
 
-  def get_qp_vals(self, input_file):
-    return self.get_col_vals(input_file, self.qp_idx)
+  #def get_qp_vals(self, input_file):
+  #  return self.get_col_vals(input_file, self.qp_idx)
 
-  def get_bits_vals(self, input_file):
-    return self.get_col_vals(input_file, self.bits_idx)
+  #def get_bits_vals(self, input_file):
+  #  return self.get_col_vals(input_file, self.bits_idx)
 
 
 # def get_qp_ashevcd(input_file,idx):
@@ -119,7 +149,7 @@ def run_cmd(cmd, filename=''):
     outFile = None
   else:
     outFile = open(filename, 'w')
-  subprocess.call(cmd, stdout=outFile, shell=True)
+  subprocess.call(cmd, stdout=outFile, stderr=outFile, shell=True)
 
 
 import sys

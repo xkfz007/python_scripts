@@ -61,7 +61,9 @@ def get_enc_param_cmd_x26x(param_list):
 
   if param_list['rc_i_pass'] > 0:
     cmd += ' --pass %s' % param_list['rc_i_pass']
-    cmd += ' --stats "%s"' % param_list['rc_s_stats']
+    #cmd += ' --stats "%s"' % param_list['rc_s_stats']
+    twopass_log_filename="%s_2pass.log"%param_list['input_filename']
+    cmd += ' --stats "%s"' % twopass_log_filename
     cmd += ' --slow-firstpass'
 
   return cmd

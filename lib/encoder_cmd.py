@@ -1,5 +1,5 @@
 import getopt, sys, os
-import common_lib, as265_cmd_init, x26x_cmd_init, seq_list, hm_cmd_init, jm_cmd_init
+import common_lib, cmd_init_as265, cmd_init_x26x, seq_list, cmd_init_hm, cmd_init_jm
 import global_vars
 
 # RC modes, enum type simple implementation
@@ -60,11 +60,11 @@ class Encoder_prop:
                  'jm': {'x86': '', 'x64': ''},
   }
   __cmd_func_list = {
-    "as265": as265_cmd_init.get_enc_param_cmd_as265,
-    "x265": x26x_cmd_init.get_enc_param_cmd_x265,
-    "x264": x26x_cmd_init.get_enc_param_cmd_x264,
-    "hm": hm_cmd_init.get_enc_param_cmd_hm,
-    "jm": jm_cmd_init.get_enc_param_cmd_jm,
+    "as265": cmd_init_as265.get_enc_param_cmd_as265,
+    "x265": cmd_init_x26x.get_enc_param_cmd_x265,
+    "x264": cmd_init_x26x.get_enc_param_cmd_x264,
+    "hm": cmd_init_hm.get_enc_param_cmd_hm,
+    "jm": cmd_init_jm.get_enc_param_cmd_jm,
   }
   #__paths = dict()
   #__paths['as265'] =

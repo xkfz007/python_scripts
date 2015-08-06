@@ -2,3 +2,5 @@
 encoder_cmd.py:
 1. modify the way to obtain the executor's path
 add function SET_EXECUTOR
+
+2. set up encoder and decoder name list

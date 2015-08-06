@@ -6,7 +6,7 @@ import os
 import common_lib
 
 
-def get_dec_param_cmd_ashevc(param_list):
+def get_dec_param_cmd_ashevcd(param_list):
   cmd = ""
   cmd += ' -i "%s"' % param_list['input_filename']
   if len(param_list['output_filename']) > 0:
@@ -14,7 +14,7 @@ def get_dec_param_cmd_ashevc(param_list):
   return cmd
 
 
-def get_dec_param_cmd_jm(param_list):
+def get_dec_param_cmd_jmd(param_list):
   cmd = ""
   cmd += " -d null"
   cmd += " -p silent=0"
@@ -24,7 +24,7 @@ def get_dec_param_cmd_jm(param_list):
   return cmd
 
 
-def get_dec_param_cmd_hm(param_list):
+def get_dec_param_cmd_hmd(param_list):
   cmd = ""
   cmd += ' -b "%s"' % param_list['input_filename']
   if len(param_list['output_filename']) > 0:
@@ -32,8 +32,13 @@ def get_dec_param_cmd_hm(param_list):
   return cmd
 
 
-avc_extension = (".264", ".avc")
-hevc_extension = (".265", ".hevc")
+h264_extension = (".264", ".avc",".h264")
+h265_extension = (".265", ".hevc",".h265")
+ashevcd_name_list=('ashevcd','ashevc','as265d')
+jmd_name_list=('jmd',)
+hmd_name_list=('hmd',)
+h264_decoder_list=('hmd',)
+h265_decoder_list=('ashevcd','hmd')
 
 
 class Decoder_prop:
@@ -42,29 +47,27 @@ class Decoder_prop:
   help_exe = ''
   version_exe = ''
   get_param_cmd = ""
-  __executors = {'ashevc': 'ashevcd.exe',
-                 'jm': 'jmd18.5.exe',
-                 # 'jm':'ldecod.exe',
-                 #'hm': 'hmd14.0.exe',
-                 'hm': 'hmd.exe',
+  __executors = {'ashevcd': 'ashevcd.exe',
+                 'jmd': 'jmd18.5.exe',
+                 'hmd': 'hmd.exe',
   }
-  __helps = {'ashevc': '',
-             'jm': '-h',
-             'hm': '--help',
+  __helps = {'ashevcd': '',
+             'jmd': '-h',
+             'hmd': '--help',
   }
-  __versions = {'ashevc': '',
-                'jm': '-V',
-                'hm': '--version',
+  __versions = {'ashevcd': '',
+                'jmd': '-V',
+                'hmd': '--version',
   }
   __cmd_func_list = {
-    "ashevc": get_dec_param_cmd_ashevc,
-    "hm": get_dec_param_cmd_hm,
-    "jm": get_dec_param_cmd_jm,
+    "ashevcd": get_dec_param_cmd_ashevcd,
+    "hmd": get_dec_param_cmd_hmd,
+    "jmd": get_dec_param_cmd_jmd,
   }
   __common_path = 'c:/tools/'
-  __paths = {'ashevc': os.path.join(__common_path),
-             'hm': os.path.join(__common_path),
-             'jm': os.path.join(__common_path),
+  __paths = {'ashevcd': os.path.join(__common_path),
+             'hmd': os.path.join(__common_path),
+             'jmd': os.path.join(__common_path),
   }
 
   def __set_encoder_prop(self):
@@ -76,10 +79,17 @@ class Decoder_prop:
     self.get_param_cmd = Decoder_prop.__cmd_func_list[self.id]
 
   def __set_id(self, id):
-    self.id = id
+    if id in ashevcd_name_list:
+      self.id= ashevcd_name_list[0]
+    elif id in hmd_name_list:
+      self.id=hmd_name_list[0]
+    elif id in jmd_name_list:
+      self.id=jmd_name_list[0]
+    else:
+      self.id='ashevcd'
 
 
-  def __init__(self, id="ashevc"):
+  def __init__(self, id="ashevcd"):
     self.__set_id(id)
     self.__set_encoder_prop()
 
@@ -171,10 +181,10 @@ def parse_dec_cl(dec, opt_list):
 
   dir_path, filename = os.path.split(opt_list['input_filename'])
   name, ext = os.path.splitext(filename)
-  if ext in (".264") and dec.id not in ("jm"):
-    dec.set_encoder_id("jm")
-  if ext in (".265", "hevc") and dec.id not in ("ashevc", "hm"):
-    dec.set_encoder_id("hm")
+  if ext in h264_extension and dec.id not in h264_decoder_list:
+    dec.set_encoder_id(jmd_name_list[0])
+  if ext in h265_extension and dec.id not in h265_decoder_list:
+    dec.set_encoder_id(ashevcd_name_list[0])
 
   cons_filename = name + "_" + dec.id + "_cons.log"
   cons_full = os.path.join(dir_path, cons_filename)

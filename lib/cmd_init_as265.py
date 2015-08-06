@@ -125,7 +125,7 @@ def get_default_enc_param_list():
   param_list['rc_b_cutree'] = 0
   param_list['rc_i_lowres'] = 1
   param_list['rc_i_pass'] = 0
-  param_list['rc_s_stats'] = "as265_2pass.log"
+  #param_list['rc_s_stats'] = "as265_2pass.log"
 
   return param_list
 

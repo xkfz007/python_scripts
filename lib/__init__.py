@@ -4,15 +4,15 @@
 #import encoder_cmd
 #import common_lib
 #from fun_lib import *
-from as265_cmd_init import *
+from cmd_init_as265 import *
 #from encoder_global_var import *
 from encoder_cmd import *
 from decoder_cmd import *
 from common_lib import *
-from x26x_cmd_init import *
+from cmd_init_x26x import *
 from TaskManager import *
 from seq_list import *
 from Log import *
-from hm_cmd_init import *
+from cmd_init_hm import *
 from global_vars import *
 
