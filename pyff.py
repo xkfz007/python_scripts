@@ -4,6 +4,7 @@ import sys
 import getopt
 import os
 import subprocess
+import glob
 
 
 def usage():
@@ -42,7 +43,7 @@ if __name__ == '__main__':
 
   for opt, arg in opts:
     if opt == "-i":
-      input_file = arg
+      input_file_tmp = arg
     elif opt == "-e":
       ext = arg
     elif opt == "-C":
@@ -56,6 +57,10 @@ if __name__ == '__main__':
     else:
       assert False, "unknown option"
 
+  print "input_file_tmp=%s"%input_file_tmp
+  input_file=glob.glob(input_file_tmp)
+  print type(input_file)
+
   if len(args) > 0:  # '':
     output_file = args
 
@@ -67,10 +72,12 @@ if __name__ == '__main__':
   print output_file
   path = os.getcwd()
   print os.getcwd()
+  #os.path.supports_unicode_filenames()
 
   if 1:  # os.path.isfile(input_file):
-    print input_file
-    file_name, file_ext = os.path.splitext(input_file)
+    #input_file2=input_file.decode('utf-8')
+    print input_file[0]
+    file_name, file_ext = os.path.splitext(input_file[0])
     print file_name
     print file_ext
     if len(output_file) == 0:  #=='':
@@ -82,12 +89,12 @@ if __name__ == '__main__':
         output_file = file_name + "_out" + file_ext
     cmd_line = FFMPEG_BIN
     #cmd_line+=" -i %s/%s"%(path,input_file)
-    cmd_line += " -i %s" % input_file
+    cmd_line += " -i \"%s\"" % input_file[0]
     cmd_line += " %s" % extra_cmd
-    cmd_line += " %s" % output_file
+    cmd_line += " \"%s\"" % output_file
     print cmd_line
     #os.system(cmd_line)
-    #subprocess.call(cmd_line, stdout=None, shell=True)
+    subprocess.call(cmd_line, stdout=None, shell=True)
 
 
 
