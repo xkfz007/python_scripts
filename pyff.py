@@ -5,15 +5,15 @@ import getopt
 import os
 import subprocess
 import glob
+import lib
 
 
 def usage():
   help_msg = '''Usage:pyff.py [option] [value]...
   options:
-   -i <string> input file
+   -i <string> input file, support pattern globbing
    -e <string> the output file extension
    -C <string> the ffmpeg commands
-
    '''
   print help_msg
   return
@@ -32,69 +32,81 @@ if __name__ == '__main__':
   except Exception, e:
     print e
 
-  FFMPEG_BIN = 'ffmpeg.exe'
-  input_file = ''
+  FFMPEG_BIN = 'ffmpeg.exe -y'
+  input_tmp = ''
   extra_cmd = ''
   ext = ''
-  output_file = ''
+  output_tmp = ''
 
   print opts
   print args
 
   for opt, arg in opts:
     if opt == "-i":
-      input_file_tmp = arg
+      input_tmp = arg
     elif opt == "-e":
       ext = arg
     elif opt == "-C":
       extra_cmd = arg
-    elif opt == "-h":
-      usage()
-      sys.exit()
     elif opt == "-h":
       cmd_line = FFMPEG_BIN + " -h"
       os.system(cmd_line)
     else:
       assert False, "unknown option"
 
-  print "input_file_tmp=%s"%input_file_tmp
-  input_file=glob.glob(input_file_tmp)
-  print type(input_file)
+  print "input_tmp=%s"%input_tmp
+  if len(input_tmp)==0:
+      usage()
+      sys.exit()
+
+  #input_tmp="./%s"%input_tmp
+
+  if os.path.isdir(input_tmp):
+      print "'%s' is a directory"%input_tmp
+      input_file_list=lib.get_file_list(input_tmp)
+  elif os.path.isfile(input_tmp):
+      print "'%s' is a file"%input_tmp
+      input_file_list=[]
+      input_file_list.append(input_tmp)
+  else:# globbing is needed
+      print "'%s' is glob pattern"%input_tmp
+      input_file_list=glob.glob(input_tmp)
+  #print type(input_file)
+  print "input_file_list=%s"%input_file_list
+  if len(input_file_list) == 0:  # '':# or ( ext=='' and output_file==''):
+      usage()
+      sys.exit()
 
   if len(args) > 0:  # '':
-    output_file = args
-
-  if len(input_file) == 0:  # '':# or ( ext=='' and output_file==''):
-    usage()
-    sys.exit()
-
-  print input_file
-  print output_file
-  path = os.getcwd()
-  print os.getcwd()
-  #os.path.supports_unicode_filenames()
-
-  if 1:  # os.path.isfile(input_file):
-    #input_file2=input_file.decode('utf-8')
-    print input_file[0]
-    file_name, file_ext = os.path.splitext(input_file[0])
-    print file_name
-    print file_ext
-    if len(output_file) == 0:  #=='':
-      if len(ext) > 0:  #'':
-        if not ext.startswith('.'):
-          ext = '.' + ext
-        output_file = file_name + ext
+      if len(args)==1:
+          output_tmp = args
       else:
-        output_file = file_name + "_out" + file_ext
+          output_tmp = args[0]
+
+  for input_file in input_file_list:
+    print input_file
+    fname, fext = os.path.splitext(input_file)
+    print fname
+    print fext
+    if len(ext) > 0:  #'':
+        if not ext.startswith('.'):
+            ext = '.' + ext
+    else:
+        ext=fext
+    if len(output_tmp) == 0:  #=='':
+        output_tmp="_out"
+    else:
+        if not output_tmp.startswith('_'):
+            output_tmp='_'+output_tmp
+    output_file = "%s%s%s"%(fname,output_tmp,ext)
+
     cmd_line = FFMPEG_BIN
-    #cmd_line+=" -i %s/%s"%(path,input_file)
-    cmd_line += " -i \"%s\"" % input_file[0]
+    cmd_line += " -i \"%s\"" % input_file
     cmd_line += " %s" % extra_cmd
     cmd_line += " \"%s\"" % output_file
     print cmd_line
     #os.system(cmd_line)
-    subprocess.call(cmd_line, stdout=None, shell=True)
+    #subprocess.call(cmd_line, stdout=None, shell=True)
 
 
 
