@@ -13,6 +13,11 @@ import lib
 
 FFMPEG_BIN = 'ffmpeg.exe -y'
 
+h264_name_list = ('h264', 'h.264', 'avc', '264')
+h265_name_list = ('h265', 'h.265', 'hevc', '265')
+bsf_for_mp4 = {'h264': 'h264_mp4toannexb',
+               'hevc': 'hevc_mp4toannexb'}
+
 
 def usage():
     help_msg = '''Usage:pyff.py [option] [value]...
@@ -21,14 +26,18 @@ def usage():
    -e <string> the output file extension
    -C <string> the ffmpeg commands
    -t <int> set thread num
-   -Y if execute the program
-   -h print the FFMpeg help
+   -d decode the input to get rawvideo(yuv)
+   -b <streamtype:h264,hevc> get the raw bitstream from media file
+   -w <int> set the output width
+   -h <int> set the output height
+   -Y whether to execute the program
+   -H print the FFMpeg help
    '''
     print help_msg
     return
 
 
-def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
+def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd, bitstream_type):
     fname, fext = os.path.splitext(input_file)
     print 'fname="%s"' % fname
     print 'fext="%s"' % fext
@@ -42,6 +51,8 @@ def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
     cmd_line = prepared_cmd
     cmd_line += " -i \"%s\"" % input_file
     cmd_line += " %s" % extra_cmd
+    if len(bitstream_type) > 1 and fext in (".mp4", ".MP4"):
+        cmd_line += " -bsf %s" % bsf_for_mp4[bitstream_type]
     cmd_line += " \"%s\"" % output_file
     return cmd_line
 
@@ -62,7 +73,7 @@ if __name__ == '__main__':
         sys.exit()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'i:e:t:C:Yh')
+        opts, args = getopt.getopt(sys.argv[1:], 'i:e:C:t:db:w:h:YH')
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -76,6 +87,10 @@ if __name__ == '__main__':
     ext = ''
     thread_num = 0
     do_execute = 0
+    decode_flag = 0
+    bitstream_type = ""
+    width=-2
+    height=-2
     print opts
     print args
 
@@ -88,11 +103,20 @@ if __name__ == '__main__':
             extra_cmd = arg
         elif opt == "-t":
             thread_num = int(arg)
+        elif opt == "-d":
+            decode_flag = 1
+        elif opt == "-b":
+            bitstream_type = arg
+        elif opt == "-w":
+            width= int(arg)
         elif opt == "-h":
-            cmd_line = FFMPEG_BIN + " -h"
-            os.system(cmd_line)
+            height= int(arg)
         elif opt == "-Y":
             do_execute = 1
+        elif opt == "-H":
+            cmd_line = FFMPEG_BIN + " -h"
+            os.system(cmd_line)
+            sys.exit()
         else:
             assert False, "unknown option"
 
@@ -103,41 +127,63 @@ if __name__ == '__main__':
 
     if os.path.isdir(input_tmp):
         print '"%s" is a directory' % input_tmp
-        input_file_list = lib.get_file_list(input_tmp)
+        input_list = lib.get_file_list(input_tmp)
     elif os.path.isfile(input_tmp):
         print '"%s" is a file' % input_tmp
-        input_file_list = []
-        input_file_list.append(input_tmp)
+        input_list = []
+        input_list.append(input_tmp)
     else:  # globbing is needed
         print '"%s" is glob pattern' % input_tmp
-        input_file_list = glob.glob(input_tmp)
+        input_list = glob.glob(input_tmp)
     # print type(input_file)
-    print "input_file_list=%s" % input_file_list
-    if len(input_file_list) == 0:  # '':# or ( ext=='' and output_file==''):
+    print "input_list=%s" % input_list
+    if len(input_list) == 0:  # '':# or ( ext=='' and output_file==''):
         usage()
         sys.exit()
 
     if len(args) > 0:  # '':
-        if len(args) == 1:
-            output_tmp = args
-        else:
-            output_tmp = args[0]
+        #if len(args) == 1:
+        #    output_tmp = args
+        #else:
+        #    output_tmp = args[0]
+        output_tmp=args[0]
     if len(output_tmp) == 0:  # =='':
         output_tmp = "_out"
     else:
         if not output_tmp.startswith('_'):
             output_tmp = '_' + output_tmp
+    print "output_tmp=%s"%output_tmp
 
     prepared_cmd = FFMPEG_BIN
     if thread_num > 0:
         prepared_cmd += " -threads %s" % thread_num
 
+    if decode_flag == 1:
+        ext = '.yuv'
+        output_tmp = '_rec'
+        extra_cmd += " -an -f rawvideo"
+    elif len(bitstream_type) > 1:
+        if bitstream_type.startswith('.'):
+            bitstream_type = bitstream_type[1:]
+
+        if bitstream_type.lower() in h264_name_list:
+            bitstream_type = 'h264'
+        elif bitstream_type.lower() in h265_name_list:
+            bitstream_type = 'hevc'
+        ext = '.' + bitstream_type
+
+        extra_cmd += " -c:v copy"
+        extra_cmd += " -an -f %s" % bitstream_type
+    elif width>0 or height >0:
+        extra_cmd += " -c:a copy"
+        extra_cmd+=" -vf scale=%s:%s"%(width,height)
+
     cmd_list = []
-    for input_file in input_file_list:
+    for input_file in input_list:
         print input_file
         if os.path.isfile(input_file):
             print '"%s" is a file' % input_file
-            cmd_line = get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd)
+            cmd_line = get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd, bitstream_type)
             print cmd_line
             cmd_list.append(cmd_line)
         elif os.path.isdir(input_file):
@@ -145,7 +191,7 @@ if __name__ == '__main__':
             input_file_list2 = lib.get_file_list(input_file)
             print "input_file_list2=%s" % input_file_list2
             for input_file2 in input_file_list2:
-                cmd_line = get_cmd_line(input_file2, ext, output_tmp, prepared_cmd, extra_cmd)
+                cmd_line = get_cmd_line(input_file2, ext, output_tmp, prepared_cmd, extra_cmd, bitstream_type)
                 print cmd_line
                 cmd_list.append(cmd_line)
 
