@@ -57,6 +57,8 @@ def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
     print 'fname="%s"' % fname
     print 'fext="%s"' % fext
     fext=fext.lower()[1:]
+    if ext=='TS' and fext=='ts':
+        return ''
 
     if len(ext) == 0 :
         if len(fext)>0:
@@ -64,7 +66,7 @@ def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
         else:#set default ext
             ext='ext'
     elif len(ext) > 0:
-        if ext in bitstream_name_list and fext =='mp4':
+        if ext in bitstream_name_list and fext in mp4_name_list:#'mp4':
             extra_cmd += " -bsf:v %s" % bsf_for_mp4[ext]
         #elif ext in audio_name_list:
         #    if fext in mp4_name_list:
@@ -72,8 +74,8 @@ def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
         if ext=='TS':
             if fext in mp4_name_list:
                 extra_cmd+=" -c copy"
-                if fext=='mp4':
-                   extra_cmd += " -bsf:v %s" % bsf_for_mp4['h264']
+                #if fext=='mp4':
+                extra_cmd += " -bsf:v %s -f mpegts" % bsf_for_mp4['h264']
             else:
                 extra_cmd+=" -c:v libx264 -c:a libvo_aacenc"
 
@@ -265,13 +267,15 @@ if __name__ == '__main__':
 
     if do_execute == 1:
         for cmd in cmd_list:
+            if len(cmd)==0:
+                continue
             print cmd
             # os.system(cmd)
             subprocess.call(cmd, stdout=None, stderr=None, shell=True)
         if len(merged_file)>0:
             for i in output_list:
                 if os.path.exists(i):
-                    os.remove(i)
+                    #os.remove(i)
                     print '"%s" is deleted'%i
 
 
