@@ -9,20 +9,20 @@ import os
 __author__ = 'hfz2597'
 
 # opts, args = getopt.getopt(sys.argv[1:], 'i:o:s:t:T:hHO:e:yn')
-#print opts
+# print opts
 #print args
 executor = "ffplay.exe "
 location = ""
 cmd_list = []
 for i in sys.argv[1:]:
-  cmd = executor
-  cmd += " -hide_banner -i %s -an -loop 0" % i
-  cmd_list.append(cmd)
+    cmd = executor
+    cmd += " -hide_banner -i %s -an -loop 0" % i
+    cmd_list.append(cmd)
 
 print cmd_list
 
 for i in cmd_list:
-  subprocess.Popen(i, stdout=None, stderr=None, shell=True)
+    subprocess.Popen(i, stdout=None, stderr=None, shell=True)
 
 
 

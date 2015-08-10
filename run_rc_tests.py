@@ -31,23 +31,23 @@ param_list['rc_i_lowres'] = 1
 
 encoder_list = ("as265", "x265")
 # encoder_list = ("as265", )
-#encoder_list = ("x265", )
+# encoder_list = ("x265", )
 #lib.Encoder_prop.SET_PATH("as265","")
 #lib.Encoder_prop.SET_PATH("x265","")
 
 lib.remove_some_tmp_files(param_list['output_path'])
 
 for encoder_id in encoder_list:
-  enc.set_encoder_id(encoder_id)
-  for seq_name in seq_list:
-    for bitrate in br_list:
-      tag_str = "_" + encoder_id + "_bitrate" + str(bitrate)
-      lib.configure_seq_param(param_list, seq_name, tags=tag_str)
-      lib.check_params(param_list)
-      lib.set_rc_related_param_semi_auto(param_list, bitrate)
-      cmd = lib.get_full_cdec_cmd(enc, param_list)
-      print cmd
-      #os.system(cmd)
-      reg_file_name = param_list['output_path'] + seq_name + tag_str + "_cons.log"
-      regression_file = open(reg_file_name, 'w')
-      subprocess.call(cmd, stdout=regression_file, shell=True)
+    enc.set_encoder_id(encoder_id)
+    for seq_name in seq_list:
+        for bitrate in br_list:
+            tag_str = "_" + encoder_id + "_bitrate" + str(bitrate)
+            lib.configure_seq_param(param_list, seq_name, tags=tag_str)
+            lib.check_params(param_list)
+            lib.set_rc_related_param_semi_auto(param_list, bitrate)
+            cmd = lib.get_full_cdec_cmd(enc, param_list)
+            print cmd
+            #os.system(cmd)
+            reg_file_name = param_list['output_path'] + seq_name + tag_str + "_cons.log"
+            regression_file = open(reg_file_name, 'w')
+            subprocess.call(cmd, stdout=regression_file, shell=True)

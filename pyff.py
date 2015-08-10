@@ -1,4 +1,8 @@
 #!/bin/python
+# The main purpose of this script is to wrap the ffmpeg.exe
+# so that we will not have to give the exact input file name or output file name.
+# Right now, we just need give the glob pattern of the input file name
+# and this is very useful for the Chinese file or directory names
 __author__ = 'hfz2597'
 import sys
 import getopt
@@ -26,8 +30,8 @@ def usage():
 
 def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
     fname, fext = os.path.splitext(input_file)
-    print fname
-    print fext
+    print 'fname="%s"' % fname
+    print 'fext="%s"' % fext
     if len(ext) > 0:  # '':
         if not ext.startswith('.'):
             ext = '.' + ext
@@ -47,7 +51,7 @@ def get_default_opt_list():
     # opt_list['input_tmp'] = ''
     opt_list['extra_cmd'] = ''
     opt_list['ext'] = ''
-    #opt_list['output_tmp'] = ''
+    # opt_list['output_tmp'] = ''
     opt_list['thread_num'] = 0
     opt_list['do_execute'] = 0
 
@@ -65,13 +69,13 @@ if __name__ == '__main__':
     except Exception, e:
         print e
 
-    #opt_list = get_default_opt_list()
+    # opt_list = get_default_opt_list()
     input_tmp = ''
     output_tmp = ''
     extra_cmd = ''
     ext = ''
-    thread_num=0
-    do_execute=0
+    thread_num = 0
+    do_execute = 0
     print opts
     print args
 
@@ -98,14 +102,14 @@ if __name__ == '__main__':
         sys.exit()
 
     if os.path.isdir(input_tmp):
-        print "'%s' is a directory" % input_tmp
+        print '"%s" is a directory' % input_tmp
         input_file_list = lib.get_file_list(input_tmp)
     elif os.path.isfile(input_tmp):
-        print "'%s' is a file" % input_tmp
+        print '"%s" is a file' % input_tmp
         input_file_list = []
         input_file_list.append(input_tmp)
     else:  # globbing is needed
-        print "'%s' is glob pattern" % input_tmp
+        print '"%s" is glob pattern' % input_tmp
         input_file_list = glob.glob(input_tmp)
     # print type(input_file)
     print "input_file_list=%s" % input_file_list
@@ -118,7 +122,7 @@ if __name__ == '__main__':
             output_tmp = args
         else:
             output_tmp = args[0]
-    if len(output_tmp) == 0:  #=='':
+    if len(output_tmp) == 0:  # =='':
         output_tmp = "_out"
     else:
         if not output_tmp.startswith('_'):
@@ -132,22 +136,22 @@ if __name__ == '__main__':
     for input_file in input_file_list:
         print input_file
         if os.path.isfile(input_file):
-            print "'%s' is a file"%input_file
-            cmd_line=get_cmd_line(input_file,ext,output_tmp,prepared_cmd,extra_cmd)
+            print '"%s" is a file' % input_file
+            cmd_line = get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd)
             print cmd_line
             cmd_list.append(cmd_line)
         elif os.path.isdir(input_file):
-            print "'%s' is a directory"%input_file
-            input_file_list2=lib.get_file_list(input_file)
-            print "input_file_list2=%s"%input_file_list2
+            print '"%s" is a directory' % input_file
+            input_file_list2 = lib.get_file_list(input_file)
+            print "input_file_list2=%s" % input_file_list2
             for input_file2 in input_file_list2:
-                cmd_line=get_cmd_line(input_file2,ext,output_tmp,prepared_cmd,extra_cmd)
+                cmd_line = get_cmd_line(input_file2, ext, output_tmp, prepared_cmd, extra_cmd)
                 print cmd_line
                 cmd_list.append(cmd_line)
 
     if do_execute == 1:
         for cmd in cmd_list:
-            #os.system(cmd)
+            # os.system(cmd)
             subprocess.call(cmd, stdout=None, stderr=None, shell=True)
 
 

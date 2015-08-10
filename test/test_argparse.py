@@ -5,7 +5,7 @@ import argparse
 # parser = argparse.ArgumentParser(description='Short sample app',usage="Usage:./test.py [option] [value]...")
 parser = argparse.ArgumentParser()
 
-#parser.add_argument('-i', action="store", dest='input_file',help="input file name")
+# parser.add_argument('-i', action="store", dest='input_file',help="input file name")
 #parser.add_argument('-ss', action="store", dest='time_off',help="set the start time offset")
 #parser.add_argument('-t', action="store", dest='duration', help="record or transcode 'duration' seconds of audio/video")
 #parser.add_argument('-to', action="store", dest='time_stop',help=" record or transcode stop time")

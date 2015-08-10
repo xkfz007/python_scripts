@@ -10,11 +10,11 @@ p = subprocess.Popen(cmd_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, s
 datalines = []
 # for a in iter(p.stdout.readline, b''):
 for a in p.stdout.readlines():
-  if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
-    datalines.append(a)
+    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+        datalines.append(a)
 for a in p.stderr.readlines():
-  if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
-    datalines.append(a)
+    if a.find('Stream #') >= 0 and a.find('Audio:') >= 0:
+        datalines.append(a)
 p.stdout.close()
 p.stderr.close()
 
@@ -22,9 +22,9 @@ assert len(datalines) == 1
 str_list = datalines[0].strip().replace(',', ' ').split(' ')
 idx = 0
 for i in str_list:
-  if i == "Audio:":
-    break
-  idx += 1
+    if i == "Audio:":
+        break
+    idx += 1
 audio_c = str_list[idx + 1]
 print datalines
 print str_list

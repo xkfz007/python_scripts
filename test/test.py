@@ -5,7 +5,7 @@ import sys
 import getopt
 import subprocess
 # abr=[(1,2), (0,3,4), (0.10,0.25,0.33), (1.0,1.1), (1.0,), (0.9,0.8,0.7,0.6,0.3)]
-#length=len(abr)
+# length=len(abr)
 #print abr
 #print length
 #num=1
@@ -44,8 +44,8 @@ print str
 
 
 def update_str(str, str2):
-  str += str2
-  return str
+    str += str2
+    return str
 
 
 print update_str(str, "OK")

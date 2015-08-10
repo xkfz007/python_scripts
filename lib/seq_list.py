@@ -1,5 +1,5 @@
 # classA=('Traffic_2560x1600_30_crop','PeopleOnStreet_2560x1600_30_crop')
-#classB=('Kimono1_1920x1080_24','ParkScene_1920x1080_24','Cactus_1920x1080_50','BasketballDrive_1920x1080_50','BQTerrace_1920x1080_60')
+# classB=('Kimono1_1920x1080_24','ParkScene_1920x1080_24','Cactus_1920x1080_50','BasketballDrive_1920x1080_50','BQTerrace_1920x1080_60')
 #classC=('BasketballDrill_832x480_50','BQMall_832x480_60','PartyScene_832x480_50','RaceHorses_832x480_30')
 #classD=('BasketballPass_416x240_50','BQSquare_416x240_60','BlowingBubbles_416x240_50','RaceHorses_416x240_30')
 #classE=('FourPeople_1280x720_60','Johnny_1280x720_60','KristenAndSara_1280x720_60')
@@ -19,7 +19,8 @@ class_i = ('Iduckstakeoff_1280x720_8_25_500', 'Ifcwr_1920x1080_8_25_6987',
            'Iflowervase_832x480_8_25_300', 'Iintotree_1280x720_8_25_500', 'Ikeiba_832x480_8_25_300',
            'Imobcalter_1280x720_8_25_500', 'Imobisode2_832x480_8_25_300', 'Imonkey_1280x720_8_25_79',
            'Inavyflight_1920x1080_8_30_2973', 'Iparkjoy_1280x720_8_25_500', 'Istockholmter_1280x720_8_25_600',
-           'Itennis_1920x1080_8_25_240', 'Ividyo1_1280x720_8_25_600', 'Ividyo3_1280x720_8_25_600', 'Ividyo4_1280x720_8_25_600',
+           'Itennis_1920x1080_8_25_240', 'Ividyo1_1280x720_8_25_600', 'Ividyo3_1280x720_8_25_600',
+           'Ividyo4_1280x720_8_25_600',
            'Ixtslf_1920x1080_8_25_1854')
 class_special = ('Ifcwr_1920x1080_8_25_6987', 'Ixtslf_1920x1080_8_25_1854', 'Inavyflight_1920x1080_8_30_2973')
 class_special2 = ('ztv_720x576_25',)
@@ -30,45 +31,45 @@ class_std = class_a + class_b + class_c + class_d + class_e + class_f
 
 
 def guess_seqname(name):
-  seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2
-  for i in seq_list:
-    if i.upper().find(name.upper().split('_')[0]) >= 0:
-      return i
+    seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2
+    for i in seq_list:
+        if i.upper().find(name.upper().split('_')[0]) >= 0:
+            return i
 
-  return name
+    return name
 
 
 import sys
 
 
 def get_reso_info(seq_name):
-  common_reso_list = ('176x144', '352x288', '416x240', '832x480', '1024x768',
-                      '1280x720', '1920x1080', '2560x1600', '3840x2160',
-                      '640x480', '448x336', '720x576')
-  common_fps_list = (15, 20, 23, 24, 25, 30, 50, 60)
-  #seq_name format: name_widthxheight_fps or
-  #                 name_widthxheight_bitdepth_fps_totalframes
-  tmp_list = seq_name.split('_')
-  if tmp_list[1] not in common_reso_list:
-    print "maybe the resolution is invalid, please check"
-    sys.exit()
-  reso = tmp_list[1].split('x')
-  width = int(reso[0])
-  height = int(reso[1])
-  #if len(tmp_list)==3:
-  #  fps=int(tmp_list[2])
-  #elif len(tmp_list)==5:
-  #  fps= int(tmp_list[3])
-  #else:
-  #  fps=30 #default fps
-  fps = int(tmp_list[2])
-  if fps < 15:
-    if len(tmp_list) == 5:
-      fps = int(tmp_list[3])
-    else:
-      fps = 30  #default fps
-  if fps not in common_fps_list:
-    print "maybe the fps is invalid, please check"
-    sys.exit()
-  return (width, height, fps)
+    common_reso_list = ('176x144', '352x288', '416x240', '832x480', '1024x768',
+                        '1280x720', '1920x1080', '2560x1600', '3840x2160',
+                        '640x480', '448x336', '720x576')
+    common_fps_list = (15, 20, 23, 24, 25, 30, 50, 60)
+    #seq_name format: name_widthxheight_fps or
+    #                 name_widthxheight_bitdepth_fps_totalframes
+    tmp_list = seq_name.split('_')
+    if tmp_list[1] not in common_reso_list:
+        print "maybe the resolution is invalid, please check"
+        sys.exit()
+    reso = tmp_list[1].split('x')
+    width = int(reso[0])
+    height = int(reso[1])
+    #if len(tmp_list)==3:
+    #  fps=int(tmp_list[2])
+    #elif len(tmp_list)==5:
+    #  fps= int(tmp_list[3])
+    #else:
+    #  fps=30 #default fps
+    fps = int(tmp_list[2])
+    if fps < 15:
+        if len(tmp_list) == 5:
+            fps = int(tmp_list[3])
+        else:
+            fps = 30  #default fps
+    if fps not in common_fps_list:
+        print "maybe the fps is invalid, please check"
+        sys.exit()
+    return (width, height, fps)
 

@@ -6,7 +6,7 @@ import sys
 import ctypes
 
 if sys.platform == 'linux2':
-  from termcolor import colored, cprint
+    from termcolor import colored, cprint
 
 STD_INPUT_HANDLE = -10
 STD_OUTPUT_HANDLE = -11
@@ -25,64 +25,64 @@ BACKGROUND_INTENSITY = 0x80  # background color is intensified.
 
 
 class Log:
-  ''''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winprog/winprog/windows_api_reference.asp
-  for information on Windows APIs.'''
-  if sys.platform == 'linux2':
-    # red_on_cyan = lambda x: colored(x, 'red', 'on_cyan')
-    #print_red_on_cyan = lambda x: cprint(x, 'red', 'on_cyan')
+    ''''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winprog/winprog/windows_api_reference.asp
+    for information on Windows APIs.'''
+    if sys.platform == 'linux2':
+        # red_on_cyan = lambda x: colored(x, 'red', 'on_cyan')
+        # print_red_on_cyan = lambda x: cprint(x, 'red', 'on_cyan')
 
-    def set_cmd_color(self, color):
-      return
+        def set_cmd_color(self, color):
+            return
 
-    def reset_color(self, color):
-      return
+        def reset_color(self, color):
+            return
 
-    def error(self, print_text):
-      print colored(print_text, 'red')
-      return
+        def error(self, print_text):
+            print colored(print_text, 'red')
+            return
 
-    def warn(self, print_text):
-      print colored(print_text, 'green')
-      return
+        def warn(self, print_text):
+            print colored(print_text, 'green')
+            return
 
-    def info(self, print_text):
-      print colored(print_text, 'grey')
-      return
+        def info(self, print_text):
+            print colored(print_text, 'grey')
+            return
 
-  elif sys.platform == "win32":
-    std_out_handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+    elif sys.platform == "win32":
+        std_out_handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
 
-    def set_cmd_color(self, color, handle=std_out_handle):
-      """(color) -> bit
-      Example: set_cmd_color(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY)
-      """
-      bool = ctypes.windll.kernel32.SetConsoleTextAttribute(handle, color)
-      return bool
+        def set_cmd_color(self, color, handle=std_out_handle):
+            """(color) -> bit
+            Example: set_cmd_color(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY)
+            """
+            bool = ctypes.windll.kernel32.SetConsoleTextAttribute(handle, color)
+            return bool
 
-    def reset_color(self):
-      self.set_cmd_color(FOREGROUND_INTENSITY)
+        def reset_color(self):
+            self.set_cmd_color(FOREGROUND_INTENSITY)
 
-    def error(self, print_text):
-      self.set_cmd_color(FOREGROUND_RED | FOREGROUND_INTENSITY)
-      print print_text
-      self.reset_color()
+        def error(self, print_text):
+            self.set_cmd_color(FOREGROUND_RED | FOREGROUND_INTENSITY)
+            print print_text
+            self.reset_color()
 
-    def warn(self, print_text):
-      self.set_cmd_color(FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-      print print_text
-      self.reset_color()
+        def warn(self, print_text):
+            self.set_cmd_color(FOREGROUND_GREEN | FOREGROUND_INTENSITY)
+            print print_text
+            self.reset_color()
 
-    def info(self, print_text):
-      print print_text
+        def info(self, print_text):
+            print print_text
 
 
 if __name__ == "__main__":
-  log = Log()
-  log.info("info")
-  log.warn("warn")
-  log.info("info")
-  log.warn("warn")
-  log.error("error")
-  log.info("info")
-  log.warn("warn")
-  log.error("error")
+    log = Log()
+    log.info("info")
+    log.warn("warn")
+    log.info("info")
+    log.warn("warn")
+    log.error("error")
+    log.info("info")
+    log.warn("warn")
+    log.error("error")
