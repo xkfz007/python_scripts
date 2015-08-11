@@ -4,13 +4,15 @@ import sys
 import lib
 import subprocess
 
-dec_id = "hm"
-dec = lib.Decoder_prop(dec_id)
+dec_id = "hmd"
+#dec = lib.Decoder_prop(dec_id)
+dec=lib.DECODER(dec_id)
 
 param_list = lib.get_default_dec_param_list()
 
 # lib.configure_dec_param(dec,param_list)
 cons = lib.parse_dec_cl(dec, param_list)
+print dec
 
 cmd_line = lib.get_full_cdec_cmd(dec, param_list)
 

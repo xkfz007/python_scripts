@@ -26,3 +26,23 @@ RC_DICT = {'CQP': HEVC_RC_CQP,
            'ABR-2': HEVC_RC_ABR_TWOPASS_ANAlYSE,
            'VBR-2': HEVC_RC_VBR_TWOPASS_ANAlYSE,
 }
+
+h264_extension = ('.264', '.avc', '.h264')
+h265_extension = ('.265', '.hevc', '.h265')
+
+ashevcd_name_list = ('ashevcd', 'ashevc', 'as265d')
+jmd_name_list = ('jmd',)
+hmd_name_list = ('hmd',)
+
+h264_decoder_list = (jmd_name_list[0],)
+h265_decoder_list = (ashevcd_name_list[0], hmd_name_list[0])
+
+as265_name_list=('as265','a265')
+jm_name_list=('jm',)
+hm_name_list=('hm',)
+x264_name_list=('x264',)
+x265_name_list=('x265',)
+
+h264_encoder_list=(x264_name_list[0],jmd_name_list[0])
+h265_encoder_list=(as265_name_list[0],x265_name_list[0],hm_name_list[0])
+
