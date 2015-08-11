@@ -111,17 +111,17 @@ def get_dec_st(id):
 #    def __str__(self):
 #        return "DECODER:%s"%self.dec_st
 class DECODER(codec_cmd.CODEC):
-    def __init__(self,id):
+    def __init__(self,id='hmd'):
         codec_cmd.CODEC.__init__(self,get_dec_st)
         #codec_cmd.CODEC.set_id(self,id)
         self.set_id(id)
     def __str__(self):
         return "DECODER:%s"%self.cdec_st
     @staticmethod
-    def SET_ENCODER_PATH(id,path):
+    def SET_PATH(id,path):
         get_dec_st(id).set_path(path)
     @staticmethod
-    def SET_ENCODER_EXECUTOR(id,executor):
+    def SET_EXECUTOR(id,executor):
         get_dec_st(id).set_executor(executor)
 
 

@@ -50,10 +50,10 @@ class CODEC:
     def get_param_cmd(self):
         return self.cdec_st.get_param_cmd
     @staticmethod
-    def SET_CDEC_PATH(id,path):
+    def SET_PATH(id,path):
         CODEC.get_cdec_st(id).set_path(path)
     @staticmethod
-    def SET_CDEC_EXECUTOR(id,executor):
+    def SET_EXECUTOR(id,executor):
         CODEC.get_cdec_st(id).set_executor(executor)
 
 def get_full_cdec_cmd(enc, param_list):

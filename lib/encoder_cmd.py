@@ -121,17 +121,17 @@ def get_enc_st(id):
 #    def SET_CODEC_EXECUTOR(id,executor):
 #        get_enc_st(id).set_executor(executor)
 class ENCODER(codec_cmd.CODEC):
-    def __init__(self,id):
+    def __init__(self,id='as265'):
         codec_cmd.CODEC.__init__(self,get_enc_st)
         #codec_cmd.CODEC.set_id(self,id)
         self.set_id(id)
     def __str__(self):
         return "DECODER:%s"%self.cdec_st
     @staticmethod
-    def SET_ENCODER_PATH(id,path):
+    def SET_PATH(id,path):
         get_enc_st(id).set_path(path)
     @staticmethod
-    def SET_ENCODER_EXECUTOR(id,executor):
+    def SET_EXECUTOR(id,executor):
         get_enc_st(id).set_executor(executor)
 
 #class Encoder_prop:

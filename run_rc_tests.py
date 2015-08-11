@@ -3,7 +3,8 @@ import lib
 import os
 import subprocess
 
-enc = lib.Encoder_prop()
+#enc = lib.Encoder_prop()
+enc = lib.ENCODER()
 
 seq_list = ('BasketballPass_416x240_50', 'BlowingBubbles_416x240_50')
 br_list = (1000, 1500, 2000, 3000)
@@ -38,7 +39,7 @@ encoder_list = ("as265", "x265")
 lib.remove_some_tmp_files(param_list['output_path'])
 
 for encoder_id in encoder_list:
-    enc.set_encoder_id(encoder_id)
+    enc.set_id(encoder_id)
     for seq_name in seq_list:
         for bitrate in br_list:
             tag_str = "_" + encoder_id + "_bitrate" + str(bitrate)

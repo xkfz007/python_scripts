@@ -5,7 +5,7 @@ import lib
 import os
 import subprocess
 
-enc = lib.Encoder_prop()
+enc = lib.ENCODER()
 
 # seq_list = lib.class_std2+lib.class_special#('BasketballPass_416x240_50','BlowingBubbles_416x240_50')
 # seq_list = lib.class_a
@@ -45,7 +45,7 @@ lib.remove_some_tmp_files(param_list['output_path'])
 
 cnt = 0
 for encoder_id in encoder_list:
-    enc.set_encoder_id(encoder_id)
+    enc.set_id(encoder_id)
     for name in seq_list:
         seq_name = lib.guess_seqname(name)
         for bitrate in br_list:
