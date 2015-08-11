@@ -14,16 +14,16 @@ cons = lib.parse_dec_cl(dec, param_list)
 
 cmd_line = lib.get_full_cdec_cmd(dec, param_list)
 
-reg_file = None
-if lib.determin_sys() == "cygwin":
-    cmd_line += (" 2>&1 |tee -a " + cons)
-    pf = open(cons, "w")
-    print >> pf, "%s" % cmd_line
-    pf.close()
-else:
-    reg_file = open(cons, 'w')
-
-# os.system(cmd_line)
-print cmd_line
-subprocess.call(cmd_line, shell=True, stdout=reg_file, stderr=reg_file)
-
+#reg_file = None
+#if lib.determin_sys() == "cygwin":
+#    cmd_line += (" 2>&1 |tee -a " + cons)
+#    pf = open(cons, "w")
+#    print >> pf, "%s" % cmd_line
+#    pf.close()
+#else:
+#    reg_file = open(cons, 'w')
+#
+## os.system(cmd_line)
+#print cmd_line
+#subprocess.call(cmd_line, shell=True, stdout=reg_file, stderr=reg_file)
+lib.run_cmd(cmd_line,cons,1)

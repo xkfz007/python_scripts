@@ -120,20 +120,20 @@ class Codec_analysis:
     def get_bits_fcmd(self, input_file):
         return self.get_full_cmd(input_file, self.bits_idx)
 
-        # def get_col_vals(self, input_file, idx=0):
-        #  # if lib.determin_sys()=="windows":
-        #  #  return
-        #  cl_list = Codec_analysis.__func_list[self.id](self, input_file, idx)
-        #  full_cl = "|".join(cl_list)
-        #  print full_cl
-        #  output = subprocess.check_output(full_cl, shell=True)
-        #  return output
+    # def get_col_vals(self, input_file, idx=0):
+    #  # if lib.determin_sys()=="windows":
+    #  #  return
+    #  cl_list = Codec_analysis.__func_list[self.id](self, input_file, idx)
+    #  full_cl = "|".join(cl_list)
+    #  print full_cl
+    #  output = subprocess.check_output(full_cl, shell=True)
+    #  return output
 
-        #def get_qp_vals(self, input_file):
-        #  return self.get_col_vals(input_file, self.qp_idx)
+    #def get_qp_vals(self, input_file):
+    #  return self.get_col_vals(input_file, self.qp_idx)
 
-        #def get_bits_vals(self, input_file):
-        #  return self.get_col_vals(input_file, self.bits_idx)
+    #def get_bits_vals(self, input_file):
+    #  return self.get_col_vals(input_file, self.bits_idx)
 
 
 # def get_qp_ashevcd(input_file,idx):
@@ -146,19 +146,19 @@ class Codec_analysis:
 #  full_cl=grep_cl+"|"+awk_cl+"|"+tr_cl
 #  output=subprocess.check_output(full_cl,shell=True)
 #  return output
-def run_cmd(cmd, filename=''):
-    if filename == '':
-        outFile = None
-    else:
-        outFile = open(filename, 'w')
-    subprocess.call(cmd, stdout=outFile, stderr=outFile, shell=True)
+#def run_cmd(cmd, filename=''):
+#    if filename == '':
+#        outFile = None
+#    else:
+#        outFile = open(filename, 'w')
+#    subprocess.call(cmd, stdout=outFile, stderr=outFile, shell=True)
 
 
 import sys
 import getopt
 
 
-def obtain_data():
+if __name__=='__main__':#obtain_data():
     if len(sys.argv) == 1:
         #usage()
         sys.exit()
@@ -199,14 +199,14 @@ def obtain_data():
 
     if bits_flag == 1:
         cmd = cdc.get_bits_fcmd(input_file)
-        run_cmd(cmd, bits_output)
+        lib.run_cmd(cmd, bits_output,1)
 
     if qp_flag == 1:
         cmd = cdc.get_qp_fcmd(input_file)
-        run_cmd(cmd, qp_output)
+        lib.run_cmd(cmd, qp_output)
 
 
-obtain_data()
+#obtain_data()
 #parse_cl()
 #cdc=Codec_analysis("ashevcd")
 

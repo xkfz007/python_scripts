@@ -275,7 +275,7 @@ if __name__ == '__main__':
         if len(merged_file)>0:
             for i in output_list:
                 if os.path.exists(i):
-                    #os.remove(i)
+                    os.remove(i)
                     print '"%s" is deleted'%i
 
 

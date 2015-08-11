@@ -1,5 +1,6 @@
 import platform
 import os
+import subprocess
 
 
 def determin_sys():
@@ -102,3 +103,19 @@ def delete_files(path, ext_list):
             ext = os.path.splitext(full_name)[1]
             if ext in ext_list:
                 os.remove(full_name)
+
+def run_cmd(cmd_line,log_file='',do_execute=0):
+   pfile = None
+   if determin_sys() == "cygwin":
+       cmd_line += " 2>&1 |tee -a %s"% log_file
+   if len(log_file)>0:
+      pfile = open(log_file, "w")
+      print >> pfile, "%s" % cmd_line
+      if determin_sys() == "cygwin":
+        pfile.close()
+        pfile=None
+
+   #os.system(cmd_line)
+   print cmd_line
+   if do_execute==1:
+      subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)

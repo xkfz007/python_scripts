@@ -37,8 +37,8 @@ h265_extension = (".265", ".hevc", ".h265")
 ashevcd_name_list = ('ashevcd', 'ashevc', 'as265d')
 jmd_name_list = ('jmd',)
 hmd_name_list = ('hmd',)
-h264_decoder_list = ('hmd',)
-h265_decoder_list = ('ashevcd', 'hmd')
+h264_decoder_list = (jmd_name_list[0],)
+h265_decoder_list = (ashevcd_name_list[0], hmd_name_list[0])
 
 
 class Decoder_prop:
@@ -135,7 +135,7 @@ def parse_dec_cl(dec, opt_list):
         sys.exit()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:i:hHV')
+        opts, args = getopt.getopt(sys.argv[1:], 'e:i:ohHV')
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -180,16 +180,16 @@ def parse_dec_cl(dec, opt_list):
         opt_list['output_filename'] = args[0]
 
     dir_path, filename = os.path.split(opt_list['input_filename'])
-    name, ext = os.path.splitext(filename)
-    if ext in h264_extension and dec.id not in h264_decoder_list:
+    fname, fext = os.path.splitext(filename)
+    if fext in h264_extension and dec.id not in h264_decoder_list:
         dec.set_encoder_id(jmd_name_list[0])
-    if ext in h265_extension and dec.id not in h265_decoder_list:
+    if fext in h265_extension and dec.id not in h265_decoder_list:
         dec.set_encoder_id(ashevcd_name_list[0])
 
-    cons_filename = name + "_" + dec.id + "_cons.log"
+    cons_filename = fname + "_" + dec.id + "_cons.log"
     cons_full = os.path.join(dir_path, cons_filename)
     if Output_flag == 1 and len(opt_list['output_filename']) == 0:
-        output_filename = name + "_rec.yuv"
+        output_filename = fname + "_rec.yuv"
         opt_list['output_filename'] = os.path.join(dir_path, output_filename)
 
     return cons_full
