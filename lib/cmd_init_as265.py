@@ -83,7 +83,7 @@ def get_default_enc_param_list():
     param_list['b_enable_cfg'] = 0
 
     #asm
-    param_list['b_asm'] = 1
+    param_list['b_asm'] = 0
 
     #architecture and algorithm
     param_list['architecture_id'] = 2

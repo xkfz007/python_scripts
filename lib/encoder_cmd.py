@@ -125,8 +125,27 @@ class ENCODER(codec_cmd.CODEC):
         codec_cmd.CODEC.__init__(self,get_enc_st)
         #codec_cmd.CODEC.set_id(self,id)
         self.set_id(id)
+    def set_fullpath(self,fullpath):
+        fpath, fname = os.path.split(fullpath)
+        new_id=''
+        if fname==as265_st.executor:
+            new_id=as265_st.id
+        elif fname==x265_st.executor:
+            new_id=x265_st.id
+        elif fname==x264_st.executor:
+            new_id=x264_st.id
+        elif fname==hm_st.executor:
+            new_id=hm_st.id
+        elif fname==jm_st.executor:
+            new_id=jm_st.id
+        if len(new_id)==0:
+            print "Warning: Invaild path, ignored"
+        else:
+           self.set_id(new_id)
+           self.set_path(fpath)
+
     def __str__(self):
-        return "DECODER:%s"%self.cdec_st
+        return "ENCODER:%s"%self.cdec_st
     @staticmethod
     def SET_PATH(id,path):
         get_enc_st(id).set_path(path)
@@ -363,6 +382,7 @@ def usage():
     help_msg = '''Usage:cl_run_enc.py [option] [value]...
   options:
    -e <string> encoder name:as265,x265,x264,hm,jm
+   --path <string> set the encoder path
    -i <string> input_path
    -o <string> output_path
    -I <integer> I frame interval
@@ -430,7 +450,7 @@ def parse_enc_cl(enc):
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:k:j:J:', ['version', ])
+                                   'i:o:I:f:F:W:L:l:hHq:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:k:j:J:', ['version', 'path='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -447,6 +467,7 @@ def parse_enc_cl(enc):
     Help_flag = 0
     Version_flag = 0
     Encoder_flag = 0
+    Encoder_path=''
 
     for opt, arg in opts:
         if opt == "-i":
@@ -514,6 +535,9 @@ def parse_enc_cl(enc):
             #opt_list["encoder_id"] = arg
             enc.set_id(arg.strip())
             Encoder_flag = 1
+        elif opt =='--path':
+            Encoder_path=arg
+            Encoder_flag=1
         elif opt == "-t":
             opt_list["vbv_buffer_init_time"] = int(arg)
             tag_str += get_tag(opt, arg)
@@ -564,6 +588,12 @@ def parse_enc_cl(enc):
             tag_str += get_tag(opt, arg)
         else:
             assert False, "unknown option"
+
+    if len(Encoder_path)>0:
+        if os.path.isdir(Encoder_path):
+            enc.set_path(Encoder_path)
+        elif os.path.isfile(Encoder_path):
+            enc.set_fullpath(Encoder_path)
 
     if Help_flag == 1:
         os.system(enc.get_help_exe())
