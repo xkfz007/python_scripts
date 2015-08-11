@@ -1,5 +1,6 @@
 import getopt, sys, os
 import common_lib, cmd_init_as265, cmd_init_x26x, seq_list, cmd_init_hm, cmd_init_jm
+import codec_cmd
 import global_vars
 
 # RC modes, enum type simple implementation
@@ -21,27 +22,34 @@ import global_vars
 #'HEVC_RC_CONFERENCE', 'HEVC_RC_ABR_TWOPASS_ANAlYSE', 'HEVC_RC_ABR_TWOPASS_ENC', 'HEVC_RC_VBR_Q',
 #'HEVC_RC_ABR', 'HEVC_RC_CQP', 'HEVC_RC_CRF', 'HEVC_RC_VBR_TWOPASS_ANAlYSE', 'HEVC_RC_VBR_TWOPASS_ENC'  )
 
-class Encoder_st:
-    def __init(self):
-        exe_str = os.path.join(self.path, self.executor)
-        self.exe = common_lib.normalize_path(exe_str)
-        self.help_exe = self.exe + " " + self.help
-        self.version_exe = self.exe + " " + self.version
-
+#class Encoder_st:
+#    def __init(self):
+#        exe_str = os.path.join(self.path, self.executor)
+#        self.exe = common_lib.normalize_path(exe_str)
+#        self.help_exe = self.exe + " " + self.help
+#        self.version_exe = self.exe + " " + self.version
+#
+#    def __init__(self,id,executor,help,version,cmd_func,path):
+#        self.id=id
+#        self.executor=executor
+#        self.help=help
+#        self.version=version
+#        self.get_param_cmd=cmd_func
+#        self.path=common_lib.format_path(path)
+#        self.__init()
+#    def set_executor(self,executor):
+#        self.executor=executor
+#        self.__init()
+#    def set_path(self,path):
+#        self.path=path
+#        self.__init()
+class Encoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,version,cmd_func,path):
-        self.id=id
-        self.executor=executor
-        self.help=help
-        self.version=version
-        self.get_param_cmd=cmd_func
-        self.path=common_lib.format_path(path)
-        self.__init()
-    def set_executor(self,executor):
-        self.executor=executor
-        self.__init()
-    def set_path(self,path):
-        self.path=path
-        self.__init()
+        codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
+    def __str__(self):
+        return "Encoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"% \
+               (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
+
 
 common_path = 'd:/workspace/'
 x265_path = "x265_v1.5_20150211"
@@ -85,150 +93,163 @@ def get_enc_st(id):
         id = 'as265'
     return enc_st_list[id]
 
-class ENCODER:
+#class ENCODER:
+#    def __init__(self,id):
+#        self.enc_st=get_enc_st(id)
+#    def set_id(self,id):
+#        self.enc_st=get_enc_st(id)
+#    def set_path(self,path):
+#        self.enc_st.set_path(path)
+#    def set_executor(self,executor):
+#        self.enc_st.set_executor(executor)
+#    def get_id(self):
+#        return self.enc_st.id
+#    def get_exe(self):
+#        return self.enc_st.exe
+#    def get_help_exe(self):
+#        return self.enc_st.help_exe
+#    def get_version_exe(self):
+#        return self.enc_st.version_exe
+#    def get_param_cmd(self):
+#        return self.enc_st.get_param_cmd
+#    def __str__(self):
+#        return "ENCODER:%s"%self.enc_st
+#    @staticmethod
+#    def SET_CODEC_PATH(id,path):
+#        get_enc_st(id).set_path(path)
+#    @staticmethod
+#    def SET_CODEC_EXECUTOR(id,executor):
+#        get_enc_st(id).set_executor(executor)
+class ENCODER(codec_cmd.CODEC):
     def __init__(self,id):
-        self.enc_st=get_enc_st(id)
-    def set_id(self,id):
-        self.enc_st=get_enc_st(id)
-    def set_path(self,path):
-        self.enc_st.set_path(path)
-    def set_executor(self,executor):
-        self.enc_st.set_executor(executor)
-    def get_id(self):
-        return self.enc_st.id
-    def get_exe(self):
-        return self.enc_st.exe
-    def get_help_exe(self):
-        return self.enc_st.help_exe
-    def get_version_exe(self):
-        return self.enc_st.version_exe
-    def get_param_cmd(self):
-        return self.enc_st.get_param_cmd
+        codec_cmd.CODEC.__init__(self,get_enc_st)
+        #codec_cmd.CODEC.set_id(self,id)
+        self.set_id(id)
     def __str__(self):
-        return "ENCODER:%s"%self.enc_st
+        return "DECODER:%s"%self.cdec_st
     @staticmethod
-    def SET_CODEC_PATH(id,path):
+    def SET_ENCODER_PATH(id,path):
         get_enc_st(id).set_path(path)
     @staticmethod
-    def SET_CODEC_EXECUTOR(id,executor):
+    def SET_ENCODER_EXECUTOR(id,executor):
         get_enc_st(id).set_executor(executor)
 
-class Encoder_prop:
-    id = ''
-    exe = ''
-    help_exe = ''
-    version_exe = ''
-    conf = 'r'
-    platform = 'x64'
-    get_param_cmd = ""
-    __executors = {'as265': 'cli_ashevc.exe',
-                   'x265': 'x265.exe',
-                   'x264': 'x264.exe',
-                   'hm': 'hm.exe',
-                   'jm': 'lencod.exe',
-    }
-    __helps = {'as265': '',
-               'x265': '--log-level full --help',
-               'x264': '--fullhelp',
-               'hm': '--help',
-               'jm': '-h'
-    }
-    __versions = {'as265': '',
-                  'x265': '--version',
-                  'x264': '--version',
-                  'hm': '--version',
-                  'jm': '-V',
-    }
-    __confs = {'as265': {'d': 'Debug', 'r': 'Release', 'R': 'Release_WithTrace'},
-               'x265': {'d': 'Debug', 'r': 'Release', 'R': 'RelWithDebInfo'},
-               'x264': {'d': 'Debug', 'r': 'Release', 'R': 'Release'},
-               'hm': {'d': 'Debug', 'r': 'Release', 'R': 'Release'},
-               'jm': {'d': '', 'r': '', 'R': ''},
-    }
-    __platforms = {'as265': {'x86': 'x64', 'x64': 'x64'},
-                   'x265': {'x86': 'vc10-x86', 'x64': 'vc10-x86_64'},
-                   'x264': {'x86': 'Win32', 'x64': 'x64'},
-                   'hm': {'x86': 'Win32', 'x64': 'x64'},
-                   'jm': {'x86': '', 'x64': ''},
-    }
-    __cmd_func_list = {
-        "as265": cmd_init_as265.get_enc_param_cmd_as265,
-        "x265": cmd_init_x26x.get_enc_param_cmd_x265,
-        "x264": cmd_init_x26x.get_enc_param_cmd_x264,
-        "hm": cmd_init_hm.get_enc_param_cmd_hm,
-        "jm": cmd_init_jm.get_enc_param_cmd_jm,
-    }
-    #__paths = dict()
-    #__paths['as265'] =
-    #__paths['x265'] =
-    #__paths['x264'] =
-    __common_path = 'd:/workspace/'
-    __x265_path = "x265_v1.5_20150211"
-    if global_vars.x265_ver == "v1.6":
-        __x265_path = "x265_v1.6_20150403"
-
-    #hevc_path='hevc_enc'
-    hevc_path = 'HEVC_Encoder'
-    #__paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/'+hevc_path+'/bin/x64/',
-    #         'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
-    #         'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
-    #         'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
-    __paths = {'as265': os.path.join(__common_path, 'arcvideo_codes/HEVC_Codec/', hevc_path, 'bin/x64/'),
-               'x265': os.path.join(__common_path, 'src.x265/trunk/', __x265_path, 'build/vc10-x86_64/'),
-               'x264': os.path.join(__common_path, 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/'),
-               'hm': os.path.join(__common_path, 'src.hm/trunk/hm-10.0/bin/vc10/x64/'),
-               'jm': os.path.join(__common_path, 'SRC.JM/trunk/jm18.5/bin/'),
-    }
-
-    #@staticmethod
-    #def __format_path(path):
-    #  path=path.strip()
-    #  path = os.path.normpath(path)#path.replace("\\", "/")
-    #  if path[-1]!="/":
-    #    path+="/"
-    #  return path
-    def __set_encoder_prop(self):
-        Encoder_prop.__paths[self.id] = common_lib.format_path(Encoder_prop.__paths[self.id])
-        #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
-        exe_str = os.path.join(Encoder_prop.__paths[self.id], Encoder_prop.__confs[self.id][self.conf],
-                               Encoder_prop.__executors[self.id])
-        #exe_str = exe_str.replace("\\", "/")
-        #sys_str = common_lib.determin_sys()
-        #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
-        #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
-        self.exe = common_lib.normalize_path(exe_str)
-        self.help_exe = self.exe + " " + Encoder_prop.__helps[self.id]
-        self.version_exe = self.exe + " " + Encoder_prop.__versions[self.id]
-        self.get_param_cmd = Encoder_prop.__cmd_func_list[self.id]
-
-    def __set_id(self, id):
-        tmp = id[-1]
-        if tmp in ('d', 'r', 'R'):
-            self.conf = tmp
-            self.id = id[:-1]
-        else:
-            self.conf = 'r'
-            self.id = id
-
-
-    def __init__(self, id="as265"):
-        #self.id = id
-        self.__set_id(id)
-        self.__set_encoder_prop()
-
-
-    def set_encoder_id(self, id):
-        #self.id=id
-        self.__set_id(id)
-        self.__set_encoder_prop()
-
-    def set_encoder_path(self, path):
-        Encoder_prop.__paths[self.id] = path
-        self.__set_encoder_prop()
-
-    @staticmethod
-    def SET_PATH(id, path):
-        Encoder_prop.__paths[id] = path
+#class Encoder_prop:
+#    id = ''
+#    exe = ''
+#    help_exe = ''
+#    version_exe = ''
+#    conf = 'r'
+#    platform = 'x64'
+#    get_param_cmd = ""
+#    __executors = {'as265': 'cli_ashevc.exe',
+#                   'x265': 'x265.exe',
+#                   'x264': 'x264.exe',
+#                   'hm': 'hm.exe',
+#                   'jm': 'lencod.exe',
+#    }
+#    __helps = {'as265': '',
+#               'x265': '--log-level full --help',
+#               'x264': '--fullhelp',
+#               'hm': '--help',
+#               'jm': '-h'
+#    }
+#    __versions = {'as265': '',
+#                  'x265': '--version',
+#                  'x264': '--version',
+#                  'hm': '--version',
+#                  'jm': '-V',
+#    }
+#    __confs = {'as265': {'d': 'Debug', 'r': 'Release', 'R': 'Release_WithTrace'},
+#               'x265': {'d': 'Debug', 'r': 'Release', 'R': 'RelWithDebInfo'},
+#               'x264': {'d': 'Debug', 'r': 'Release', 'R': 'Release'},
+#               'hm': {'d': 'Debug', 'r': 'Release', 'R': 'Release'},
+#               'jm': {'d': '', 'r': '', 'R': ''},
+#    }
+#    __platforms = {'as265': {'x86': 'x64', 'x64': 'x64'},
+#                   'x265': {'x86': 'vc10-x86', 'x64': 'vc10-x86_64'},
+#                   'x264': {'x86': 'Win32', 'x64': 'x64'},
+#                   'hm': {'x86': 'Win32', 'x64': 'x64'},
+#                   'jm': {'x86': '', 'x64': ''},
+#    }
+#    __cmd_func_list = {
+#        "as265": cmd_init_as265.get_enc_param_cmd_as265,
+#        "x265": cmd_init_x26x.get_enc_param_cmd_x265,
+#        "x264": cmd_init_x26x.get_enc_param_cmd_x264,
+#        "hm": cmd_init_hm.get_enc_param_cmd_hm,
+#        "jm": cmd_init_jm.get_enc_param_cmd_jm,
+#    }
+#    #__paths = dict()
+#    #__paths['as265'] =
+#    #__paths['x265'] =
+#    #__paths['x264'] =
+#    __common_path = 'd:/workspace/'
+#    __x265_path = "x265_v1.5_20150211"
+#    if global_vars.x265_ver == "v1.6":
+#        __x265_path = "x265_v1.6_20150403"
+#
+#    #hevc_path='hevc_enc'
+#    hevc_path = 'HEVC_Encoder'
+#    #__paths={'as265':__common_path + 'arcsoft_codes/HEVC_Codec/'+hevc_path+'/bin/x64/',
+#    #         'x265':__common_path+'src.x265/trunk/'+__x265_path+'/build/vc10-x86_64/',
+#    #         'x264':__common_path + 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/',
+#    #         'hm':__common_path + 'src.hm/trunk/hm-10.0/bin/vc10/x64/'}
+#    __paths = {'as265': os.path.join(__common_path, 'arcvideo_codes/HEVC_Codec/', hevc_path, 'bin/x64/'),
+#               'x265': os.path.join(__common_path, 'src.x265/trunk/', __x265_path, 'build/vc10-x86_64/'),
+#               'x264': os.path.join(__common_path, 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/'),
+#               'hm': os.path.join(__common_path, 'src.hm/trunk/hm-10.0/bin/vc10/x64/'),
+#               'jm': os.path.join(__common_path, 'SRC.JM/trunk/jm18.5/bin/'),
+#    }
+#
+#    #@staticmethod
+#    #def __format_path(path):
+#    #  path=path.strip()
+#    #  path = os.path.normpath(path)#path.replace("\\", "/")
+#    #  if path[-1]!="/":
+#    #    path+="/"
+#    #  return path
+#    def __set_encoder_prop(self):
+#        Encoder_prop.__paths[self.id] = common_lib.format_path(Encoder_prop.__paths[self.id])
+#        #exe_str = Encoder_prop.__paths[self.id] + Encoder_prop.__executors[self.id]
+#        exe_str = os.path.join(Encoder_prop.__paths[self.id], Encoder_prop.__confs[self.id][self.conf],
+#                               Encoder_prop.__executors[self.id])
+#        #exe_str = exe_str.replace("\\", "/")
+#        #sys_str = common_lib.determin_sys()
+#        #if sys_str == "cygwin" and exe_str.find("cygdrive") < 0:
+#        #  exe_str = "/cygdrive/" + exe_str.replace(":", "")
+#        self.exe = common_lib.normalize_path(exe_str)
+#        self.help_exe = self.exe + " " + Encoder_prop.__helps[self.id]
+#        self.version_exe = self.exe + " " + Encoder_prop.__versions[self.id]
+#        self.get_param_cmd = Encoder_prop.__cmd_func_list[self.id]
+#
+#    def __set_id(self, id):
+#        tmp = id[-1]
+#        if tmp in ('d', 'r', 'R'):
+#            self.conf = tmp
+#            self.id = id[:-1]
+#        else:
+#            self.conf = 'r'
+#            self.id = id
+#
+#
+#    def __init__(self, id="as265"):
+#        #self.id = id
+#        self.__set_id(id)
+#        self.__set_encoder_prop()
+#
+#
+#    def set_encoder_id(self, id):
+#        #self.id=id
+#        self.__set_id(id)
+#        self.__set_encoder_prop()
+#
+#    def set_encoder_path(self, path):
+#        Encoder_prop.__paths[self.id] = path
+#        self.__set_encoder_prop()
+#
+#    @staticmethod
+#    def SET_PATH(id, path):
+#        Encoder_prop.__paths[id] = path
 
 
 def configure_seq_param(param_list, tmp_name, tmp_width=-1, tmp_height=-1, tags=""):
@@ -719,15 +740,3 @@ def configure_enc_param(enc, param_list):
     return (cons_log, tmp_list['extra_cls'])
 
 
-def get_full_cdec_cmd(enc, param_list):
-    #param_cmd=""
-    #if enc.id=="as265":
-    #  param_cmd=as265_cmd_init.get_param_cmd_as265(param_list)
-    #elif enc.id=="x265":
-    #  param_cmd=x26x_cmd_init.get_param_cmd_x265(param_list)
-    #elif enc.id=="x264":
-    #  param_cmd=x26x_cmd_init.get_param_cmd_x264(param_list)
-    param_cmd = enc.get_param_cmd()(param_list)
-    exe = enc.get_exe()
-    full_cmd_line = exe + " " + param_cmd
-    return full_cmd_line

@@ -15,4 +15,5 @@ from seq_list import *
 from Log import *
 from cmd_init_hm import *
 from global_vars import *
+from codec_cmd import *
 
