@@ -139,7 +139,7 @@ class ENCODER(codec_cmd.CODEC):
         elif fname==jm_st.executor:
             new_id=jm_st.id
         if len(new_id)==0:
-            print "Warning: Invaild path, ignored"
+            print 'Warning: Invaild path[%s], ignored'%fullpath
         else:
            self.set_id(new_id)
            self.set_path(fpath)

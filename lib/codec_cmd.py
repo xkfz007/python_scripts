@@ -36,11 +36,16 @@ class CODEC:
     def set_id(self,id):
         self.cdec_st=self.get_cdec_st(id)
     def set_path(self,path):
-        self.cdec_st.set_path(path)
+        if os.path.isfile(os.path.join(path,self.get_executor())):
+            self.cdec_st.set_path(path)
+        else:
+            print 'Warning: Invaild path[%s], ignored'%path
     def set_executor(self,executor):
         self.cdec_st.set_executor(executor)
     def get_id(self):
         return self.cdec_st.id
+    def get_executor(self):
+        return self.cdec_st.executor
     def get_exe(self):
         return self.cdec_st.exe
     def get_help_exe(self):
