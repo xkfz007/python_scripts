@@ -77,6 +77,7 @@ dec_st_list={global_vars.ashevcd_name_list[0]:ashevcd_st,
              global_vars.jmd_name_list[0]:jmd_st,
              global_vars.hmd_name_list[0]:hmd_st,
              }
+#dec_st_id_list={key:value for key }
 
 def get_dec_st(id):
     if id in global_vars.ashevcd_name_list:
