@@ -3,7 +3,7 @@ __author__ = 'hfz2597'
 
 import common_lib
 import os
-class Codec_st:
+class Codec_st(object):
     def __init(self):
         exe_str = os.path.join(self.path, self.executor)
         self.exe = common_lib.normalize_path(exe_str)
@@ -25,7 +25,7 @@ class Codec_st:
         self.path=path
         self.__init()
 
-class CODEC:
+class CODEC(object):
     def __init__(self,get_cdec_st):
         #self.cdec_list=cdec_list
         self.get_cdec_st=get_cdec_st

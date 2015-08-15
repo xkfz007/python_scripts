@@ -45,7 +45,8 @@ import global_vars
 #        self.__init()
 class Encoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,version,cmd_func,path):
-        codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
+        #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
+        super(Encoder_st,self).__init__(id,executor,help,version,cmd_func,path)
     def __str__(self):
         return "Encoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"% \
                (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
@@ -122,7 +123,8 @@ def get_enc_st(id):
 #        get_enc_st(id).set_executor(executor)
 class ENCODER(codec_cmd.CODEC):
     def __init__(self,id='as265'):
-        codec_cmd.CODEC.__init__(self,get_enc_st)
+        #codec_cmd.CODEC.__init__(self,get_enc_st)
+        super(ENCODER,self).__init__(get_enc_st)
         #codec_cmd.CODEC.set_id(self,id)
         self.set_id(id)
     def set_fullpath(self,fullpath):
