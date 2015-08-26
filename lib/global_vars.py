@@ -1,4 +1,4 @@
-x265_ver = "v1.5"
+x265_ver = "v1.6"
 
 # RC modes, enum type simple implementation
 HEVC_RC_FIXQUANT = 0

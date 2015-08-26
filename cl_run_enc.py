@@ -7,15 +7,11 @@ import subprocess
 encoder_id = "as265"
 #enc = lib.Encoder_prop(encoder_id)
 enc = lib.ENCODER(encoder_id)
-# lib.Encoder_prop.SET_PATH("as265",r"D:\workspace\arcvideo_codes\HEVC_Codec\HEVC_Encoder3\bin\x64")
-#lib.Encoder_prop.SET_PATH("x265",
-#                          r"D:\workspace\arcvideo_codes\HEVC_Codec\HEVC_Encoder\tool_X265_stable_2015_02_14_b6be305a2f99_modified_for_performance_test\build\vc10-x86_64")
 #lib.ENCODER.SET_PATH("as265",
 #                           r"D:\workspace\arcvideo_codes\HEVC_Codec\HEVC_Encoder4\bin\x64\Release_WithTrace")
 #lib.ENCODER.SET_PATH("x265",
-#                          r"D:\workspace\arcvideo_codes\HEVC_Codec\HEVC_Encoder\tool_X265_stable_2015_02_14_b6be305a2f99_modified_for_performance_test\build\vc10-x86_64\Release")
-#lib.ENCODER.SET_CDEC_PATH("x265",
 #                             r"D:\workspace\arcvideo_codes\HEVC_Codec\HEVC_Encoder\tool_X265_stable_2015_02_14_b6be305a2f99_modified_for_performance_test\build\vc10-x86_64\Release")
+#lib.x265_ver="v1.6"
 
 param_list = lib.get_default_enc_param_list()
 # param_list['encder_exe']=lib.get_encoder_exe()

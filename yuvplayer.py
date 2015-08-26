@@ -3,7 +3,6 @@ import getopt
 import sys
 import subprocess
 import lib.seq_list
-import lib.fun_lib
 import os
 
 __author__ = 'hfz2597'
@@ -23,7 +22,7 @@ for i in sys.argv[1:]:
         name = lib.seq_list.guess_seqname(name)
         name += ".yuv"
     #reso=name.split('_')[1]
-    width, height, fps = lib.fun_lib.get_reso_info(name)
+    width, height, fps = lib.get_reso_info(name)
     cmd = executor
     full_path = os.path.join(location, name)
     cmd += " -i %s" % full_path

@@ -119,3 +119,32 @@ def run_cmd(cmd_line,log_file='',do_execute=0):
    print cmd_line
    if do_execute==1:
       subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
+
+
+class HELP(object):
+    default_msg='''-h print this help
+            -H print help of grep
+            -Y whether to execute the program
+  '''
+    default_opt='hHY'
+    def __init__(self,usage,help):
+        self.usage=usage
+        self.help=help
+        self.do_execute=0
+    def set_do_execute(self,do_execute=1):
+        self.do_execute=do_execute
+    def get_msg(self):
+        return HELP.default_msg
+    def get_opt(self):
+        return HELP.default_opt
+
+    def parse_opt(self,opt):
+        if opt == '-h':
+            self.usage()
+            sys.exit()
+        elif opt == '-H':
+            os.system(self.help)
+            sys.exit()
+        elif opt == '-Y':
+            self.set_do_execute()
+

@@ -4,7 +4,8 @@ __author__ = 'hfz2597'
 import sys
 import getopt
 import os
-def help():
+BIN='grep'
+def usage():
   msg='''usage:grep.py [options] pattern [path or file]
   -i, --ignore-case         ignore case distinctions
   -w, --word-regexp         force PATTERN to match only whole words
@@ -15,79 +16,92 @@ def help():
   -I                        don't search binary files, equivalent to --binary-files=without-match
   -a, --text                equivalent to --binary-files=text
   -b, --byte-offset         print the byte offset with output lines
+  -h print this help
+  -H print help of grep
+  -Y whether to execute the program
   '''
   print msg
   return
 #print sys.argv
 if len(sys.argv) == 1:
-  help()
+  usage()
   sys.exit()
 
-options="iwxnorIab"
+options='iwxnorIab'
 try:
-  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options)
+  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+'hHY')
 except getopt.GetoptError as err:
   print str(err)
   sys.exit(2)
 except Exception, e:
   print e
 
-if len(args)<1:
-  help()
-  sys.exit()
 
-opt_list="I"
+do_execute=0
+opt_list='I'
 for opt, arg in opts:
-  #if opt == "-i":
-  #  opt_list+="i"
-  #elif opt == "-w":
-  #  opt_list+="w"
-  #elif opt == "-x":
-  #  opt_list+="x"
-  #elif opt == "-n":
-  #  opt_list+="n"
-  #elif opt == "-o":
-  #  opt_list+="o"
-  #elif opt == "-r":
-  #  opt_list+="r"
+  #if opt == '-i':
+  #  opt_list+='i'
+  #elif opt == '-w':
+  #  opt_list+='w'
+  #elif opt == '-x':
+  #  opt_list+='x'
+  #elif opt == '-n':
+  #  opt_list+='n'
+  #elif opt == '-o':
+  #  opt_list+='o'
+  #elif opt == '-r':
+  #  opt_list+='r'
+  #print opt
   if opt[1] in options :
     if not opt[1] in opt_list:
       opt_list+=opt[1]
+  elif opt == '-h':
+      usage()
+      sys.exit()
+  elif opt == '-H':
+      os.system(BIN+' --help')
+      sys.exit()
+  elif opt == '-Y':
+      do_execute=1
   else:
-    assert False, "unknown option"
+    assert False, 'unknown option'
 
-#print "opts=%s"%opt_list
+#print 'opts=%s'%opt_list
 #for i in args:
-#  print "args=%s"%i
+#  print 'args=%s'%i
 
 #pattern=args[0]
+if len(args)<1:
+    usage()
+    sys.exit()
 
-dir_or_file=""
+dir_or_file=''
 pattern_list=[]
 for i in args:
-  if not os.path.isdir(i):
+  if not os.path.isdir(i) and not os.path.isfile(i):
     pattern_list.append(i)
   else:
     dir_or_file=i
 
 if len(pattern_list)==0:
-  print "BAD"
+  print 'BAD'
   sys.exit()
 else:
-  pattern="|".join(pattern_list)
+  pattern='|'.join(pattern_list)
 
 #if len(args)>1:
 #  dir_or_file=args[1]
 if len(dir_or_file)==0:
-  dir_or_file="."
+  dir_or_file='.'
 if os.path.isdir(dir_or_file):
   if 'r' not in opt_list:
-    opt_list+="r"
-BIN="grep -E --color"
-#cmd="grep --color -"+opt_list+" "+pattern+" "+dir_or_file
-cmd=BIN
-cmd+=" -%s"%opt_list
-cmd+=" '%s'"%pattern
-cmd+=" %s"%dir_or_file
+    opt_list+='r'
+cmd=BIN+' -E --color'
+#cmd='grep --color -'+opt_list+' '+pattern+' '+dir_or_file
+cmd+=' -%s'%opt_list
+cmd+=' "%s"'%pattern
+cmd+=' %s'%dir_or_file
 print cmd
-os.system(cmd)
+if do_execute==1:
+    os.system(cmd)

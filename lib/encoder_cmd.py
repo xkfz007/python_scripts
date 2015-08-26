@@ -426,6 +426,7 @@ def usage():
    -k <integer> seek frame
    -j <integer> sao: 0 disabled, 1 enabled
    -J <integer> deblock: 0 disabled, 1 enabled
+   -Y whether to execute the program
    '''
     print help_msg
     return

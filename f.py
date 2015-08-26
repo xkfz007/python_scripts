@@ -4,32 +4,34 @@ __author__ = 'hfz2597'
 import sys
 import getopt
 import os
-def help():
+BIN='find'
+def usage():
   msg='''usage:find.py [options] pattern [path]
          -iname pattern
          -type [df]
          -size [-+]n[cbkMG]
          -empty
+         -h print this help
+         -H print help of find
+         -Y whether to execute the program
   '''
   print msg
   return
 #print sys.argv
 if len(sys.argv) == 1:
-  help()
+  usage()
   sys.exit()
 
+do_execute=0
 options="ifde:m:"
 try:
-  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options)
+  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+'hHY')
 except getopt.GetoptError as err:
   print str(err)
   sys.exit(2)
 except Exception, e:
   print e
 
-if len(args)<1:
-  help()
-  sys.exit()
 
 opt_list=""
 pattern=""
@@ -52,8 +54,20 @@ for opt, arg in opts:
   #  opt_list+="r"
   #if opt[1] in options:
   #  opt_list+=opt[1]
+  elif opt == '-h':
+      usage()
+      sys.exit()
+  elif opt == '-H':
+      os.system(BIN+' --help')
+      sys.exit()
+  elif opt == '-Y':
+      do_execute=1
   else:
     assert False, "unknown option"
+
+if len(args)<1:
+    usage()
+    sys.exit()
 
 if len(excl_list)==0:
   excl_pat=""
@@ -82,7 +96,6 @@ else:
 if len(dir_or_file)==0:
   dir_or_file="."
 
-BIN="find"
 cmd=BIN
 cmd+=" %s"%dir_or_file
 cmd+=" %s"%maxdep_pat
@@ -90,4 +103,5 @@ cmd+=" %s"%excl_pat
 cmd+=" %s"%name_pat2
 cmd+=" -print"
 print cmd
-os.system(cmd)
+if do_execute==1:
+    os.system(cmd)

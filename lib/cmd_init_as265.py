@@ -37,7 +37,7 @@ def get_default_enc_param_list():
     param_list['nQuadtreeTUMaxDepthInter'] = 3
 
     # gop
-    param_list['nIntraPicInterval'] = 30
+    param_list['nIntraPicInterval'] = 350
     param_list['nMaxRefNum'] = 1
     param_list['bExistRefB'] = 0
     param_list['nBframe'] = 0

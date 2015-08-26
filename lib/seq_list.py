@@ -5,6 +5,7 @@
 #classE=('FourPeople_1280x720_60','Johnny_1280x720_60','KristenAndSara_1280x720_60')
 #classF=('BasketballDrillText_832x480_50','SlideEditing_1280x720_30','SlideShow_1280x720_20')
 
+
 class_a = ('Apeopleonstreet_2560x1600_8_30_150', 'Atraffic_2560x1600_8_30_150')
 class_b = ('Bbasketballdrive_1920x1080_8_50_500', 'Bbqterrace_1920x1080_8_60_600',
            'Bcactus_1920x1080_8_50_500', 'Bkimono_1920x1080_8_24_240', 'Bparkscene_1920x1080_8_24_240')
@@ -25,13 +26,14 @@ class_i = ('Iduckstakeoff_1280x720_8_25_500', 'Ifcwr_1920x1080_8_25_6987',
 class_special = ('Ifcwr_1920x1080_8_25_6987', 'Ixtslf_1920x1080_8_25_1854', 'Inavyflight_1920x1080_8_30_2973')
 class_special2 = ('ztv_720x576_25',)
 class_x = ('Xclownlogoed_3840x2160_8_25_640', 'Xsnake_3840x2160_8_25_353', 'Xsusielogoed_3840x2160_8_25_588')
+class_m=('ClassAmerge_2560x1600_30','ClassBMerge_1920x1080_24','ClassEMerge_1280x720_60','ClassFMerge_1280x720_30')
 
 class_std2 = class_b + class_c + class_d + class_e + class_f
 class_std = class_a + class_b + class_c + class_d + class_e + class_f
 
 
 def guess_seqname(name):
-    seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2
+    seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2+class_m
     for i in seq_list:
         if i.upper().find(name.upper().split('_')[0]) >= 0:
             return i
@@ -49,7 +51,11 @@ def get_reso_info(seq_name):
     common_fps_list = (15, 20, 23, 24, 25, 30, 50, 60)
     #seq_name format: name_widthxheight_fps or
     #                 name_widthxheight_bitdepth_fps_totalframes
+    import os.path
+    if seq_name.lower().endswith('.yuv'):
+        seq_name,ext=os.path.splitext(seq_name)
     tmp_list = seq_name.split('_')
+    print tmp_list
     if tmp_list[1] not in common_reso_list:
         print "maybe the resolution is invalid, please check"
         sys.exit()
