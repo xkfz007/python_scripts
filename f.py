@@ -4,6 +4,7 @@ __author__ = 'hfz2597'
 import sys
 import getopt
 import os
+import lib.common_lib
 BIN='find'
 def usage():
   msg='''usage:find.py [options] pattern [path]
@@ -17,15 +18,16 @@ def usage():
   '''
   print msg
   return
+help=lib.common_lib.HELP(usage,BIN,'--help')
 #print sys.argv
 if len(sys.argv) == 1:
-  usage()
+  help.usage()
   sys.exit()
 
-do_execute=0
+#do_execute=0
 options="ifde:m:"
 try:
-  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+'hHY')
+  opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+help.get_opt())
 except getopt.GetoptError as err:
   print str(err)
   sys.exit(2)
@@ -54,19 +56,21 @@ for opt, arg in opts:
   #  opt_list+="r"
   #if opt[1] in options:
   #  opt_list+=opt[1]
-  elif opt == '-h':
-      usage()
-      sys.exit()
-  elif opt == '-H':
-      os.system(BIN+' --help')
-      sys.exit()
-  elif opt == '-Y':
-      do_execute=1
+  #elif opt == '-h':
+  #    usage()
+  #    sys.exit()
+  #elif opt == '-H':
+  #    os.system(BIN+' --help')
+  #    sys.exit()
+  #elif opt == '-Y':
+  #    do_execute=1
+  elif opt[1] in help.get_opt():
+      help.parse_opt(opt)
   else:
     assert False, "unknown option"
 
 if len(args)<1:
-    usage()
+    help.usage()
     sys.exit()
 
 if len(excl_list)==0:
@@ -103,5 +107,5 @@ cmd+=" %s"%excl_pat
 cmd+=" %s"%name_pat2
 cmd+=" -print"
 print cmd
-if do_execute==1:
+if help.get_do_execute()==1:
     os.system(cmd)

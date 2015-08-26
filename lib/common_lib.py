@@ -122,29 +122,36 @@ def run_cmd(cmd_line,log_file='',do_execute=0):
 
 
 class HELP(object):
-    default_msg='''-h print this help
-            -H print help of grep
-            -Y whether to execute the program
-  '''
     default_opt='hHY'
-    def __init__(self,usage,help):
+    def __init__(self,usage,BIN='',help='--help'):
         self.usage=usage
+        self.BIN=BIN
         self.help=help
         self.do_execute=0
     def set_do_execute(self,do_execute=1):
         self.do_execute=do_execute
-    def get_msg(self):
-        return HELP.default_msg
     def get_opt(self):
         return HELP.default_opt
+    def add_usage(self):
+        msg='additional options:\n'
+        msg+='   -h print this help\n'
+        if len(self.BIN)>0:
+           msg+='   -H print help of "%s"\n'%self.BIN
+        msg+='   -Y whether to execute the program\n'
+        print msg
 
     def parse_opt(self,opt):
         if opt == '-h':
             self.usage()
+            self.add_usage()
             sys.exit()
         elif opt == '-H':
-            os.system(self.help)
+            if len(self.BIN):
+               os.system(self.BIN+' '+self.help)
             sys.exit()
         elif opt == '-Y':
             self.set_do_execute()
+
+    def get_do_execute(self):
+        return self.do_execute
 

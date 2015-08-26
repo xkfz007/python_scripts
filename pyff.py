@@ -39,17 +39,16 @@ def usage():
    -o <string> output file tag
    -C <string> the ffmpeg commands
    -t <int> set thread num
-   -w <int> set the output width
-   -h <int> set the output height
+   -r <intxint> set the output width and height
    -m <string> merge the input media files to one
-   -Y whether to execute the program
-   -H print the FFMpeg help
    arguments:
    <input1> <input2> <input3> file or directory, support pattern globbing
            these are the input files that will be processed
    '''
     print help_msg
     return
+
+help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
 
 
 def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
@@ -127,13 +126,24 @@ def get_input_list(input_list,input_tmp):
     #print "input_list=%s" % input_list
 
 
+def parse_reso(arg,width=-2,height=-2):
+    arg=arg.lower()
+    if 'x' in arg:
+        x,y=arg.split('x')
+        if len(x)>0:
+            width=int(x)
+        if len(y)>0:
+            height=int(y)
+    else:
+        width=int(arg)
+    return width,height
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
         sys.exit()
 
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:t:w:h:m:YH')
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:t:r:m:'+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -146,7 +156,7 @@ if __name__ == '__main__':
     extra_cmd = ''
     extension = ''
     thread_num = 0
-    do_execute = 0
+    #do_execute = 0
     #decode_flag = 0
     #bitstream_type = ""
     auto_audio_flag=1
@@ -167,18 +177,13 @@ if __name__ == '__main__':
             extra_cmd = arg
         elif opt == "-t":
             thread_num = int(arg)
-        elif opt == "-w":
-            width= int(arg)
-        elif opt == "-h":
-            height= int(arg)
+        elif opt == "-r":
+            #width= int(arg)
+            width,height=parse_reso(arg,width,height)
         elif opt=="-m":
             merged_file=arg
-        elif opt == "-Y":
-            do_execute = 1
-        elif opt == "-H":
-            cmd_line = FFMPEG_BIN + " -h"
-            os.system(cmd_line)
-            sys.exit()
+        elif opt[1] in help.get_opt():
+            help.parse_opt(opt)
         else:
             assert False, "unknown option"
 
@@ -265,7 +270,7 @@ if __name__ == '__main__':
         cmd_list.append(cmd_line)
 
 
-    if do_execute == 1:
+    if help.get_do_execute()== 1:
         for cmd in cmd_list:
             if len(cmd)==0:
                 continue

@@ -8,7 +8,7 @@ import os
 
 
 
-def help():
+def usage():
     msg='''usage:tg.py [options] [path or file]
     -e <string> the extension which identify the compression type
     example: uncompress:
@@ -20,13 +20,15 @@ def help():
   '''
     print msg
     return
+
+help=lib.common_lib.HELP(usage)
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        help()
+        help.usage()
         sys.exit()
 
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:Yh')
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:'+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -34,16 +36,18 @@ if __name__ == '__main__':
         print e
 
     extension = ''
-    do_execute = 0
+    #do_execute = 0
 
     for opt, arg in opts:
         if opt == "-e":
             extension = arg
-        elif opt == "-Y":
-            do_execute = 1
-        elif opt == "-h":
-            help()
-            sys.exit()
+        #elif opt == "-Y":
+        #    do_execute = 1
+        #elif opt == "-h":
+        #    help()
+        #    sys.exit()
+        elif opt[1] in help.get_opt():
+            help.parse_opt(opt)
         else:
             assert False, "unknown option"
 
@@ -86,7 +90,7 @@ if __name__ == '__main__':
         cmd+='unzip "%s" -d "%s"'%(input_file,target_dir)
 
     print cmd
-    if do_execute==1:
+    if help.get_do_execute()==1:
         os.system(cmd)
 
 
