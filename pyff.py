@@ -36,7 +36,10 @@ def usage():
       aac,mp3: extract audio from media file
    -a extract audio using the extra command lines from -C,
       ignore the auto generated command lines from extension(-e)
-   -o <string> output file tag
+   -o <string> output file path or file tag:
+      <path>/<tag>
+      <path>
+      <tag>
    -C <string> the ffmpeg commands
    -t <int> set thread num
    -r <intxint> set the output width and height
@@ -51,8 +54,12 @@ def usage():
 help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
 
 
-def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
-    fname, fext = os.path.splitext(input_file)
+def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cmd):
+    indir,infile=os.path.split(input_file)
+    if len(output_path)==0:
+        output_path=indir
+    assert len(infile)>0
+    fname, fext = os.path.splitext(infile)
     print 'fname="%s"' % fname
     print 'fext="%s"' % fext
     fext=fext.lower()[1:]
@@ -79,7 +86,9 @@ def get_cmd_line(input_file, ext, output_tmp, prepared_cmd, extra_cmd):
                 extra_cmd+=" -c:v libx264 -c:a libvo_aacenc"
 
 
-    output_file = "%s%s.%s" % (fname, output_tmp, ext)
+    output_file = "%s%s.%s" % (fname, output_tag, ext)
+    if len(output_path)>0:
+       output_file = "%s/%s" % (output_path, output_file)
 
     cmd_line = prepared_cmd
     cmd_line += " -i \"%s\"" % input_file
@@ -153,6 +162,7 @@ if __name__ == '__main__':
     # opt_list = get_default_opt_list()
     input_tmp = ''
     output_tmp = ''
+    output_path=''
     extra_cmd = ''
     extension = ''
     thread_num = 0
@@ -198,12 +208,28 @@ if __name__ == '__main__':
         print "Error: Input is invalid, please check"
         sys.exit()
 
-    if len(output_tmp) == 0:  # =='':
-        output_tmp = "_out"
+    p1=output_tmp.split('/')
+    print "p1=%s"%p1
+    if os.path.isdir(p1[0]):
+        output_path=p1[0]
+        output_tag=''
+        if len(p1)>1:
+            output_tag=p1[1]
     else:
-        if not output_tmp.startswith('_'):
-            output_tmp = '_' + output_tmp
-    print "output_tmp=%s"%output_tmp
+        if len(p1)>1:
+            lib.check_path(p1[0])
+            assert os.path.isdir(p1[0])
+            ouput_path=p1[0]
+            ouput_tag=p1[1]
+        else:
+          output_tag=p1[0]
+
+    if len(output_tag) == 0:  # =='':
+        output_tag = "_out"
+    else:
+        if not output_tag.startswith('_'):
+            output_tag = '_' + output_tag
+    print "output_tag=%s"%output_tag
 
     prepared_cmd = FFMPEG_BIN
     if thread_num > 0:
@@ -220,10 +246,10 @@ if __name__ == '__main__':
             sys.exit()
 
         if extension in yuv_name_list:# decode to get raw yuv
-            output_tmp = '_rec'
+            output_tag = '_rec'
             extra_cmd += " -an -f rawvideo"
         elif extension in bitstream_name_list:# just get the raw stream
-            output_tmp= '_bin'
+            output_tag= '_bin'
             if extension in h264_name_list:
                 extension= 'h264'
             elif extension in h265_name_list:
@@ -231,7 +257,7 @@ if __name__ == '__main__':
             extra_cmd += " -c:v copy"
             extra_cmd += " -an -f %s" % extension
         elif extension in audio_name_list:
-            output_tmp='_aud'
+            output_tag='_aud'
             extra_cmd+=" -vn"
             if auto_audio_flag==1:
                 extra_cmd+=" -c:a copy"
@@ -249,7 +275,7 @@ if __name__ == '__main__':
         print input_file
         if not os.path.isfile(input_file):
             print 'Error: "%s" is not file, but is in the input_list'%input_file
-        cmd_line,output_file = get_cmd_line(input_file, extension, output_tmp, prepared_cmd, extra_cmd)
+        cmd_line,output_file = get_cmd_line(input_file, extension, output_path,output_tag, prepared_cmd, extra_cmd)
         print cmd_line
         cmd_list.append(cmd_line)
         output_list.append(output_file)
