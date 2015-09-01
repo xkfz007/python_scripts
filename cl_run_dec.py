@@ -11,7 +11,7 @@ dec=lib.DECODER(dec_id)
 param_list = lib.get_default_dec_param_list()
 
 # lib.configure_dec_param(dec,param_list)
-cons = lib.parse_dec_cl(dec, param_list)
+cons,do_execute = lib.parse_dec_cl(dec, param_list)
 print dec
 
 cmd_line = lib.get_full_cdec_cmd(dec, param_list)
@@ -28,4 +28,4 @@ cmd_line = lib.get_full_cdec_cmd(dec, param_list)
 ## os.system(cmd_line)
 #print cmd_line
 #subprocess.call(cmd_line, shell=True, stdout=reg_file, stderr=reg_file)
-lib.run_cmd(cmd_line,cons,1)
+lib.run_cmd(cmd_line,cons,do_execute)

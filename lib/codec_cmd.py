@@ -48,6 +48,8 @@ class CODEC(object):
         return self.cdec_st.executor
     def get_exe(self):
         return self.cdec_st.exe
+    def get_help(self):
+        return self.cdec_st.help
     def get_help_exe(self):
         return self.cdec_st.help_exe
     def get_version_exe(self):

@@ -25,7 +25,7 @@ param_list = lib.get_default_enc_param_list()
 
 cons = "tmp_cons.log"
 #if len(sys.argv)> 1:
-cons, extra_cls = lib.configure_enc_param(enc, param_list)
+cons, extra_cls,do_execute = lib.configure_enc_param(enc, param_list)
 
 cmd_line = lib.get_full_cdec_cmd(enc, param_list)
 cmd_line += " " + extra_cls
@@ -42,5 +42,5 @@ cmd_line += " " + extra_cls
 ##os.system(cmd_line)
 #print cmd_line
 #subprocess.call(cmd_line, shell=True, stdout=reg_file, stderr=reg_file)
-lib.run_cmd(cmd_line,cons,1)
+lib.run_cmd(cmd_line,cons,do_execute)
 

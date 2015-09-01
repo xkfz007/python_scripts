@@ -86,12 +86,12 @@ import os
 import getopt
 
 
-help=lib.common_lib.HELP(usage,'','--help')
 if __name__=='__main__':#obtain_data():
     if len(sys.argv) == 1:
-        help.usage()
+        usage()
         sys.exit()
 
+    help=lib.common_lib.HELP(usage)
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:i:'+help.get_opt(), ['bits=', 'qps=', 'qp='])
     except getopt.GetoptError as err:
@@ -123,10 +123,13 @@ if __name__=='__main__':#obtain_data():
             input_file = arg
         elif opt in ('-e',):
             cdc.set_id(arg.strip())
-        elif opt[1] in help.get_opt():
-            help.parse_opt(opt)
+        #elif opt[1] in help.get_opt():
+        #    help.parse_opt(opt)
         else:
-            assert False, "unknown option"
+            continue
+            #assert False, "unknown option"
+
+    help.parse_opt(opts)
 
     if bits_flag == 1:
         cmd = cdc.get_bits_cmd(input_file)

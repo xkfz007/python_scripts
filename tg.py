@@ -21,12 +21,12 @@ def usage():
     print msg
     return
 
-help=lib.common_lib.HELP(usage)
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        help.usage()
+        usage()
         sys.exit()
 
+    help=lib.common_lib.HELP(usage)
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:'+help.get_opt())
     except getopt.GetoptError as err:
@@ -46,10 +46,13 @@ if __name__ == '__main__':
         #elif opt == "-h":
         #    help()
         #    sys.exit()
-        elif opt[1] in help.get_opt():
-            help.parse_opt(opt)
+        #elif opt[1] in help.get_opt():
+        #    help.parse_opt(opt)
         else:
-            assert False, "unknown option"
+            continue
+            #assert False, "unknown option"
+
+    help.parse_opt(opts)
 
     if len(args) == 0:
         print "Error: No input is specified, please check"

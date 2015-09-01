@@ -51,7 +51,6 @@ def usage():
     print help_msg
     return
 
-help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
 
 
 def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cmd):
@@ -146,11 +145,13 @@ def parse_reso(arg,width=-2,height=-2):
     else:
         width=int(arg)
     return width,height
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
         sys.exit()
 
+    help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:t:r:m:'+help.get_opt())
     except getopt.GetoptError as err:
@@ -193,10 +194,12 @@ if __name__ == '__main__':
             width,height=parse_reso(arg,width,height)
         elif opt=="-m":
             merged_file=arg
-        elif opt[1] in help.get_opt():
-            help.parse_opt(opt)
-        else:
-            assert False, "unknown option"
+        #elif opt[1] in help.get_opt():
+        #    help.parse_opt(opt)
+        #else:
+        #    assert False, "unknown option"
+
+    help.parse_opt(opts)
 
     if len(args) == 0:
         print "Error: No input is specified, please check"

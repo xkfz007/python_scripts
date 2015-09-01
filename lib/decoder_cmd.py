@@ -221,16 +221,17 @@ def parse_dec_cl(dec, opt_list):
         usage()
         sys.exit()
 
+    help=common_lib.HELP(usage,dec.get_exe())
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:i:ohHV')
+        opts, args = getopt.getopt(sys.argv[1:], 'e:i:ohHV'+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
     except Exception, e:
         print e
 
-    Help_flag = 0
-    Version_flag = 0
+    #Help_flag = 0
+    #Version_flag = 0
     Output_flag = 0
 
     for opt, arg in opts:
@@ -239,25 +240,28 @@ def parse_dec_cl(dec, opt_list):
         elif opt == "-o":
             Output_flag = 1
             # opt_list["output_filename"] = arg
-        elif opt == "-h":
-            usage()
-            sys.exit()
-        elif opt == "-H":
-            Help_flag = 1
+        #elif opt == "-h":
+        #    usage()
+        #    sys.exit()
+        #elif opt == "-H":
+        #    Help_flag = 1
         elif opt == "-e":
             dec.set_id(arg.strip())
-        elif opt == "-v":
-            Version_flag = 1
+        #elif opt == "-v":
+        #    Version_flag = 1
         else:
-            assert False, "unknown option"
+            continue
+            #assert False, "unknown option"
 
-    if Help_flag == 1:
-        os.system(dec.get_help_exe())
-        sys.exit()
+    help.parse_opt(opts)
 
-    if Version_flag == 1:
-        os.system(dec.get_version_exe())
-        sys.exit()
+    #if Help_flag == 1:
+    #    os.system(dec.get_help_exe())
+    #    sys.exit()
+
+    #if Version_flag == 1:
+    #    os.system(dec.get_version_exe())
+    #    sys.exit()
 
     if len(opt_list['input_filename']) == 0:
         print "input isn't set"
@@ -279,7 +283,7 @@ def parse_dec_cl(dec, opt_list):
         output_filename = fname + "_rec.yuv"
         opt_list['output_filename'] = os.path.join(dir_path, output_filename)
 
-    return cons_full
+    return cons_full,help.get_do_execute()
 
 # def configure_dec_param(dec,param_list):
 # cons_log=parse_dec_cl(dec,param_list)

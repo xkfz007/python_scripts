@@ -21,11 +21,12 @@ def usage():
   print msg
   return
 
-help=lib.common_lib.HELP(usage,BIN,'--help')
 #print sys.argv
 if len(sys.argv) == 1:
-  help.usage() #usage()
+  usage() #usage()
   sys.exit()
+
+help=lib.common_lib.HELP(usage,BIN,'--help')
 
 options='iwxnorIab'
 try:
@@ -64,11 +65,13 @@ for opt, arg in opts:
   #    sys.exit()
   #elif opt == '-Y':
   #    do_execute=1
-  elif opt[1] in help.get_opt():
-      help.parse_opt(opt)
+  #elif opt[1] in help.get_opt():
+  #    help.parse_opt(opt)
   else:
-    assert False, 'unknown option'
+      continue
+    #assert False, 'unknown option'
 
+help.parse_opt(opts)
 #print 'opts=%s'%opt_list
 #for i in args:
 #  print 'args=%s'%i
