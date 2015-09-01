@@ -162,6 +162,7 @@ if __name__ == '__main__':
     # opt_list = get_default_opt_list()
     input_tmp = ''
     output_tmp = ''
+    output_tag=''
     output_path=''
     extra_cmd = ''
     extension = ''
@@ -212,7 +213,7 @@ if __name__ == '__main__':
     print "p1=%s"%p1
     if os.path.isdir(p1[0]):
         output_path=p1[0]
-        output_tag=''
+        #output_tag=''
         if len(p1)>1:
             output_tag=p1[1]
     else:

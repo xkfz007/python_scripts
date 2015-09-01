@@ -104,21 +104,24 @@ def delete_files(path, ext_list):
             if ext in ext_list:
                 os.remove(full_name)
 
-def run_cmd(cmd_line,log_file='',do_execute=0):
+def run_cmd(cmd_line,log_file='',do_execute=0,rec_cl=1):
+   print cmd_line
+   if do_execute==0:
+       return
    pfile = None
-   if determin_sys() == "cygwin":
-       cmd_line += " 2>&1 |tee -a %s"% log_file
+   #if determin_sys() == "cygwin" and rec_cl==1:
+   #    cmd_line += " 2>&1 |tee -a %s"% log_file
    if len(log_file)>0:
       pfile = open(log_file, "w")
-      print >> pfile, "%s" % cmd_line
-      if determin_sys() == "cygwin":
-        pfile.close()
-        pfile=None
+      if rec_cl==1:
+         print >> pfile, "%s" % cmd_line
+         if determin_sys() == "cygwin":
+           cmd_line += " 2>&1 |tee -a %s"% log_file
+           pfile.close()
+           pfile=None
 
    #os.system(cmd_line)
-   print cmd_line
-   if do_execute==1:
-      subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
+   subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
 
 
 class HELP(object):

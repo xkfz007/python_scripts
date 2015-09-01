@@ -268,9 +268,9 @@ def parse_dec_cl(dec, opt_list):
 
     dir_path, filename = os.path.split(opt_list['input_filename'])
     fname, fext = os.path.splitext(filename)
-    if fext in global_vars.h264_extension and dec.id not in global_vars.h264_decoder_list:
+    if fext in global_vars.h264_extension and dec.get_id() not in global_vars.h264_decoder_list:
         dec.set_id(global_vars.jmd_name_list[0])
-    if fext in global_vars.h265_extension and dec.id not in global_vars.h265_decoder_list:
+    if fext in global_vars.h265_extension and dec.get_id() not in global_vars.h265_decoder_list:
         dec.set_id(global_vars.ashevcd_name_list[0])
 
     cons_filename = fname + "_" + dec.get_id() + "_cons.log"

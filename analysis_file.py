@@ -153,18 +153,29 @@ class Codec_analysis:
 #        outFile = open(filename, 'w')
 #    subprocess.call(cmd, stdout=outFile, stderr=outFile, shell=True)
 
+def usage():
+    msg='''usage:analysis_file.py [options]
+    -e <id> set the encoder or decoder
+    -i <filename> set input file name
+    --bits <filename> output bits of each frame
+    --qp <filename> output qp of each frame
+  '''
+    print msg
+    return
 
 import sys
+import os
 import getopt
 
 
+help=lib.common_lib.HELP(usage,'','--help')
 if __name__=='__main__':#obtain_data():
     if len(sys.argv) == 1:
-        #usage()
+        help.usage()
         sys.exit()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:i:', ['bits=', 'qps=', 'qp='])
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:i:'+help.get_opt(), ['bits=', 'qps=', 'qp='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -176,10 +187,10 @@ if __name__=='__main__':#obtain_data():
     bits_flag = 0
     qp_flag = 0
     qps_flag = 0
-    input_file = ""
-    bits_output = ""
-    qp_output = ""
-    qps_output = ""
+    input_file = ''
+    bits_output = ''
+    qp_output = ''
+    qps_output = ''
     for opt, arg in opts:
         if opt in ('--bits',):
             bits_flag = 1
@@ -194,16 +205,22 @@ if __name__=='__main__':#obtain_data():
             input_file = arg
         elif opt in ('-e',):
             cdc.set_codec_id(arg.strip())
+        elif opt[1] in help.get_opt():
+            help.parse_opt(opt)
         else:
             assert False, "unknown option"
 
     if bits_flag == 1:
         cmd = cdc.get_bits_fcmd(input_file)
-        lib.run_cmd(cmd, bits_output,1)
+        #print cmd
+        lib.run_cmd(cmd, bits_output,help.get_do_execute(),0)
 
     if qp_flag == 1:
         cmd = cdc.get_qp_fcmd(input_file)
-        lib.run_cmd(cmd, qp_output)
+        #print cmd
+        lib.run_cmd(cmd, qp_output,help.get_do_execute(),0)
+        #if help.get_do_execute()==1:
+        #   os.system(cmd)
 
 
 #obtain_data()
