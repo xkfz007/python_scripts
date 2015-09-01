@@ -46,10 +46,10 @@ import global_vars
 class Encoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,version,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
-        super(Encoder_st,self).__init__(id,executor,help,version,cmd_func,path)
+        super(Encoder_st,self).__init__(id,executor,help,cmd_func,path)
     def __str__(self):
-        return "Encoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"% \
-               (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
+        return "Encoder_st[id=%s,executor=%s,help=%s,path=%s,get_para_cmd=%s]"% \
+               (self.id,self.executor,self.help,self.path,self.get_param_cmd)
 
 
 common_path = 'd:/workspace/'
@@ -57,19 +57,19 @@ x265_path = "x265_v1.5_20150211"
 if global_vars.x265_ver == "v1.6":
     x265_path = "x265_v1.6_20150403"
 hevc_path = 'HEVC_Encoder'
-as265_st=Encoder_st(global_vars.as265_name_list[0],'cli_ashevc.exe','','',cmd_init_as265.get_enc_param_cmd_as265,
+as265_st=Encoder_st(global_vars.as265_name_list[0],'cli_ashevc.exe','',cmd_init_as265.get_enc_param_cmd_as265,
                     os.path.join(common_path, 'arcvideo_codes/HEVC_Codec/', hevc_path, 'bin/x64/Release_WithTrace')
                     )
-x265_st=Encoder_st(global_vars.x265_name_list[0],'x265.exe','--log-level full --help','--version',cmd_init_x26x.get_enc_param_cmd_x265,
+x265_st=Encoder_st(global_vars.x265_name_list[0],'x265.exe','--log-level full --help',cmd_init_x26x.get_enc_param_cmd_x265,
                    os.path.join(common_path, 'src.x265/trunk/', x265_path, 'build/vc10-x86_64/Release')
                    )
-x264_st=Encoder_st(global_vars.x264_name_list[0],'x264.exe','--fullhelp','--version',cmd_init_x26x.get_enc_param_cmd_x264,
+x264_st=Encoder_st(global_vars.x264_name_list[0],'x264.exe','--fullhelp',cmd_init_x26x.get_enc_param_cmd_x264,
                    os.path.join(common_path, 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/Release')
                    )
-hm_st=Encoder_st(global_vars.hm_name_list[0],'hm.exe','--help','--version',cmd_init_hm.get_enc_param_cmd_hm,
+hm_st=Encoder_st(global_vars.hm_name_list[0],'hm.exe','--help',cmd_init_hm.get_enc_param_cmd_hm,
  os.path.join(common_path, 'src.hm/trunk/hm-10.0/bin/vc10/x64/Release')
 )
-jm_st=Encoder_st(global_vars.jm_name_list[0],'lencod.exe','-h','-V',cmd_init_jm.get_enc_param_cmd_jm,
+jm_st=Encoder_st(global_vars.jm_name_list[0],'lencod.exe','-h',cmd_init_jm.get_enc_param_cmd_jm,
 os.path.join(common_path, 'SRC.JM/trunk/jm18.5/bin/')
 )
 enc_st_list={global_vars.as265_name_list[0]:as265_st,

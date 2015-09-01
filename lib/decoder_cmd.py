@@ -64,15 +64,15 @@ def get_dec_param_cmd_hmd(param_list):
 class Decoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,version,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
-        super(Decoder_st,self).__init__(id,executor,help,version,cmd_func,path)
+        super(Decoder_st,self).__init__(id,executor,help,cmd_func,path)
     def __str__(self):
-        return "Decoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"% \
-               (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
+        return "Decoder_st[id=%s,executor=%s,help=%s,path=%s,get_para_cmd=%s]"% \
+               (self.id,self.executor,self.help,self.path,self.get_param_cmd)
 
 common_path = 'c:/tools/'
-ashevcd_st=Decoder_st(global_vars.ashevcd_name_list[0],'ashevcd.exe','','',get_dec_param_cmd_ashevcd,common_path)
-jmd_st=Decoder_st(global_vars.jmd_name_list[0],'jmd18.5.exe','-h','-V',get_dec_param_cmd_jmd,common_path)
-hmd_st=Decoder_st(global_vars.hmd_name_list[0],'hmd.exe','--help','--version',get_dec_param_cmd_hmd,common_path)
+ashevcd_st=Decoder_st(global_vars.ashevcd_name_list[0],'ashevcd.exe','',get_dec_param_cmd_ashevcd,common_path)
+jmd_st=Decoder_st(global_vars.jmd_name_list[0],'jmd18.5.exe','-h',get_dec_param_cmd_jmd,common_path)
+hmd_st=Decoder_st(global_vars.hmd_name_list[0],'hmd.exe','--help',get_dec_param_cmd_hmd,common_path)
 
 dec_st_list={global_vars.ashevcd_name_list[0]:ashevcd_st,
              global_vars.jmd_name_list[0]:jmd_st,

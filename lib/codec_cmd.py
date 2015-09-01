@@ -8,13 +8,13 @@ class Codec_st(object):
         exe_str = os.path.join(self.path, self.executor)
         self.exe = common_lib.normalize_path(exe_str)
         self.help_exe = self.exe + " " + self.help
-        self.version_exe = self.exe + " " + self.version
+        #self.version_exe = self.exe + " " + self.version
 
-    def __init__(self,id,executor,help,version,cmd_func,path):
+    def __init__(self,id,executor,help,cmd_func,path):
         self.id=id
         self.executor=executor
         self.help=help
-        self.version=version
+        #self.version=version
         self.get_param_cmd=cmd_func
         self.path=common_lib.format_path(path)
         self.__init()
@@ -52,8 +52,8 @@ class CODEC(object):
         return self.cdec_st.help
     def get_help_exe(self):
         return self.cdec_st.help_exe
-    def get_version_exe(self):
-        return self.cdec_st.version_exe
+    #def get_version_exe(self):
+    #    return self.cdec_st.version_exe
     def get_param_cmd(self):
         return self.cdec_st.get_param_cmd
     @staticmethod
