@@ -250,10 +250,7 @@ def parse_dec_cl(dec, opt_list):
         #elif opt == "-v":
         #    Version_flag = 1
         else:
-            continue
-            #assert False, "unknown option"
-
-    help.parse_opt(opts)
+            help.parse_opt(opt)
 
     #if Help_flag == 1:
     #    os.system(dec.get_help_exe())

@@ -477,10 +477,8 @@ def parse_enc_cl(enc):
         #elif opt[1] in help.get_opt():
         #    continue
         else:
-            continue
-        #    assert False, "unknown option"
+            help.parse_opt(opt)
 
-    help.parse_opt(opts)
 
     opt_list['do_execute']=help.get_do_execute()
 

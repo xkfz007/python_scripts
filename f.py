@@ -67,9 +67,7 @@ for opt, arg in opts:
   #elif opt[1] in help.get_opt():
   #    help.parse_opt(opt)
   else:
-      continue
-    #assert False, "unknown option"
-help.parse_opt(opts)
+    help.parse_opt(opt)
 
 if len(args)<1:
     help.usage()

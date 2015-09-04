@@ -126,10 +126,8 @@ if __name__=='__main__':#obtain_data():
         #elif opt[1] in help.get_opt():
         #    help.parse_opt(opt)
         else:
-            continue
-            #assert False, "unknown option"
+            help.parse_opt(opt)
 
-    help.parse_opt(opts)
 
     if bits_flag == 1:
         cmd = cdc.get_bits_cmd(input_file)

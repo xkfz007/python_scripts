@@ -68,10 +68,8 @@ for opt, arg in opts:
   #elif opt[1] in help.get_opt():
   #    help.parse_opt(opt)
   else:
-      continue
-    #assert False, 'unknown option'
+    help.parse_opt(opt)
 
-help.parse_opt(opts)
 #print 'opts=%s'%opt_list
 #for i in args:
 #  print 'args=%s'%i

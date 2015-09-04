@@ -10,6 +10,7 @@ import os
 import subprocess
 import glob
 import lib
+import logging
 
 FFMPEG_BIN = 'ffmpeg.exe -y'
 
@@ -41,10 +42,8 @@ def usage():
       jpg,png,bmp: extract images from media file
    -a extract audio using the extra command lines from -C,
       ignore the auto generated command lines from extension(-e)
-   -o <string> output file path or file tag:
-      <path>/<tag>
-      <path>
-      <tag>
+   -o <path>:<tag> output file path or file tag:
+      <path>: if <path> is a dir, it is used, or it is regared as <tag>
    -C <string> the ffmpeg commands
    -T <int> set thread num
    -t <hour:minute:second.xxx-hour:minute:second.xxx> set the time duration
@@ -93,7 +92,7 @@ def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cm
 
     output_file = "%s%s.%s" % (fname, output_tag, ext)
     if len(output_path)>0:
-       output_file = "%s/%s" % (output_path, output_file)
+       output_file = "%s%s%s" % (output_path,os.sep, output_file)
 
     cmd_line = prepared_cmd
     cmd_line += " -i \"%s\"" % input_file
@@ -119,72 +118,61 @@ def get_ffmpeg_opt_list():
     ff_opt_list['acodec']=''
     return ff_opt_list
 
-def get_input_list(input_list,input_tmp):
-    print "input_tmp=%s" % input_tmp
-    #if len(input_tmp) == 0:
-    #    usage()
+def get_input_list(input_list,arg):
 
-    if os.path.isdir(input_tmp):
-        print '"%s" is a directory' % input_tmp
-        input_list.extend(lib.get_file_list(input_tmp))
-    elif os.path.isfile(input_tmp):
-        print '"%s" is a file' % input_tmp
-        #input_list = []
-        input_list.append(input_tmp)
+    if os.path.isdir(arg):
+        logging.info('"%s" is a directory' % arg)
+        input_list.extend(lib.get_file_list(arg))
+    elif os.path.isfile(arg):
+        logging.info('"%s" is a file' % arg)
+        input_list.append(arg)
     else:  # globbing is needed
-        print '"%s" is glob pattern' % input_tmp
-        glob_list=glob.glob(input_tmp)
+        logging.info('"%s" is glob pattern' % arg)
+        glob_list=glob.glob(arg)
         for i in glob_list:
             get_input_list(input_list,i)
     # print type(input_file)
     #print "input_list=%s" % input_list
 
-
-def parse_reso(arg,width=-2,height=-2):
-    arg=arg.lower()
-    if 'x' in arg:
-        x,y=arg.split('x')
+def parse_arg(arg,X,Y,delimiter):
+    cnt=arg.count(delimiter)
+    if cnt>2:
+        logging.error('Invalid arg:%s'%arg)
+        sys.exit()
+    elif cnt>0:
+        x,y=arg.split(delimiter)
         if len(x)>0:
-            width=int(x)
+            X=x
         if len(y)>0:
-            height=int(y)
+            Y=y
     else:
-        width=int(arg)
-    return width,height
+        X=arg
+    return X,Y
 
-def parse_time(arg,startp='',dura=''):
-    if '+' in arg:
-        x,y=arg.split('+')
-        if len(x)>0:
-            startp=x
-        if len(y)>0:
-            dura=y
-    else:
-        startp=arg
-    print 'startp=%s'%startp
-    print 'dura=%s'%dura
-    return startp,dura
+def parse_reso(arg,width=-2,height=-2,delimiter='x'):
+    x,y=parse_arg(arg,str(width),str(height),delimiter)
+    return int(x),int(y)
 
-def parse_outpath(arg,output_path='',output_tag=''):
-    p1=arg.split('/')
-    print "p1=%s"%p1
-    if os.path.isdir(p1[0]):
-        output_path=p1[0]
-        #output_tag=''
-        if len(p1)>1:
-            output_tag=p1[1]
-    else:
-        if len(p1)>1:
-            lib.check_path(p1[0])
-            assert os.path.isdir(p1[0])
-            print "p1=%s"%p1
-            output_path=p1[0]
-            output_tag=p1[1]
+def parse_time(arg,startp='',dura='',delimiter='+'):
+    x,y=parse_arg(arg,startp,dura,delimiter)
+    return x,y
+
+def parse_outpath(arg,output_path='',output_tag='',delimiter=':'):
+    opath,otag=parse_arg(arg,output_path,output_tag,delimiter)
+    #lib.check_path(opath)
+    if not os.path.isdir(opath):
+        if len(otag)>0:
+           opt=input('Directory "%s" does not exist, do you want to create it?(Y/N)'%opath)
+           if opt.lower() in 'yes':
+               os.makedirs(opath)
+               logging.info('Diectory "%s" is created.'%arg)
+           else:
+               logging.error('Diectory "%s" does not exist, using the current directory'%arg)
+               opath=''
         else:
-            output_tag=p1[0]
-    print "output_path=%s"%output_path
-    print "output_tag=%s"%output_tag
-    return (output_path,output_tag)
+            opath,otag=otag,opath
+
+    return opath,otag
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -201,7 +189,7 @@ if __name__ == '__main__':
         print e
 
     # opt_list = get_default_opt_list()
-    input_tmp = ''
+    #input_tmp = ''
     #output_tmp = ''
     output_tag=''
     output_path=''
@@ -244,13 +232,11 @@ if __name__ == '__main__':
         #elif opt[1] in help.get_opt():
         #    help.parse_opt(opt)
         else:
-            continue
-            assert False, 'unknown option'
+            help.parse_opt(opt)
 
-    help.parse_opt(opts)
 
     if len(args) == 0:
-        print 'Error: No input is specified, please check'
+        logging.error('No input is specified, please check')
         sys.exit()
 
     input_list=[]
@@ -258,16 +244,15 @@ if __name__ == '__main__':
         get_input_list(input_list,arg)
 
     if len(input_list) == 0:
-        print 'Error: Input is invalid, please check'
+        logging.error('Input is invalid, please check')
         sys.exit()
-
 
     if len(output_tag) == 0:  # =='':
         output_tag = "_out"
     else:
         if not output_tag.startswith('_'):
             output_tag = '_' + output_tag
-    print "output_tag=%s"%output_tag
+    #print "output_tag=%s"%output_tag
 
     prepared_cmd = FFMPEG_BIN
 
@@ -280,40 +265,40 @@ if __name__ == '__main__':
     if len(dura)>0:
         prepared_cmd+=' -t %s'%dura
 
-    if len(merged_file)>0:
+    if len(merged_file)>0: # option -m: merge the inputfiles
         extension='TS'
-    elif len(extension)>0 :
+    elif len(extension)>0 : # option -e: do actions according to the extension
         if extension.startswith('.'):
            extension =  extension[1:]
         extension=extension.lower()
         if not extension in valid_ext_list:
-            print "Error: invaild extension, please check"
+            logging.error('Invaild extension, please check')
             sys.exit()
 
         if extension in yuv_name_list:# decode to get raw yuv
             output_tag = '_rec'
-            extra_cmd += " -an -f rawvideo"
+            extra_cmd += ' -an -f rawvideo'
         elif extension in bitstream_name_list:# just get the raw stream
             output_tag= '_bin'
             if extension in h264_name_list:
                 extension= 'h264'
             elif extension in h265_name_list:
                 extension= 'hevc'
-            extra_cmd += " -c:v copy"
-            extra_cmd += " -an -f %s" % extension
+            extra_cmd += ' -c:v copy'
+            extra_cmd += ' -an -f %s' % extension
         elif extension in audio_name_list:
             output_tag='_aud'
-            extra_cmd+=" -vn"
+            extra_cmd+=' -vn'
             if auto_audio_flag==1:
-                extra_cmd+=" -c:a copy"
+                extra_cmd+=' -c:a copy'
             else:
-                extra_cmd+=" -b:a 64k"#set bitrate for audio
+                extra_cmd+=' -b:a 64k'#set bitrate for audio
         elif extension in image_name_list:
             output_tag='-%3d'
 
-    elif width>0 or height >0:
-        extra_cmd += " -c:a copy"
-        extra_cmd+=" -vf scale=%s:%s"%(width,height)
+    elif width>0 or height >0:# option -r: resize the input video file
+        extra_cmd += ' -c:a copy'
+        extra_cmd+=' -vf scale=%s:%s'%(width,height)
 
 
     cmd_list = []
@@ -321,7 +306,7 @@ if __name__ == '__main__':
     for input_file in input_list:
         print input_file
         if not os.path.isfile(input_file):
-            print 'Error: "%s" is not file, but is in the input_list'%input_file
+            logging.error('"%s" is not a file, but is in the input_list'%input_file)
         cmd_line,output_file = get_cmd_line(input_file, extension, output_path,output_tag, prepared_cmd, extra_cmd)
         print cmd_line
         cmd_list.append(cmd_line)
@@ -354,7 +339,7 @@ if __name__ == '__main__':
             for i in output_list:
                 if os.path.exists(i):
                     #os.remove(i)
-                    print '"%s" is deleted'%i
+                   logging.info('"%s" is deleted'%i)
 
 
 

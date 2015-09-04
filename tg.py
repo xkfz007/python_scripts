@@ -49,10 +49,8 @@ if __name__ == '__main__':
         #elif opt[1] in help.get_opt():
         #    help.parse_opt(opt)
         else:
-            continue
-            #assert False, "unknown option"
+            help.parse_opt(opt)
 
-    help.parse_opt(opts)
 
     if len(args) == 0:
         print "Error: No input is specified, please check"

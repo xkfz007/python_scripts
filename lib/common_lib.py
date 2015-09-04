@@ -1,6 +1,7 @@
 import platform
 import os
 import subprocess
+import logging
 
 
 def determin_sys():
@@ -147,22 +148,21 @@ class HELP(object):
         msg+='   -Y whether to execute the program\n'
         print msg
 
-    def parse_opt(self,opts):
-        for opt, arg in opts:
-           if opt == '-h':
-               self.usage()
-               self.add_usage()
-               sys.exit()
-           elif opt == '-H':
-               if len(self.BIN):
-                  os.system(self.BIN+' '+self.help)
-               else:
-                   print 'Error: executor is not set'
-               sys.exit()
-           elif opt == '-Y':
-            self.set_do_execute()
-           else:
-               continue
+    def parse_opt(self,opt):
+        if opt == '-h':
+            self.usage()
+            self.add_usage()
+            sys.exit()
+        elif opt == '-H':
+            if len(self.BIN):
+               os.system(self.BIN+' '+self.help)
+            else:
+                logging.error('Executor is not set')
+            sys.exit()
+        elif opt == '-Y':
+         self.set_do_execute()
+        else:
+            logging.warning('unknown option:%s'%opt)
 
     def get_do_execute(self):
         return self.do_execute

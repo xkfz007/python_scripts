@@ -46,3 +46,5 @@ x265_name_list=('x265',)
 h264_encoder_list=(x264_name_list[0],jmd_name_list[0])
 h265_encoder_list=(as265_name_list[0],x265_name_list[0],hm_name_list[0])
 
+import logging
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s]:%(message)s')
