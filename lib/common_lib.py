@@ -72,7 +72,7 @@ def get_file_list(path_dir, ext=''):
         if ext[0] != '.':
             ext = '.' + ext
         if len(ext) == 1:
-            print "invaild extension, please check"
+            logging.error('Invaild extension, please check')
             sys.exit()
     path_dir = format_path(path_dir)
     file_list = []

@@ -7,6 +7,7 @@ import common_lib
 import global_vars
 import codec_cmd
 import copy
+import logging
 
 def get_dec_param_cmd_ashevcd(param_list):
     cmd = ""
@@ -33,34 +34,6 @@ def get_dec_param_cmd_hmd(param_list):
         cmd += ' -o "%s"' % param_list['output_filename']
     return cmd
 
-#class Decoder_st:
-#    #executor=''
-#    #help=''
-#    #version=''
-#    #cmd_func=''
-#    #path=''
-#    def __init(self):
-#        exe_str=os.path.join(self.path,self.executor)
-#        self.exe = common_lib.normalize_path(exe_str)
-#        self.help_exe = self.exe + " " + self.help
-#        self.version_exe = self.exe + " " + self.version
-#    def __init__(self,id,executor,help,version,cmd_func,path):
-#        self.id=id
-#        self.executor=executor
-#        self.help=help
-#        self.version=version
-#        self.get_param_cmd=cmd_func
-#        self.path=common_lib.format_path(path)
-#        self.__init()
-#    def set_executor(self,executor):
-#        self.executor=executor
-#        self.__init()
-#    def set_path(self,path):
-#        self.path=common_lib.format_path(path)
-#        self.__init()
-#    def __str__(self):
-#        return "decoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"%\
-#              (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
 class Decoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
@@ -91,27 +64,6 @@ def get_dec_st(id):
         id = 'ashevcd'
     return dec_st_list[id]
 
-#class DECODER:
-#    def __init__(self,id):
-#        self.dec_st=get_dec_st(id)
-#    def set_id(self,id):
-#        self.dec_st=get_dec_st(id)
-#    def set_path(self,path):
-#        self.dec_st.set_path(path)
-#    def set_executor(self,executor):
-#        self.dec_st.set_executor(executor)
-#    def get_id(self):
-#        return self.dec_st.id
-#    def get_exe(self):
-#        return self.dec_st.exe
-#    def get_help_exe(self):
-#        return self.dec_st.help_exe
-#    def get_version_exe(self):
-#        return self.dec_st.version_exe
-#    def get_param_cmd(self):
-#        return self.dec_st.get_param_cmd
-#    def __str__(self):
-#        return "DECODER:%s"%self.dec_st
 class DECODER(codec_cmd.CODEC):
     def __init__(self,id='hmd'):
         #codec_cmd.CODEC.__init__(self,get_dec_st)
@@ -126,74 +78,6 @@ class DECODER(codec_cmd.CODEC):
     @staticmethod
     def SET_EXECUTOR(id,executor):
         get_dec_st(id).set_executor(executor)
-
-
-#class Decoder_prop:
-#    #id = 'hm'
-#    #exe = ''
-#    #help_exe = ''
-#    #version_exe = ''
-#    #get_param_cmd = ""
-#    #dec_st=dec_st_list[id]
-#    #dec_executors = {'ashevcd': 'ashevcd.exe',
-#    #               'jmd': 'jmd18.5.exe',
-#    #               'hmd': 'hmd.exe',
-#    #}
-#    #dec_helps = {'ashevcd': '',
-#    #           'jmd': '-h',
-#    #           'hmd': '--help',
-#    #}
-#    #dec_versions = {'ashevcd': '',
-#    #              'jmd': '-V',
-#    #              'hmd': '--version',
-#    #}
-#    #dec_cmd_func_list = {
-#    #    "ashevcd": get_dec_param_cmd_ashevcd,
-#    #    "hmd": get_dec_param_cmd_hmd,
-#    #    "jmd": get_dec_param_cmd_jmd,
-#    #}
-#    #__common_path = 'c:/tools/'
-#    #dec_paths = {'ashevcd': os.path.join(__common_path),
-#    #           'hmd': os.path.join(__common_path),
-#    #           'jmd': os.path.join(__common_path),
-#    #}
-#
-#    def __set_encoder_prop(self):
-#        #Decoder_prop.dec_paths[self.id] = common_lib.format_path(Decoder_prop.dec_paths[self.id])
-#        #exe_str = os.path.join(Decoder_prop.dec_paths[self.id], Decoder_prop.dec_executors[self.id])
-#        exe_str=os.path.join(self.dec_st.path,self.dec_st.executor)
-#        self.exe = common_lib.normalize_path(exe_str)
-#        self.help_exe = self.exe + " " + Decoder_prop.dec_helps[self.id]
-#        self.version_exe = self.exe + " " + Decoder_prop.dec_versions[self.id]
-#        self.get_param_cmd = Decoder_prop.dec_cmd_func_list[self.id]
-#
-#    def __set_id(self, id):
-#        if id in global_vars.ashevcd_name_list:
-#            self.id = global_vars.ashevcd_name_list[0]
-#        elif id in global_vars.hmd_name_list:
-#            self.id = global_vars.hmd_name_list[0]
-#        elif id in global_vars.jmd_name_list:
-#            self.id = global_vars.jmd_name_list[0]
-#        else:
-#            self.id = 'ashevcd'
-#
-#
-#    def __init__(self, id="ashevcd"):
-#        self.__set_id(id)
-#        self.__set_encoder_prop()
-#
-#
-#    def set_encoder_id(self, id):
-#        self.__set_id(id)
-#        self.__set_encoder_prop()
-#
-#    def set_encoder_path(self, path):
-#        Decoder_prop.dec_paths[self.id] = path
-#        self.__set_encoder_prop()
-#
-#    @staticmethod
-#    def SET_PATH(id, path):
-#        Decoder_prop.dec_paths[id] = path
 
 
 def get_default_dec_param_list():
@@ -261,7 +145,7 @@ def parse_dec_cl(dec, opt_list):
     #    sys.exit()
 
     if len(opt_list['input_filename']) == 0:
-        print "input isn't set"
+        logging.error('Input is not set')
         sys.exit()
 
     if len(args) > 0:

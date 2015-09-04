@@ -2,47 +2,8 @@ import getopt, sys, os
 import common_lib, cmd_init_as265, cmd_init_x26x, seq_list, cmd_init_hm, cmd_init_jm
 import codec_cmd
 import global_vars
+import logging
 
-# RC modes, enum type simple implementation
-# HEVC_RC_FIXQUANT=0
-#HEVC_RC_CBR=1
-#HEVC_RC_QUALITY_RANK=2
-#HEVC_RC_VBR=3
-#HEVC_RC_CONFERENCE=4
-#HEVC_RC_ABR_TWOPASS_ANAlYSE=5
-#HEVC_RC_ABR_TWOPASS_ENC=6
-#HEVC_RC_VBR_Q=7
-#HEVC_RC_ABR=8
-#HEVC_RC_CQP=9
-#HEVC_RC_CRF=10
-#HEVC_RC_VBR_TWOPASS_ANAlYSE=11
-#HEVC_RC_VBR_TWOPASS_ENC=12
-#
-#RC_STRING=( 'HEVC_RC_FIXQUANT', 'HEVC_RC_CBR', 'HEVC_RC_QUALITY_RANK', 'HEVC_RC_VBR',
-#'HEVC_RC_CONFERENCE', 'HEVC_RC_ABR_TWOPASS_ANAlYSE', 'HEVC_RC_ABR_TWOPASS_ENC', 'HEVC_RC_VBR_Q',
-#'HEVC_RC_ABR', 'HEVC_RC_CQP', 'HEVC_RC_CRF', 'HEVC_RC_VBR_TWOPASS_ANAlYSE', 'HEVC_RC_VBR_TWOPASS_ENC'  )
-
-#class Encoder_st:
-#    def __init(self):
-#        exe_str = os.path.join(self.path, self.executor)
-#        self.exe = common_lib.normalize_path(exe_str)
-#        self.help_exe = self.exe + " " + self.help
-#        self.version_exe = self.exe + " " + self.version
-#
-#    def __init__(self,id,executor,help,version,cmd_func,path):
-#        self.id=id
-#        self.executor=executor
-#        self.help=help
-#        self.version=version
-#        self.get_param_cmd=cmd_func
-#        self.path=common_lib.format_path(path)
-#        self.__init()
-#    def set_executor(self,executor):
-#        self.executor=executor
-#        self.__init()
-#    def set_path(self,path):
-#        self.path=path
-#        self.__init()
 class Encoder_st(codec_cmd.Codec_st):
     def __init__(self,id,executor,help,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
@@ -50,7 +11,6 @@ class Encoder_st(codec_cmd.Codec_st):
     def __str__(self):
         return "Encoder_st[id=%s,executor=%s,help=%s,path=%s,get_para_cmd=%s]"% \
                (self.id,self.executor,self.help,self.path,self.get_param_cmd)
-
 
 common_path = 'd:/workspace/'
 x265_path = "x265_v1.5_20150211"
@@ -94,33 +54,6 @@ def get_enc_st(id):
         id = 'as265'
     return enc_st_list[id]
 
-#class ENCODER:
-#    def __init__(self,id):
-#        self.enc_st=get_enc_st(id)
-#    def set_id(self,id):
-#        self.enc_st=get_enc_st(id)
-#    def set_path(self,path):
-#        self.enc_st.set_path(path)
-#    def set_executor(self,executor):
-#        self.enc_st.set_executor(executor)
-#    def get_id(self):
-#        return self.enc_st.id
-#    def get_exe(self):
-#        return self.enc_st.exe
-#    def get_help_exe(self):
-#        return self.enc_st.help_exe
-#    def get_version_exe(self):
-#        return self.enc_st.version_exe
-#    def get_param_cmd(self):
-#        return self.enc_st.get_param_cmd
-#    def __str__(self):
-#        return "ENCODER:%s"%self.enc_st
-#    @staticmethod
-#    def SET_CODEC_PATH(id,path):
-#        get_enc_st(id).set_path(path)
-#    @staticmethod
-#    def SET_CODEC_EXECUTOR(id,executor):
-#        get_enc_st(id).set_executor(executor)
 class ENCODER(codec_cmd.CODEC):
     def __init__(self,id='as265'):
         #codec_cmd.CODEC.__init__(self,get_enc_st)
@@ -141,7 +74,7 @@ class ENCODER(codec_cmd.CODEC):
         elif fname==jm_st.executor:
             new_id=jm_st.id
         if len(new_id)==0:
-            print 'Warning: Invaild path[%s], ignored'%fullpath
+            logging.warning('Invaild path "%s", ignored'%fullpath)
         else:
            self.set_id(new_id)
            self.set_path(fpath)
@@ -387,12 +320,6 @@ def parse_enc_cl(enc):
         elif opt == "-l":
             opt_list["rc_i_lookahead"] = int(arg)
             tag_str += get_tag(opt, arg)
-        #elif opt == "-h":
-        #    usage()
-        #    sys.exit()
-        #elif opt == "-H":
-        #    #print_encoder_help(encoder_id)
-        #    Help_flag = 1
         elif opt == "-q":
             opt_list["nQp"] = int(arg)
             tag_str += get_tag(opt, arg)
@@ -440,9 +367,6 @@ def parse_enc_cl(enc):
         elif opt == "-p":
             opt_list["rc_i_pass"] = int(arg)
             tag_str += get_tag(opt, arg)
-        #elif opt == "-g":
-        #  opt_list["rc_s_stats"] = arg
-        #  tag_str += get_tag(opt, arg)
         elif opt == "-P":
             opt_list["rc_i_qp_step"] = int(arg)
             tag_str += get_tag(opt, arg)
@@ -463,8 +387,6 @@ def parse_enc_cl(enc):
         elif opt == "-D":
             opt_list["i_bframe_adaptive"] = int(arg)
             tag_str += get_tag(opt, arg)
-        #elif opt in ('--version',):
-        #    Version_flag = 1
         elif opt in ("-k",):
             opt_list["first_frame"] = int(arg)
             tag_str += get_tag(opt, arg)
@@ -474,11 +396,8 @@ def parse_enc_cl(enc):
         elif opt in ("-J",):
             opt_list["b_dbl"] = int(arg)
             tag_str += get_tag(opt, arg)
-        #elif opt[1] in help.get_opt():
-        #    continue
         else:
             help.parse_opt(opt)
-
 
     opt_list['do_execute']=help.get_do_execute()
 
@@ -515,44 +434,44 @@ def check_files(param_list):
     #check the input file
     input_fullname = os.path.join(param_list['input_path'], param_list['input_filename'])
     if not os.path.exists(input_fullname):
-        print "input file (%s) does not exist. Please check" % input_fullname
+        logging.error('Input file "%s" does not exist. Please check' % input_fullname)
         sys.exit()
 
     #check the outputfiles: if exists, delete it
     output_fullname = os.path.join(param_list['output_path'], param_list['output_filename'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_cabac'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_general'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_prd_y'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_prd_uv'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_cabacrdo'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
     output_fullname = os.path.join(param_list['output_path'], param_list['trace_file_arch1rdo'])
     if os.path.exists(output_fullname):
         os.remove(output_fullname)
-        print "Deleted output file: %s" % output_fullname
+        logging.info('Deleted output file: %s' % output_fullname)
 
 
 def get_total_frame_num(filename, width, height):
@@ -588,10 +507,10 @@ def configure_rc_param(param_list, tmp_list):
     rc_type = param_list['eRcType']
     if param_list['rc_i_pass'] != 0:
         if rc_type in (global_vars.HEVC_RC_CBR, global_vars.HEVC_RC_CQP, global_vars.HEVC_RC_FIXQUANT):
-            print "WARNING:2pass is incompatible with %s" % global_vars.RC_STRING[rc_type]
+            logging.warning('2pass is incompatible with %s' % global_vars.RC_STRING[rc_type])
             #sys.exit()
         elif rc_type not in (global_vars.HEVC_RC_ABR, global_vars.HEVC_RC_VBR):
-            print "WARNING:2pass is incompatible with %s" % global_vars.RC_STRING[rc_type]
+            logging.warning('2pass is incompatible with %s' % global_vars.RC_STRING[rc_type])
 
     if rc_type != global_vars.HEVC_RC_FIXQUANT and rc_type != global_vars.HEVC_RC_CQP:
         if tmp_list['tmp_nBitrate'] <= 0:
@@ -620,8 +539,8 @@ def configure_rc_param(param_list, tmp_list):
 
 def get_default_tmp_list(param_list):
     tmp_list = {}  #dict()
-    tmp_list['seq_name'] = os.path.splitext(param_list['input_filename'])[
-        0]  #param_list['input_filename'].replace(".yuv","")
+    tmp_list['seq_name'] = os.path.splitext(param_list['input_filename'])[0]
+                         #param_list['input_filename'].replace(".yuv","")
     tmp_list['tmp_nBitrate'] = -1
     tmp_list['tmp_nMaxBitrate'] = -1
     tmp_list['tmp_vbv_buffer_size'] = -1
@@ -648,10 +567,10 @@ def configure_enc_param(enc, param_list):
                 #print "Bug may exist in this program"
                 tmp_list[k] = v
         if param_len != len(param_list):
-            print "dict(param_list) has been changed somewhere. Please fix this bug."
+            logging.error('dict(param_list) has been changed somewhere. Please fix this bug.')
             sys.exit()
         if tmp_list_len != len(tmp_list):
-            print "dict(tmp_list) has been changed somewhere. Please fix this bug."
+            logging.error('dict(tmp_list) has been changed somewhere. Please fix this bug.')
             sys.exit()
 
     cons_log = configure_seq_param(param_list, tmp_list['seq_name'], tmp_list['tmp_nSrcWidth'],

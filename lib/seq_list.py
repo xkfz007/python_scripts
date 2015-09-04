@@ -5,6 +5,7 @@
 #classE=('FourPeople_1280x720_60','Johnny_1280x720_60','KristenAndSara_1280x720_60')
 #classF=('BasketballDrillText_832x480_50','SlideEditing_1280x720_30','SlideShow_1280x720_20')
 
+import logging
 
 class_a = ('Apeopleonstreet_2560x1600_8_30_150', 'Atraffic_2560x1600_8_30_150')
 class_b = ('Bbasketballdrive_1920x1080_8_50_500', 'Bbqterrace_1920x1080_8_60_600',
@@ -32,6 +33,8 @@ class_std2 = class_b + class_c + class_d + class_e + class_f
 class_std = class_a + class_b + class_c + class_d + class_e + class_f
 
 
+
+
 def guess_seqname(name):
     seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2+class_m
     for i in seq_list:
@@ -57,7 +60,7 @@ def get_reso_info(seq_name):
     tmp_list = seq_name.split('_')
     print tmp_list
     if tmp_list[1] not in common_reso_list:
-        print "maybe the resolution is invalid, please check"
+        logging.error("maybe the resolution is invalid, please check")
         sys.exit()
     reso = tmp_list[1].split('x')
     width = int(reso[0])
@@ -75,7 +78,7 @@ def get_reso_info(seq_name):
         else:
             fps = 30  #default fps
     if fps not in common_fps_list:
-        print "maybe the fps is invalid, please check"
+        logging.error("maybe the fps is invalid, please check")
         sys.exit()
     return (width, height, fps)
 
