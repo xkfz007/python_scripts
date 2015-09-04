@@ -44,7 +44,7 @@ import global_vars
 #        self.path=path
 #        self.__init()
 class Encoder_st(codec_cmd.Codec_st):
-    def __init__(self,id,executor,help,version,cmd_func,path):
+    def __init__(self,id,executor,help,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
         super(Encoder_st,self).__init__(id,executor,help,cmd_func,path)
     def __str__(self):
@@ -67,11 +67,11 @@ x264_st=Encoder_st(global_vars.x264_name_list[0],'x264.exe','--fullhelp',cmd_ini
                    os.path.join(common_path, 'src.x264/trunk/x264-snapshot-20140915-2245/bin/x64/Release')
                    )
 hm_st=Encoder_st(global_vars.hm_name_list[0],'hm.exe','--help',cmd_init_hm.get_enc_param_cmd_hm,
- os.path.join(common_path, 'src.hm/trunk/hm-10.0/bin/vc10/x64/Release')
-)
+                 os.path.join(common_path, 'src.hm/trunk/hm-10.0/bin/vc10/x64/Release')
+                )
 jm_st=Encoder_st(global_vars.jm_name_list[0],'lencod.exe','-h',cmd_init_jm.get_enc_param_cmd_jm,
-os.path.join(common_path, 'SRC.JM/trunk/jm18.5/bin/')
-)
+                 os.path.join(common_path, 'SRC.JM/trunk/jm18.5/bin/')
+                )
 enc_st_list={global_vars.as265_name_list[0]:as265_st,
              global_vars.x265_name_list[0]:x265_st,
              global_vars.x264_name_list[0]:x264_st,

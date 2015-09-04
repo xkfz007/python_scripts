@@ -62,7 +62,7 @@ def get_dec_param_cmd_hmd(param_list):
 #        return "decoder_st[id=%s,executor=%s,help=%s,version=%s,path=%s,get_para_cmd=%s]"%\
 #              (self.id,self.executor,self.help,self.version,self.path,self.get_param_cmd)
 class Decoder_st(codec_cmd.Codec_st):
-    def __init__(self,id,executor,help,version,cmd_func,path):
+    def __init__(self,id,executor,help,cmd_func,path):
         #codec_cmd.Codec_st.__init__(self,id,executor,help,version,cmd_func,path)
         super(Decoder_st,self).__init__(id,executor,help,cmd_func,path)
     def __str__(self):

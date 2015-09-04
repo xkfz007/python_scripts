@@ -15,6 +15,9 @@ except getopt.GetoptError as err:
 except Exception, e:
     print e
 
+print 'opts=%s'%opts
+print 'args=%s'%args
+
 opt_list = ""
 for opt, arg in opts:
     if opt == "-a":

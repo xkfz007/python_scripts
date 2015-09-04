@@ -24,7 +24,11 @@ avi_name_list=('avi',)
 video_name_list=mp4_name_list+avi_name_list
 audio_name_list=('aac','mp3','ogg')
 
-valid_ext_list=h264_name_list+h265_name_list+yuv_name_list+video_name_list+audio_name_list
+image_name_list=('jpg','jpeg','png','bmp')
+
+valid_ext_list=h264_name_list+h265_name_list+yuv_name_list+\
+               video_name_list+audio_name_list+\
+               image_name_list
 
 
 def usage():
@@ -34,6 +38,7 @@ def usage():
       h264/hevc: get the raw bitstream from media file
       yuv: decode the input to get rawvideo(yuv)
       aac,mp3: extract audio from media file
+      jpg,png,bmp: extract images from media file
    -a extract audio using the extra command lines from -C,
       ignore the auto generated command lines from extension(-e)
    -o <string> output file path or file tag:
@@ -41,9 +46,10 @@ def usage():
       <path>
       <tag>
    -C <string> the ffmpeg commands
-   -t <int> set thread num
-   -r <intxint> set the output width and height
-   -m <string> merge the input media files to one
+   -T <int> set thread num
+   -t <hour:minute:second.xxx-hour:minute:second.xxx> set the time duration
+   -r <int>x<int> set the output width and height
+   -m <filename> merge the input media files to one, only mp4 and mkv is supported
    arguments:
    <input1> <input2> <input3> file or directory, support pattern globbing
            these are the input files that will be processed
@@ -63,7 +69,7 @@ def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cm
     print 'fext="%s"' % fext
     fext=fext.lower()[1:]
     if ext=='TS' and fext=='ts':
-        return ''
+        return ('',input_file)
 
     if len(ext) == 0 :
         if len(fext)>0:
@@ -146,73 +152,21 @@ def parse_reso(arg,width=-2,height=-2):
         width=int(arg)
     return width,height
 
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        usage()
-        sys.exit()
+def parse_time(arg,startp='',dura=''):
+    if '+' in arg:
+        x,y=arg.split('+')
+        if len(x)>0:
+            startp=x
+        if len(y)>0:
+            dura=y
+    else:
+        startp=arg
+    print 'startp=%s'%startp
+    print 'dura=%s'%dura
+    return startp,dura
 
-    help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:t:r:m:'+help.get_opt())
-    except getopt.GetoptError as err:
-        print str(err)
-        sys.exit(2)
-    except Exception, e:
-        print e
-
-    # opt_list = get_default_opt_list()
-    input_tmp = ''
-    output_tmp = ''
-    output_tag=''
-    output_path=''
-    extra_cmd = ''
-    extension = ''
-    thread_num = 0
-    #do_execute = 0
-    #decode_flag = 0
-    #bitstream_type = ""
-    auto_audio_flag=1
-    width=-2
-    height=-2
-    merged_file=''
-    print opts
-    print args
-
-    for opt, arg in opts:
-        if opt == "-o":
-            output_tmp = arg
-        elif opt == "-e":
-            extension = arg
-        elif opt == "-a":
-            auto_audio_flag= 0
-        elif opt == "-C":
-            extra_cmd = arg
-        elif opt == "-t":
-            thread_num = int(arg)
-        elif opt == "-r":
-            #width= int(arg)
-            width,height=parse_reso(arg,width,height)
-        elif opt=="-m":
-            merged_file=arg
-        #elif opt[1] in help.get_opt():
-        #    help.parse_opt(opt)
-        #else:
-        #    assert False, "unknown option"
-
-    help.parse_opt(opts)
-
-    if len(args) == 0:
-        print "Error: No input is specified, please check"
-        sys.exit()
-    input_list=[]
-    for arg in args:
-        get_input_list(input_list,arg)
-
-    if len(input_list) == 0:
-        print "Error: Input is invalid, please check"
-        sys.exit()
-
-    p1=output_tmp.split('/')
+def parse_outpath(arg,output_path='',output_tag=''):
+    p1=arg.split('/')
     print "p1=%s"%p1
     if os.path.isdir(p1[0]):
         output_path=p1[0]
@@ -223,10 +177,90 @@ if __name__ == '__main__':
         if len(p1)>1:
             lib.check_path(p1[0])
             assert os.path.isdir(p1[0])
-            ouput_path=p1[0]
-            ouput_tag=p1[1]
+            print "p1=%s"%p1
+            output_path=p1[0]
+            output_tag=p1[1]
         else:
-          output_tag=p1[0]
+            output_tag=p1[0]
+    print "output_path=%s"%output_path
+    print "output_tag=%s"%output_tag
+    return (output_path,output_tag)
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+
+    help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:T:r:m:t:'+help.get_opt())
+    except getopt.GetoptError as err:
+        print str(err)
+        sys.exit(2)
+    except Exception, e:
+        print e
+
+    # opt_list = get_default_opt_list()
+    input_tmp = ''
+    #output_tmp = ''
+    output_tag=''
+    output_path=''
+    extra_cmd = ''
+    extension = ''
+    thread_num = ''
+    #do_execute = 0
+    #decode_flag = 0
+    #bitstream_type = ""
+    auto_audio_flag=1
+    width=-2
+    height=-2
+    merged_file=''
+    #time_str=''
+    startp=''
+    dura=''
+
+    print opts
+    print args
+
+    for opt, arg in opts:
+        if opt == '-o':
+            #output_tmp = arg
+            output_path,output_tag=parse_outpath(arg)
+        elif opt == '-e':
+            extension = arg
+        elif opt == '-a':
+            auto_audio_flag= 0
+        elif opt == '-C':
+            extra_cmd = arg
+        elif opt == '-T':
+            thread_num = arg
+        elif opt == '-r':
+            #width= int(arg)
+            width,height=parse_reso(arg,width,height)
+        elif opt=='-m':
+            merged_file=arg
+        elif opt=='-t':
+            startp,dura=parse_time(arg,startp,dura)
+        #elif opt[1] in help.get_opt():
+        #    help.parse_opt(opt)
+        else:
+            continue
+            assert False, 'unknown option'
+
+    help.parse_opt(opts)
+
+    if len(args) == 0:
+        print 'Error: No input is specified, please check'
+        sys.exit()
+
+    input_list=[]
+    for arg in args:
+        get_input_list(input_list,arg)
+
+    if len(input_list) == 0:
+        print 'Error: Input is invalid, please check'
+        sys.exit()
+
 
     if len(output_tag) == 0:  # =='':
         output_tag = "_out"
@@ -236,8 +270,15 @@ if __name__ == '__main__':
     print "output_tag=%s"%output_tag
 
     prepared_cmd = FFMPEG_BIN
-    if thread_num > 0:
-        prepared_cmd += " -threads %s" % thread_num
+
+    if len(thread_num) > 0:
+        prepared_cmd += ' -threads %s' % thread_num
+
+    if len(startp)>0:
+        prepared_cmd+=' -ss %s'%startp
+
+    if len(dura)>0:
+        prepared_cmd+=' -t %s'%dura
 
     if len(merged_file)>0:
         extension='TS'
@@ -267,6 +308,8 @@ if __name__ == '__main__':
                 extra_cmd+=" -c:a copy"
             else:
                 extra_cmd+=" -b:a 64k"#set bitrate for audio
+        elif extension in image_name_list:
+            output_tag='-%3d'
 
     elif width>0 or height >0:
         extra_cmd += " -c:a copy"
@@ -310,7 +353,7 @@ if __name__ == '__main__':
         if len(merged_file)>0:
             for i in output_list:
                 if os.path.exists(i):
-                    os.remove(i)
+                    #os.remove(i)
                     print '"%s" is deleted'%i
 
 
