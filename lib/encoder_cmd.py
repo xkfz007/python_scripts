@@ -573,6 +573,7 @@ def configure_enc_param(enc, param_list):
             logging.error('dict(tmp_list) has been changed somewhere. Please fix this bug.')
             sys.exit()
 
+    print tmp_list
     cons_log = configure_seq_param(param_list, tmp_list['seq_name'], tmp_list['tmp_nSrcWidth'],
                                    tmp_list['tmp_nSrcHeight'], tag_str)
 

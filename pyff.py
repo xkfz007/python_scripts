@@ -26,10 +26,11 @@ video_name_list=mp4_name_list+avi_name_list
 audio_name_list=('aac','mp3','ogg')
 
 image_name_list=('jpg','jpeg','png','bmp')
+gif_name_list=('gif',)
 
 valid_ext_list=h264_name_list+h265_name_list+yuv_name_list+\
                video_name_list+audio_name_list+\
-               image_name_list
+               image_name_list+gif_name_list
 
 
 def usage():
@@ -40,6 +41,7 @@ def usage():
       yuv: decode the input to get rawvideo(yuv)
       aac,mp3: extract audio from media file
       jpg,png,bmp: extract images from media file
+      gif:create a gif file from video file
    -a extract audio using the extra command lines from -C,
       ignore the auto generated command lines from extension(-e)
    -o <path>:<tag> output file path or file tag:
@@ -72,7 +74,11 @@ def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cm
 
     if len(ext) == 0 :
         if len(fext)>0:
-            ext = fext
+            if fext in mp4_name_list:
+               ext = fext
+               extra_cmd += ' -c:a copy'
+            else:# if the extension is rmvb, we will use mp4 for output file
+                ext='mp4'
         else:#set default ext
             ext='ext'
     elif len(ext) > 0:
@@ -89,8 +95,10 @@ def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cm
             else:
                 extra_cmd+=" -c:v libx264 -c:a libvo_aacenc"
 
+    output_file = "%s_%s.%s" % (fname, output_tag, ext)
+    if '.' in output_tag:# regard there is an extension in output_tag
+        output_file='%s.%s'%(output_tag,ext)
 
-    output_file = "%s%s.%s" % (fname, output_tag, ext)
     if len(output_path)>0:
        output_file = "%s%s%s" % (output_path,os.sep, output_file)
 
@@ -127,8 +135,8 @@ def get_input_list(input_list,arg):
         logging.info('"%s" is a file' % arg)
         input_list.append(arg)
     else:  # globbing is needed
-        logging.info('"%s" is glob pattern' % arg)
         glob_list=glob.glob(arg)
+        logging.info('"%s" is glob pattern:%s' % (arg,glob_list))
         for i in glob_list:
             get_input_list(input_list,i)
     # print type(input_file)
@@ -206,6 +214,7 @@ if __name__ == '__main__':
     #time_str=''
     startp=''
     dura=''
+    endp=''
 
     print opts
     print args
@@ -228,7 +237,10 @@ if __name__ == '__main__':
         elif opt=='-m':
             merged_file=arg
         elif opt=='-t':
-            startp,dura=parse_time(arg,startp,dura)
+            if '+' in arg:
+                startp,dura=parse_time(arg,startp,dura)
+            elif '-' in arg:
+                startp,endp=parse_time(arg,startp,endp,'-')
         #elif opt[1] in help.get_opt():
         #    help.parse_opt(opt)
         else:
@@ -248,22 +260,29 @@ if __name__ == '__main__':
         sys.exit()
 
     if len(output_tag) == 0:  # =='':
-        output_tag = "_out"
+        output_tag = "out"
     else:
-        if not output_tag.startswith('_'):
-            output_tag = '_' + output_tag
-    #print "output_tag=%s"%output_tag
+        if '.' in output_tag:
+            output_tag,extension=os.path.splitext(output_tag)
+    #    if not output_tag.startswith('_'):
+    #        output_tag = '_' + output_tag
+    print "output_tag=%s"%output_tag
+    print type(extension)
+    print 'extension=%s'%extension
 
     prepared_cmd = FFMPEG_BIN
 
     if len(thread_num) > 0:
         prepared_cmd += ' -threads %s' % thread_num
 
-    if len(startp)>0:
-        prepared_cmd+=' -ss %s'%startp
-
     if len(dura)>0:
+        if len(startp)>0:
+            prepared_cmd+=' -ss %s'%startp
         prepared_cmd+=' -t %s'%dura
+    if len(endp)>0:
+        if len(startp)>0:
+            extra_cmd+=' -ss %s'%startp
+        extra_cmd+=' -to %s'%endp
 
     if len(merged_file)>0: # option -m: merge the inputfiles
         extension='TS'
@@ -276,10 +295,10 @@ if __name__ == '__main__':
             sys.exit()
 
         if extension in yuv_name_list:# decode to get raw yuv
-            output_tag = '_rec'
+            output_tag = 'rec'
             extra_cmd += ' -an -f rawvideo'
         elif extension in bitstream_name_list:# just get the raw stream
-            output_tag= '_bin'
+            output_tag= 'bin'
             if extension in h264_name_list:
                 extension= 'h264'
             elif extension in h265_name_list:
@@ -287,17 +306,20 @@ if __name__ == '__main__':
             extra_cmd += ' -c:v copy'
             extra_cmd += ' -an -f %s' % extension
         elif extension in audio_name_list:
-            output_tag='_aud'
+            output_tag='audio'
             extra_cmd+=' -vn'
             if auto_audio_flag==1:
                 extra_cmd+=' -c:a copy'
             else:
                 extra_cmd+=' -b:a 64k'#set bitrate for audio
         elif extension in image_name_list:
-            output_tag='-%3d'
+            output_tag='%3d'
+        elif extension in gif_name_list:
+            extra_cmd+=' -r 15'
+            extra_cmd+=' -an'
 
-    elif width>0 or height >0:# option -r: resize the input video file
-        extra_cmd += ' -c:a copy'
+
+    if width>0 or height >0:# option -r: resize the input video file
         extra_cmd+=' -vf scale=%s:%s'%(width,height)
 
 

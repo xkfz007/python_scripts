@@ -17,6 +17,7 @@ class_d = ('Dbasketballpass_416x240_8_50_500', 'Dblowingbubbles_416x240_8_50_500
 class_e = ('Efourpeople_1280x720_8_60_600', 'Ejohnny_1280x720_8_60_600', 'Ekristenandsara_1280x720_8_60_600')
 class_f = ('Fbasketballdrilltext_832x480_8_50_500', 'Fchinaspeed_1024x768_8_30_500',
            'Fslideediting_1280x720_8_30_300', 'Fslideshow_1280x720_8_20_500')
+class_h=('Hforeman_176x144_8_25_300','Hforeman_352x288_8_25_300')
 class_i = ('Iduckstakeoff_1280x720_8_25_500', 'Ifcwr_1920x1080_8_25_6987',
            'Iflowervase_832x480_8_25_300', 'Iintotree_1280x720_8_25_500', 'Ikeiba_832x480_8_25_300',
            'Imobcalter_1280x720_8_25_500', 'Imobisode2_832x480_8_25_300', 'Imonkey_1280x720_8_25_79',
@@ -33,19 +34,15 @@ class_std2 = class_b + class_c + class_d + class_e + class_f
 class_std = class_a + class_b + class_c + class_d + class_e + class_f
 
 
-
-
 def guess_seqname(name):
-    seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2+class_m
+    seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2+class_m+class_h
     for i in seq_list:
         if i.upper().find(name.upper().split('_')[0]) >= 0:
             return i
 
     return name
 
-
 import sys
-
 
 def get_reso_info(seq_name):
     common_reso_list = ('176x144', '352x288', '416x240', '832x480', '1024x768',
@@ -54,6 +51,7 @@ def get_reso_info(seq_name):
     common_fps_list = (15, 20, 23, 24, 25, 30, 50, 60)
     #seq_name format: name_widthxheight_fps or
     #                 name_widthxheight_bitdepth_fps_totalframes
+    print "seq_name=%s"%seq_name
     import os.path
     if seq_name.lower().endswith('.yuv'):
         seq_name,ext=os.path.splitext(seq_name)
