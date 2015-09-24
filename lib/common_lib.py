@@ -14,6 +14,7 @@ def determin_sys():
     elif sysinfo.find("CYGWIN") >= 0:
         str = "cygwin"
     else:
+        logging.error('Can not detect the host system, please check')
         str = "unknown"
 
     return str
@@ -89,8 +90,8 @@ def get_file_list(path_dir, ext=''):
 
 def check_path(path):
     path = path.strip()  #delete the blankspace before or after the path
-    path = path.strip('\\')
-    path = path.strip('/')
+    path = path.rstrip('\\')
+    path = path.rstrip('/')
     #chech whether the path exists or creat it
     if not os.path.exists(path):
         os.makedirs(path)
@@ -116,7 +117,7 @@ def run_cmd(cmd_line,log_file='',do_execute=0,rec_cl=1):
       pfile = open(log_file, "w")
       if rec_cl==1:
          print >> pfile, "%s" % cmd_line
-         if determin_sys() == "cygwin":
+         if determin_sys() in ('cygwin','linux'):
            cmd_line += " 2>&1 |tee -a %s"% log_file
            pfile.close()
            pfile=None
@@ -166,4 +167,33 @@ class HELP(object):
 
     def get_do_execute(self):
         return self.do_execute
+def parse_arg_bak(arg,delimiter,X,Y):
+    cnt=arg.count(delimiter)
+    if cnt>2:
+        logging.error('Invalid arg:%s'%arg)
+        sys.exit()
+    elif cnt>0:
+        x,y=arg.split(delimiter)
+        if len(x)>0:
+            X=x
+        if len(y)>0:
+            Y=y
+    else:
+        X=arg
+    return X,Y
 
+def parse_arg(arg,delimiter,n,*LS):
+    cnt=arg.count(delimiter)
+    N=cnt+1
+    print 'cnt=%s'%cnt
+    assert n==len(LS)
+    olst=list(LS)
+    print olst
+    lst=arg.split(delimiter)
+    print 'lst=%s'%lst
+    for i in range(0,N):
+       print lst[i]
+       if len(lst[i])>0:
+           olst[i]=lst[i]
+
+    return olst

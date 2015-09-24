@@ -6,6 +6,7 @@
 #classF=('BasketballDrillText_832x480_50','SlideEditing_1280x720_30','SlideShow_1280x720_20')
 
 import logging
+import os.path
 
 class_a = ('Apeopleonstreet_2560x1600_8_30_150', 'Atraffic_2560x1600_8_30_150')
 class_b = ('Bbasketballdrive_1920x1080_8_50_500', 'Bbqterrace_1920x1080_8_60_600',
@@ -35,6 +36,9 @@ class_std = class_a + class_b + class_c + class_d + class_e + class_f
 
 
 def guess_seqname(name):
+    if name.lower().endswith('.yuv'):
+        name,ext=os.path.splitext(name)
+        return name
     seq_list = class_a + class_b + class_c + class_d + class_e + class_f + class_special + class_x + class_special2+class_m+class_h
     for i in seq_list:
         if i.upper().find(name.upper().split('_')[0]) >= 0:
@@ -53,8 +57,6 @@ def get_reso_info(seq_name):
     #                 name_widthxheight_bitdepth_fps_totalframes
     print "seq_name=%s"%seq_name
     import os.path
-    if seq_name.lower().endswith('.yuv'):
-        seq_name,ext=os.path.splitext(seq_name)
     tmp_list = seq_name.split('_')
     print tmp_list
     if tmp_list[1] not in common_reso_list:

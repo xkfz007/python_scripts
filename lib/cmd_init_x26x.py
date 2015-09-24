@@ -59,7 +59,7 @@ def get_enc_param_cmd_x26x(param_list):
     cmd += " --psnr"
     cmd += " --ssim"
     cmd += " --no-progress"
-    cmd += "  --log-level debug"
+    #cmd += "  --log-level debug"
 
     if param_list['rc_i_pass'] > 0:
         cmd += ' --pass %s' % param_list['rc_i_pass']

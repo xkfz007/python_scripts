@@ -134,12 +134,35 @@ import subprocess
 # print __file__
 # print os.path.realpath(__file__)
 
-def str_func(str,i):
-    str+="test%s"%i
-    print str
+#def str_func(str,i):
+#    str+="test%s"%i
+#    print str
 
-str="good"
-for i in range(5):
-    str_func(str,i)
+#str="good"
+#for i in range(5):
+#    str_func(str,i)
 
+
+def parse_arg(arg,delimiter,n,*LS):
+    cnt=arg.count(delimiter)
+    N=cnt+1
+    print 'cnt=%s'%cnt
+    assert n==len(LS)
+    olst=list(LS)
+    print olst
+    lst=arg.split(delimiter)
+    print 'lst=%s'%lst
+    for i in range(0,N):
+       print lst[i]
+       if len(lst[i])>0:
+           olst[i]=lst[i]
+       
+    return olst
+
+
+x,y,z,w=parse_arg('500',':',4,0,0,0,0)
+print x,y,z,w
+
+opt=raw_input('Directory "a" does not exist, do you want to create it?(Y/N)')
+print opt
 

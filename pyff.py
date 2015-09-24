@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 # The main purpose of this script is to wrap the ffmpeg.exe
 # so that we will not have to give the exact input file name or output file name.
 # Right now, we just need give the glob pattern of the input file name
@@ -12,7 +12,7 @@ import glob
 import lib
 import logging
 
-FFMPEG_BIN = 'ffmpeg.exe -y'
+ffmpeg_exe_list=('ffmpeg','ffmpeg.exe')
 
 h264_name_list = ('h264', 'h.264', 'avc', '264')
 h265_name_list = ('h265', 'h.265', 'hevc', '265')
@@ -23,7 +23,7 @@ yuv_name_list=('yuv','y4m')
 mp4_name_list=('mp4','flv','mkv','f4v')
 avi_name_list=('avi',)
 video_name_list=mp4_name_list+avi_name_list
-audio_name_list=('aac','mp3','ogg')
+audio_name_list=('aac','mp3','ogg','wav')
 
 image_name_list=('jpg','jpeg','png','bmp')
 gif_name_list=('gif',)
@@ -97,7 +97,7 @@ def get_cmd_line(input_file, ext, output_path,output_tag, prepared_cmd, extra_cm
 
     output_file = "%s_%s.%s" % (fname, output_tag, ext)
     if '.' in output_tag:# regard there is an extension in output_tag
-        output_file='%s.%s'%(output_tag,ext)
+        output_file='%s'%output_tag
 
     if len(output_path)>0:
        output_file = "%s%s%s" % (output_path,os.sep, output_file)
@@ -142,43 +142,38 @@ def get_input_list(input_list,arg):
     # print type(input_file)
     #print "input_list=%s" % input_list
 
-def parse_arg(arg,X,Y,delimiter):
-    cnt=arg.count(delimiter)
-    if cnt>2:
-        logging.error('Invalid arg:%s'%arg)
-        sys.exit()
-    elif cnt>0:
-        x,y=arg.split(delimiter)
-        if len(x)>0:
-            X=x
-        if len(y)>0:
-            Y=y
-    else:
-        X=arg
-    return X,Y
+
 
 def parse_reso(arg,width=-2,height=-2,delimiter='x'):
-    x,y=parse_arg(arg,str(width),str(height),delimiter)
+    n=2
+    x,y=lib.parse_arg(arg,delimiter,n,str(width),str(height))
     return int(x),int(y)
 
 def parse_time(arg,startp='',dura='',delimiter='+'):
-    x,y=parse_arg(arg,startp,dura,delimiter)
+    n=2
+    x,y=lib.parse_arg(arg,delimiter,n,startp,dura)
     return x,y
 
 def parse_outpath(arg,output_path='',output_tag='',delimiter=':'):
-    opath,otag=parse_arg(arg,output_path,output_tag,delimiter)
+    n=2
+    opath,otag=lib.parse_arg(arg,delimiter,n,output_path,output_tag)
+    print 'opth=%s,otag=%s'%(opath,otag)
+    if '.' in opath:
+        opath,otag=os.path.split(opath)
+    print 'opth=%s,otag=%s'%(opath,otag)
     #lib.check_path(opath)
     if not os.path.isdir(opath):
-        if len(otag)>0:
-           opt=input('Directory "%s" does not exist, do you want to create it?(Y/N)'%opath)
-           if opt.lower() in 'yes':
-               os.makedirs(opath)
-               logging.info('Diectory "%s" is created.'%arg)
-           else:
-               logging.error('Diectory "%s" does not exist, using the current directory'%arg)
-               opath=''
+        #if len(otag)>0:
+        opt=raw_input('Directory "%s" does not exist, do you want to create it?(Y/N)'%opath)
+        if opt.lower() in 'yes':
+            os.makedirs(opath)
+            logging.info('Diectory "%s" is created.'%arg)
         else:
-            opath,otag=otag,opath
+            logging.error('Diectory "%s" does not exist, using the current directory'%opath)
+            opath=''
+        #else:
+        #    opath,otag=otag,opath
+
 
     return opath,otag
 
@@ -186,6 +181,19 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
         sys.exit()
+
+    #FFMPEG_BIN = 'ffmpeg.exe'
+    #for i in ffmpeg_exe_list:
+    #    if os.path.exists(i):
+    #        logging.info("%s exists"%i)
+    #        FFMPEG_BIN=i
+    #        break
+    #    else:
+    #        logging.error("%s does not exist"%i)
+    if lib.determin_sys() in ('windows',):
+        FFMPEG_BIN='ffmpeg.exe'
+    else:
+        FFMPEG_BIN='ffmpeg'
 
     help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
     try:
@@ -259,11 +267,8 @@ if __name__ == '__main__':
         logging.error('Input is invalid, please check')
         sys.exit()
 
-    if len(output_tag) == 0:  # =='':
-        output_tag = "out"
-    else:
-        if '.' in output_tag:
-            output_tag,extension=os.path.splitext(output_tag)
+    if '.' in output_tag:
+        dump_value,extension=os.path.splitext(output_tag)
     #    if not output_tag.startswith('_'):
     #        output_tag = '_' + output_tag
     print "output_tag=%s"%output_tag
@@ -271,6 +276,7 @@ if __name__ == '__main__':
     print 'extension=%s'%extension
 
     prepared_cmd = FFMPEG_BIN
+    prepared_cmd += ' -y'
 
     if len(thread_num) > 0:
         prepared_cmd += ' -threads %s' % thread_num
@@ -295,10 +301,12 @@ if __name__ == '__main__':
             sys.exit()
 
         if extension in yuv_name_list:# decode to get raw yuv
-            output_tag = 'rec'
+            if len(output_tag) == 0:  # =='':
+               output_tag = 'rec'
             extra_cmd += ' -an -f rawvideo'
         elif extension in bitstream_name_list:# just get the raw stream
-            output_tag= 'bin'
+            if len(output_tag) == 0:  # =='':
+               output_tag= 'bin'
             if extension in h264_name_list:
                 extension= 'h264'
             elif extension in h265_name_list:
@@ -306,22 +314,27 @@ if __name__ == '__main__':
             extra_cmd += ' -c:v copy'
             extra_cmd += ' -an -f %s' % extension
         elif extension in audio_name_list:
-            output_tag='audio'
+            if len(output_tag) == 0:  # =='':
+               output_tag='audio'
             extra_cmd+=' -vn'
             if auto_audio_flag==1:
                 extra_cmd+=' -c:a copy'
             else:
                 extra_cmd+=' -b:a 64k'#set bitrate for audio
         elif extension in image_name_list:
-            output_tag='%3d'
+            if len(output_tag) == 0:  # =='':
+               output_tag='%3d'
         elif extension in gif_name_list:
+            if len(output_tag) == 0:  # =='':
+                output_tag='gif'
             extra_cmd+=' -r 15'
             extra_cmd+=' -an'
-
 
     if width>0 or height >0:# option -r: resize the input video file
         extra_cmd+=' -vf scale=%s:%s'%(width,height)
 
+    if len(output_tag) == 0:  # =='':
+        output_tag = "out"
 
     cmd_list = []
     output_list=[]

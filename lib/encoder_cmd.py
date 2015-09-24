@@ -74,10 +74,12 @@ class ENCODER(codec_cmd.CODEC):
         elif fname==jm_st.executor:
             new_id=jm_st.id
         if len(new_id)==0:
-            logging.warning('Invaild path "%s", ignored'%fullpath)
+            logging.warning('Invaild path "%s", checking is needed'%fullpath)
+            self.set_executor(fname)
+            self.set_path(fpath)
         else:
-           self.set_id(new_id)
-           self.set_path(fpath)
+            self.set_id(new_id)
+            self.set_path(fpath)
 
     def __str__(self):
         return "ENCODER:%s"%self.cdec_st
@@ -89,20 +91,25 @@ class ENCODER(codec_cmd.CODEC):
         get_enc_st(id).set_executor(executor)
 
 
-def configure_seq_param(param_list, tmp_name, tmp_width=-1, tmp_height=-1, tags=""):
+def configure_seq_param(param_list, tmp_name, tmp_width=-1, tmp_height=-1, tmp_fps=-1, tags=''):
     seq_name = seq_list.guess_seqname(tmp_name)
     org_width, org_height, org_fps = seq_list.get_reso_info(seq_name)
     #tmp_width=tmp_list['tmp_nSrcWidth']
     #tmp_height=tmp_list['tmp_nSrcHeight']
-    if tmp_width <= 0 or tmp_height <= 0:
+    if tmp_width <= 0:
         param_list['nSrcWidth'] = int(org_width)
-        param_list['nSrcHeight'] = int(org_height)
     else:
         param_list['nSrcWidth'] = int(tmp_width)
+    if tmp_height<= 0:
+        param_list['nSrcHeight'] = int(org_height)
+    else:
         param_list['nSrcHeight'] = int(tmp_height)
-    param_list['fFrameRate'] = int(org_fps)
+    if tmp_fps<= 0:
+        param_list['fFrameRate'] = int(org_fps)
+    else:
+        param_list['fFrameRate'] = int(tmp_fps)
 
-    if tags != "":
+    if len(tags) >0:
         tags = "_" + tags
     param_list['input_filename'] = seq_name + ".yuv"
     param_list['output_filename'] = seq_name + tags + "_str.bin"
@@ -200,7 +207,6 @@ def usage():
     help_msg = '''Usage:cl_run_enc.py [option] [value]...
   options:
    -e <string> encoder name:as265,x265,x264,hm,jm
-   --path <string> set the encoder path
    -i <string> input_path
    -o <string> output_path
    -I <integer> I frame interval
@@ -232,18 +238,47 @@ def usage():
    -g <string> the 2pass log file (not supported yet)
    -P <integer> qp step
    -A <integer> cu tree:0 disabled, 1 enabled
-   -E <intxint> resolution: widthxheight
+   -E <intxintxfps> resolution: widthxheightxfps
    -c <integer> scenecut value
    -G <integer> open-gop:0 disabled, 1 enabled
    -D <integer> bframe adaptive
-   --version show the version info
    -k <integer> seek frame
    -j <integer> sao: 0 disabled, 1 enabled
    -J <integer> deblock: 0 disabled, 1 enabled
+   --path <string> set the encoder path
+   --log print log
    '''
     print help_msg
     return
 
+
+#def parse_arg(arg,delimiter,X='-1',Y='-1',Z='-1'):
+#    cnt=arg.count(delimiter)
+#    print 'arg=%s cnt=%s'%(arg,cnt)
+#    x=''
+#    y=''
+#    z=''
+#    if cnt>2:
+#        logging.error('Invalid arg:%s'%arg)
+#        sys.exit()
+#    elif cnt>1:
+#        x,y,z=arg.split(delimiter)
+#    elif cnt>0:
+#        x,y=arg.split(delimiter)
+#    else:
+#        x=arg
+#    if len(x)>0:
+#        X=x
+#    if len(y)>0:
+#        Y=y
+#    if len(z)>0:
+#        Z=z
+#    return X,Y,Z
+
+def parse_reso_fps(arg,width=-1,height=-1,fps=-1,delimiter='x'):
+    n=3
+    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(width),str(height),str(fps))
+    return int(x),int(y),int(z)
 
 def get_tag(opt, arg):
     str = opt[1:] + arg
@@ -269,7 +304,7 @@ def parse_enc_cl(enc):
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    'i:o:I:f:F:W:L:l:q:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:k:j:J:'+help.get_opt(),
-                                   ['path='])
+                                   ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -295,9 +330,6 @@ def parse_enc_cl(enc):
             help.set_BIN(enc.get_exe())
             help.set_help(enc.get_help())
             Encoder_flag = 1
-        elif opt =='--path':
-            Encoder_path=arg
-            Encoder_flag=1
         elif opt == "-i":
             opt_list["input_path"] = arg
         elif opt == "-o":
@@ -374,9 +406,10 @@ def parse_enc_cl(enc):
             opt_list["rc_b_cutree"] = int(arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-E":
-            tmp_width, tmp_height = arg.split('x')
+            tmp_width, tmp_height, tmp_fps = parse_reso_fps(arg)#arg.split('x')
             opt_list["tmp_nSrcWidth"] = int(tmp_width)
             opt_list["tmp_nSrcHeight"] = int(tmp_height)
+            opt_list["tmp_fFrameRate"] = int(tmp_fps)
             tag_str += get_tag(opt, arg)
         elif opt == "-c":
             opt_list["i_scenecut_threshold"] = int(arg)
@@ -396,6 +429,11 @@ def parse_enc_cl(enc):
         elif opt in ("-J",):
             opt_list["b_dbl"] = int(arg)
             tag_str += get_tag(opt, arg)
+        elif opt =='--path':
+            Encoder_path=arg
+            Encoder_flag=1
+        elif opt =='--log':
+            opt_list['log_print']=1
         else:
             help.parse_opt(opt)
 
@@ -547,7 +585,9 @@ def get_default_tmp_list(param_list):
     tmp_list['extra_cls'] = ""
     tmp_list['tmp_nSrcWidth'] = -1
     tmp_list['tmp_nSrcHeight'] = -1
+    tmp_list['tmp_fFrameRate'] = -1
     tmp_list['do_execute']=0
+    tmp_list['log_print']=0
     return tmp_list
 
 
@@ -575,7 +615,7 @@ def configure_enc_param(enc, param_list):
 
     print tmp_list
     cons_log = configure_seq_param(param_list, tmp_list['seq_name'], tmp_list['tmp_nSrcWidth'],
-                                   tmp_list['tmp_nSrcHeight'], tag_str)
+                                   tmp_list['tmp_nSrcHeight'], tmp_list['tmp_fFrameRate'], tag_str)
 
     configure_rc_param(param_list, tmp_list)
 
