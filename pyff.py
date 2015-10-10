@@ -162,7 +162,7 @@ def parse_outpath(arg,output_path='',output_tag='',delimiter=':'):
         opath,otag=os.path.split(opath)
     print 'opth=%s,otag=%s'%(opath,otag)
     #lib.check_path(opath)
-    if not os.path.isdir(opath):
+    if len(opath)>0 and not os.path.isdir(opath):
         #if len(otag)>0:
         opt=raw_input('Directory "%s" does not exist, do you want to create it?(Y/N)'%opath)
         if opt.lower() in 'yes':
