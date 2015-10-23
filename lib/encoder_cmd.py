@@ -225,9 +225,10 @@ def usage():
       <int3>:vbv_buffer_size
       <int4>:vbv-init-time
    -R <string> ref number
-   -b <integer> bframes
-   -M <integer> bref/b-pyramid/hierarchical:0 disabled, 1 enabled
-   -D <integer> bframe adaptive
+   -b <int1>:<int2>:<int3> b-frame parameters
+      <int1>: number of b-frame
+      <int2>: bref/b-pyramid/hierarchical:0 disabled, 1 enabled
+      <int3>: bframe adaptive, 0: disabled, 1: fast method, 2: trellis
    -c <integer> scenecut value
    -G <integer> open-gop:0 disabled, 1 enabled
    -y dump-yuv
@@ -291,10 +292,44 @@ def parse_threads(arg,frame_threads=-1,wpp_threads=-1,lookahead_threads=-1,delim
     x,y,z=common_lib.parse_arg(arg,delimiter,n,str(frame_threads),str(wpp_threads),str(lookahead_threads))
     return int(x),int(y),int(z)
 
-def parse_frame_num(arg,frames_to_be_encoded=-1,keyframe_int=-1,delimiter=':'):
-    n=2
-    x,y=common_lib.parse_arg(arg,delimiter,n,str(frames_to_be_encoded),str(keyframe_int))
-    return int(x),int(y)
+def parse_encoder_arg(opt_list,arg,local_dict,delimiter=':'):
+    n=len(local_dict)
+    opts=list()
+    vals=list()
+    for (k,v) in local_dict.items():
+        opts.append(k)
+        vals.append(str(v))
+    common_lib.parse_arg_internal(arg,delimiter,vals)
+
+    for i in range(0,n):
+        if int(vals[i])>=0:
+            opt_list[opts[i]]=int(vals[i])
+
+
+def parse_frame_num(opt_list,arg):
+    local_dict={'frame_num_to_encode':-1,
+                'nIntraPicInterval':-1,
+                }
+    parse_encoder_arg(opt_list,arg,local_dict)
+
+def parse_bframe_param(opt_list,arg):
+    #default parameter values
+    bframe_num=-1
+    bref=-1
+    badaptive=-1
+    delimiter=':'
+    n=3
+    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(bframe_num),str(bref),str(badaptive))
+    bframe_num=int(x)
+    bref=int(y)
+    badaptive=int(z)
+    if bframe_num>=0:
+        opt_list['nBframe'] = bframe_num
+    if bref>=0:
+        opt_list['bExistRefB'] = bref
+    if badaptive>=0:
+        opt_list['i_bframe_adaptive'] = badaptive
+
 
 def get_tag(opt, arg):
     new_arg=arg.replace(':','x')
@@ -320,7 +355,7 @@ def parse_enc_cl(enc):
     help=common_lib.HELP(usage,enc.get_exe())
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'i:o:I:f:T:l:q:r:b:M:a:s:R:e:yC:O:p:P:A:E:c:G:D:k:j:J:'+help.get_opt(),
+                                   'i:o:I:f:T:l:q:r:b:a:s:R:e:yC:O:p:P:A:E:c:G:k:j:J:'+help.get_opt(),
                                    ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)
@@ -352,9 +387,7 @@ def parse_enc_cl(enc):
         elif opt == "-o":
             opt_list["output_path"] = arg
         elif opt == "-f":
-            tmp_value=parse_frame_num(arg)
-            opt_list["frame_num_to_encode"] = int(tmp_value[0])
-            opt_list["nIntraPicInterval"] = int(tmp_value[1])
+            parse_frame_num(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-T":
             tmp_value=parse_threads(arg)
@@ -386,11 +419,8 @@ def parse_enc_cl(enc):
                     if int(tmp_value[4])>=0:
                         opt_list["vbv_buffer_init_time"] = int(tmp_value[4])
             tag_str += get_tag(opt, arg)
-        elif opt == "-b":
-            opt_list["nBframe"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-M":
-            opt_list["bExistRefB"] = int(arg)
+        elif opt == '-b':
+            parse_bframe_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-a":
             opt_list["rc_i_aq_mode"] = int(arg)
@@ -429,9 +459,6 @@ def parse_enc_cl(enc):
             tag_str += get_tag(opt, arg)
         elif opt == "-G":
             opt_list["b_open_gop"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-D":
-            opt_list["i_bframe_adaptive"] = int(arg)
             tag_str += get_tag(opt, arg)
         elif opt in ("-k",):
             opt_list["first_frame"] = int(arg)
@@ -539,11 +566,11 @@ def check_params(param_list):
     common_lib.check_path(param_list['output_path'])
     check_files(param_list)
 
-    if param_list['frame_num_to_encode'] <= 0:
+    if param_list['frame_num_to_encode'] == 0:
         param_list['frame_num_to_encode'] = get_total_frame_num(
             os.path.join(param_list['input_path'], param_list['input_filename']),
             param_list['nSrcWidth'], param_list['nSrcHeight'])
-    if param_list['nIntraPicInterval']<=0:
+    if param_list['nIntraPicInterval']==0:
         param_list['nIntraPicInterval']=param_list['fFrameRate']
     return
 

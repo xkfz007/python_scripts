@@ -181,19 +181,30 @@ def parse_arg_bak(arg,delimiter,X,Y):
     else:
         X=arg
     return X,Y
-
-def parse_arg(arg,delimiter,n,*LS):
+def parse_arg_internal(arg,delimiter,olst):
     cnt=arg.count(delimiter)
     N=cnt+1
-    print 'cnt=%s'%cnt
-    assert n==len(LS)
-    olst=list(LS)
-    print olst
     lst=arg.split(delimiter)
-    print 'lst=%s'%lst
     for i in range(0,N):
-       print lst[i]
-       if len(lst[i])>0:
-           olst[i]=lst[i]
+        print lst[i]
+        if len(lst[i])>0:
+            olst[i]=lst[i]
+
+def parse_arg(arg,delimiter,n,*LS):
+    #cnt=arg.count(delimiter)
+    #N=cnt+1
+    #print 'cnt=%s'%cnt
+    #assert n==len(LS)
+    #olst=list(LS)
+    #print olst
+    #lst=arg.split(delimiter)
+    #print 'lst=%s'%lst
+    #for i in range(0,N):
+    #   print lst[i]
+    #   if len(lst[i])>0:
+    #       olst[i]=lst[i]
+    olst=list(LS)
+    parse_arg_internal(arg,delimiter,olst)
 
     return olst
+

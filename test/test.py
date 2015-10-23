@@ -143,11 +143,11 @@ import subprocess
 #    str_func(str,i)
 
 
-def parse_arg(arg,delimiter,n,*LS):
+def parse_arg(arg,delimiter,*LS):
     cnt=arg.count(delimiter)
     N=cnt+1
     print 'cnt=%s'%cnt
-    assert n==len(LS)
+    #assert n==len(LS)
     olst=list(LS)
     print olst
     lst=arg.split(delimiter)
@@ -160,9 +160,9 @@ def parse_arg(arg,delimiter,n,*LS):
     return olst
 
 
-x,y,z,w=parse_arg('500',':',4,0,0,0,0)
+x,y,z,w=parse_arg('500::2:1',':',0,0,0,0)
 print x,y,z,w
 
-opt=raw_input('Directory "a" does not exist, do you want to create it?(Y/N)')
-print opt
+#opt=raw_input('Directory "a" does not exist, do you want to create it?(Y/N)')
+#print opt
 
