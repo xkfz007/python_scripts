@@ -91,26 +91,21 @@ class ENCODER(codec_cmd.CODEC):
         get_enc_st(id).set_executor(executor)
 
 
-def configure_seq_param(param_list, tmp_name, tmp_width=-1, tmp_height=-1, tmp_fps=-1, tags=''):
+def configure_seq_param(param_list, tmp_name, tags=''):
     seq_name = seq_list.guess_seqname(tmp_name)
     org_width, org_height, org_fps = seq_list.get_reso_info(seq_name)
-    #tmp_width=tmp_list['tmp_nSrcWidth']
-    #tmp_height=tmp_list['tmp_nSrcHeight']
-    if tmp_width <= 0:
+    if param_list['nSrcWidth'] <= 0:
         param_list['nSrcWidth'] = int(org_width)
-    else:
-        param_list['nSrcWidth'] = int(tmp_width)
-    if tmp_height<= 0:
+
+    if param_list['nSrcHeight'] <= 0:
         param_list['nSrcHeight'] = int(org_height)
-    else:
-        param_list['nSrcHeight'] = int(tmp_height)
-    if tmp_fps<= 0:
+
+    if param_list['fFrameRate'] <= 0:
         param_list['fFrameRate'] = int(org_fps)
-    else:
-        param_list['fFrameRate'] = int(tmp_fps)
 
     if len(tags) >0:
         tags = "_" + tags
+
     param_list['input_filename'] = seq_name + ".yuv"
     param_list['output_filename'] = seq_name + tags + "_str.bin"
     param_list['trace_file_cabac'] = seq_name + tags + "_cabac.log"
@@ -124,83 +119,42 @@ def configure_seq_param(param_list, tmp_name, tmp_width=-1, tmp_height=-1, tmp_f
     return seq_name + tags + "_cons.log"
 
 
-def set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, vbv_buffer_size):
+def set_bitrate(param_list,bitrate=-1,factor=2):
+    if bitrate<=0:
+       base_rate_dict={ "2560x1600": 3200,
+                        "1920x1080": 1500,
+                        "1280x720": 600,
+                        "1024x768": 568,
+                        "832x480": 300,
+                        "416x240": 75,
+                        "640x480": 222,
+                        "352x288": 73,
+                        "448x336": 110,
+                        "3840x2160": 8000,
+                        }
+       reso = '%sx%s' % (param_list['nSrcWidth'], param_list['nSrcHeight'])
+       if base_rate_dict.has_key(reso):
+           base_rate=base_rate_dict[reso]
+       else:
+           base_rate=5000
+       bitrate = param_list['fFrameRate'] * base_rate / 30 *factor
+    elif bitrate <= 1.0:
+       bitrate *= param_list['nSrcWidth'] * param_list['nSrcHeight'] * param_list['fFrameRate'] / 1000
     param_list['nBitrate'] = bitrate
-    param_list['nMaxBitrate'] = vbv_maxrate
-    param_list['vbv_buffer_size'] = vbv_buffer_size
-    #if bitrate == 0:
-    #  param_list['eRcType'] = 0
-    #elif vbv_maxrate == 0 or vbv_buffer_size == 0:
-    #  param_list['eRcType'] = 8
-    #elif vbv_maxrate <= bitrate:
-    #  param_list['eRcType'] = 1
-    #else:
-    #  param_list['eRcType'] = 9
-
-    return
 
 
-def set_rc_related_param_auto(param_list, factor=2):
-    #rc_param = fun_lib.get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'], param_list['fFrameRate'], factor)
+def set_max_bitrate(param_list,max_bitrate=-1):
+    if max_bitrate <= 0:
+       if param_list['eRcType'] == global_vars.HEVC_RC_CBR:  #CBR
+           max_bitrate=param_list['nBitrate']
+       elif param_list['eRcType'] == global_vars.HEVC_RC_VBR:  #"VBR":
+           max_bitrate= 3 * param_list['nBitrate']
+    param_list['nMaxBitrate'] = max_bitrate
 
-    reso = '%sx%s' % (param_list['nSrcWidth'], param_list['nSrcHeight'])
-    if reso == "2560x1600":
-        base_rate = 3200
-    elif reso == "1920x1080":
-        base_rate = 1500
-    elif reso == "1280x720":
-        base_rate = 600
-    elif reso == "1024x768":
-        base_rate = 568
-    elif reso == "832x480":
-        base_rate = 300
-    elif reso == "416x240":
-        base_rate = 75
-    elif reso == "640x480":
-        base_rate = 222
-    elif reso == "352x288":
-        base_rate = 73
-    elif reso == "448x336":
-        base_rate = 110
-    elif reso == "3840x2160":
-        base_rate = 8000
-    else:
-        base_rate = 5000
-
-    brate = param_list['fFrameRate'] * base_rate / 30
-    nBitrate = brate * factor
-    nMaxBitrate = 0
-    vbv_buffer_size = 0
-
-    if param_list['eRcType'] != global_vars.HEVC_RC_ABR:  #not ABR or ABR-2
-        if param_list['eRcType'] == global_vars.HEVC_RC_CBR:  #CBR
-            nMaxBitrate = nBitrate
-        elif param_list['eRcType'] == global_vars.HEVC_RC_VBR:  #"VBR":
-            nMaxBitrate = 3 * nBitrate
-        vbv_buffer_size = 1 * nMaxBitrate
-    #param_list['nBitrate'] = rc_param[0]
-    #param_list['nMaxBitrate'] = rc_param[1]
-    #param_list['vbv_buffer_size'] = rc_param[2]
-    set_rc_related_param_manual(param_list, nBitrate, nMaxBitrate, vbv_buffer_size)
-    return
-
-
-def set_rc_related_param_semi_auto(param_list, bitrate):
-    if bitrate <= 0:
-        #param_list['eRcType']=0
-        set_rc_related_param_auto(param_list)
-        return
-    if bitrate <= 1.0:
-        bitrate *= param_list['nSrcWidth'] * param_list['nSrcHeight'] * param_list['fFrameRate'] / 1000
-    bitrate = int(bitrate)
-    vbv_maxrate = 0
-    if param_list['eRcType'] == global_vars.HEVC_RC_CBR:  #1:
-        vbv_maxrate = bitrate
-    elif param_list['eRcType'] == global_vars.HEVC_RC_VBR:  #3:
-        vbv_maxrate = 3 * bitrate
-    vbv_bufsize = vbv_maxrate * 1
-    set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, vbv_bufsize)
-    return
+def set_buffer_size(param_list,buffer_size=-1):
+    if buffer_size <= 0:
+       buffer_size = 1 * param_list['nMaxBitrate']
+    param_list['vbv_buffer_size'] = buffer_size
 
 
 def usage():
@@ -254,82 +208,66 @@ def usage():
     return
 
 
-#def parse_arg(arg,delimiter,X='-1',Y='-1',Z='-1'):
-#    cnt=arg.count(delimiter)
-#    print 'arg=%s cnt=%s'%(arg,cnt)
-#    x=''
-#    y=''
-#    z=''
-#    if cnt>2:
-#        logging.error('Invalid arg:%s'%arg)
-#        sys.exit()
-#    elif cnt>1:
-#        x,y,z=arg.split(delimiter)
-#    elif cnt>0:
-#        x,y=arg.split(delimiter)
-#    else:
-#        x=arg
-#    if len(x)>0:
-#        X=x
-#    if len(y)>0:
-#        Y=y
-#    if len(z)>0:
-#        Z=z
-#    return X,Y,Z
-
-def parse_reso_fps(arg,width=-1,height=-1,fps=-1,delimiter=':'):
-    n=3
-    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(width),str(height),str(fps))
-    return int(x),int(y),int(z)
-def parse_rc_param(arg,method=-1,qp_bitrate=-1,vbv_max_rate=-1,vbv_bufsize=-1,vbv_init_time=-1,delimiter=':'):
-    n=5
-    x,y,z,s,t=common_lib.parse_arg(arg,delimiter,n,str(method),str(qp_bitrate),str(vbv_max_rate),str(vbv_bufsize),str(vbv_init_time))
-    method= get_rc_type(x)
-    return int(method),int(y),int(z),int(s),int(t)
-
-def parse_threads(arg,frame_threads=-1,wpp_threads=-1,lookahead_threads=-1,delimiter=':'):
-    n=3
-    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(frame_threads),str(wpp_threads),str(lookahead_threads))
-    return int(x),int(y),int(z)
-
-def parse_encoder_arg(opt_list,arg,local_dict,delimiter=':'):
-    n=len(local_dict)
-    opts=list()
-    vals=list()
-    for (k,v) in local_dict.items():
-        opts.append(k)
-        vals.append(str(v))
+def parse_encoder_arg_int(opt_list,arg,opts,vals,delimiter=':'):
     common_lib.parse_arg_internal(arg,delimiter,vals)
-
+    n=len(opts)
     for i in range(0,n):
         if int(vals[i])>=0:
-            opt_list[opts[i]]=int(vals[i])
+           opt_list[opts[i]]=int(vals[i])
 
+def parse_encoder_arg_mix(opt_list,arg,opts,vals,delimiter=':'):
+    typs=list()
+    for i in vals:
+        typs.append(type(i))
+
+    common_lib.parse_arg_internal(arg,delimiter,vals)
+    n=len(opts)
+    for i in range(0,n):
+        if typs[i]==int and int(vals[i])>=0:
+            opt_list[opts[i]]=int(vals[i])
+        elif typs[i]==float and float(vals[i])>=0:
+            opt_list[opts[i]]=float(vals[i])
+        elif typs[i]==str and len(vals[i])>0:
+            opt_list[opts[i]]=str(vals[i])
+
+
+def parse_reso_fps(opt_list,arg):
+    opts=('nSrcWidth', 'nSrcHeight', 'fFrameRate')
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_threads(opt_list,arg):
+    opts=('frame_threads', 'wpp_threads', 'lookahead_threads')
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
 
 def parse_frame_num(opt_list,arg):
-    local_dict={'frame_num_to_encode':-1,
-                'nIntraPicInterval':-1,
-                }
-    parse_encoder_arg(opt_list,arg,local_dict)
+    #default parameter values
+    opts=('frame_num_to_encode', 'nIntraPicInterval')
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
 
 def parse_bframe_param(opt_list,arg):
-    #default parameter values
-    bframe_num=-1
-    bref=-1
-    badaptive=-1
-    delimiter=':'
-    n=3
-    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(bframe_num),str(bref),str(badaptive))
-    bframe_num=int(x)
-    bref=int(y)
-    badaptive=int(z)
-    if bframe_num>=0:
-        opt_list['nBframe'] = bframe_num
-    if bref>=0:
-        opt_list['bExistRefB'] = bref
-    if badaptive>=0:
-        opt_list['i_bframe_adaptive'] = badaptive
+    opts=('nBframe', 'bExistRefB', 'i_bframe_adaptive')
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
 
+def parse_rc_param(opt_list,arg):
+    opts=('eRcType', 'nBitrate', 'nMaxBitrate', 'vbv_buffer_size', 'vbv_buffer_init_time')
+    vals=[-1 for i in range(0,len(opts))]
+    common_lib.parse_arg_internal(arg,':',vals)
+
+    n=len(opts)
+    for i in range(0,n):
+        print "opts[%s]=%s,vals[%s]=%s"%(i,opts[i],i,vals[i])
+        if opts[i]=='eRcType': #set rc method
+           opt_list[opts[i]]=get_rc_type(vals[i])
+        else:
+           if int(vals[i])>=0:
+              opt_list[opts[i]]=int(vals[i])
+
+    if opt_list['eRcType'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP) and opt_list.has_key('nBitrate'):
+        opt_list['nQp'] = opt_list['nBitrate']
 
 def get_tag(opt, arg):
     new_arg=arg.replace(':','x')
@@ -339,12 +277,12 @@ def get_tag(opt, arg):
 
 def get_rc_type(arg):
     rc_type = 0
-    if arg.isdigit():
+    if type(arg)==int:
         rc_type = int(arg)
-    elif global_vars.RC_DICT.has_key(arg.upper()):
+    elif type(arg)==str and global_vars.RC_DICT.has_key(arg.upper()):
         rc_type = global_vars.RC_DICT[arg.upper()]
-    return rc_type
 
+    return rc_type
 
 def parse_enc_cl(enc):
 
@@ -390,34 +328,13 @@ def parse_enc_cl(enc):
             parse_frame_num(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-T":
-            tmp_value=parse_threads(arg)
-            if int(tmp_value[0])>0:
-                opt_list["frame_threads"] = int(tmp_value[0])
-            if int(tmp_value[1])>0:
-                opt_list["wpp_threads"] = int(tmp_value[1])
-            if int(tmp_value[2])>0:
-                opt_list["lookahead_threads"] = int(tmp_value[2])
+            parse_threads(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-l":
             opt_list["rc_i_lookahead"] = int(arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-r":
-            tmp_value=parse_rc_param(arg)
-            if int(tmp_value[0])>=0:
-                opt_list["eRcType"] = int(tmp_value[0])
-            if opt_list['eRcType'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP):
-                if int(tmp_value[1])>=0:
-                    opt_list["nQp"] = int(tmp_value[1])
-            else:
-                if int(tmp_value[1])>=0:
-                    opt_list['tmp_nBitrate'] = int(tmp_value[1])
-                if opt_list['eRcType'] in (global_vars.HEVC_RC_CBR, global_vars.HEVC_RC_VBR):
-                    if int(tmp_value[2])>=0:
-                        opt_list['tmp_nMaxBitrate'] = int(tmp_value[2])
-                    if int(tmp_value[3])>=0:
-                        opt_list['tmp_vbv_buffer_size'] = int(tmp_value[3])
-                    if int(tmp_value[4])>=0:
-                        opt_list["vbv_buffer_init_time"] = int(tmp_value[4])
+            parse_rc_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == '-b':
             parse_bframe_param(opt_list,arg)
@@ -449,10 +366,7 @@ def parse_enc_cl(enc):
             opt_list["rc_b_cutree"] = int(arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-E":
-            tmp_width, tmp_height, tmp_fps = parse_reso_fps(arg)#arg.split('x')
-            opt_list["tmp_nSrcWidth"] = int(tmp_width)
-            opt_list["tmp_nSrcHeight"] = int(tmp_height)
-            opt_list["tmp_fFrameRate"] = int(tmp_fps)
+            parse_reso_fps(opt_list,arg)#arg.split('x')
             tag_str += get_tag(opt, arg)
         elif opt == "-c":
             opt_list["i_scenecut_threshold"] = int(arg)
@@ -575,7 +489,7 @@ def check_params(param_list):
     return
 
 
-def configure_rc_param(param_list, tmp_list):
+def configure_rc_param(param_list):
     #check if it is 2pass
     if param_list['eRcType'] == global_vars.HEVC_RC_ABR_TWOPASS_ANAlYSE:
         param_list['eRcType'] = global_vars.HEVC_RC_ABR
@@ -592,42 +506,24 @@ def configure_rc_param(param_list, tmp_list):
         elif rc_type not in (global_vars.HEVC_RC_ABR, global_vars.HEVC_RC_VBR):
             logging.warning('2pass is incompatible with %s' % global_vars.RC_STRING[rc_type])
 
+
     if rc_type != global_vars.HEVC_RC_FIXQUANT and rc_type != global_vars.HEVC_RC_CQP:
-        if tmp_list['tmp_nBitrate'] <= 0:
-            set_rc_related_param_auto(param_list)
-            return
-        elif rc_type == global_vars.HEVC_RC_ABR and tmp_list['tmp_nBitrate'] > 0:
-            tmp_list['tmp_nMaxBitrate'] = 0
-            tmp_list['tmp_vbv_buffer_size'] = 0
-            #set_rc_related_param_manual(param_list, tmp_nBitrate, 0, 0)
-        elif rc_type == global_vars.HEVC_RC_CBR and tmp_list['tmp_nBitrate'] > 0:
-            if tmp_list['tmp_nMaxBitrate'] <= 0:
-                tmp_list['tmp_nMaxBitrate'] = tmp_list['tmp_nBitrate']
-            if tmp_list['tmp_vbv_buffer_size'] <= 0:
-                tmp_list['tmp_vbv_buffer_size'] = tmp_list['tmp_nMaxBitrate']
-                #set_rc_related_param_manual(param_list, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
-        elif rc_type == global_vars.HEVC_RC_VBR and tmp_list['tmp_nBitrate'] > 0:
-            if tmp_list['tmp_nMaxBitrate'] <= 0:
-                tmp_list['tmp_nMaxBitrate'] = 3 * tmp_list['tmp_nBitrate']
-            if tmp_list['tmp_vbv_buffer_size'] <= 0:
-                tmp_list['tmp_vbv_buffer_size'] = tmp_list['tmp_nMaxBitrate']
-                #set_rc_related_param_manual(param_list, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size)
-        set_rc_related_param_manual(param_list, tmp_list['tmp_nBitrate'], tmp_list['tmp_nMaxBitrate'],
-                                    tmp_list['tmp_vbv_buffer_size'])
-        return
+        set_bitrate(param_list,param_list['nBitrate'])
+        set_max_bitrate(param_list,param_list['nMaxBitrate'])
+        set_buffer_size(param_list,param_list['vbv_buffer_size'])
 
 
 def get_default_tmp_list(param_list):
     tmp_list = {}  #dict()
     tmp_list['seq_name'] = os.path.splitext(param_list['input_filename'])[0]
                          #param_list['input_filename'].replace(".yuv","")
-    tmp_list['tmp_nBitrate'] = -1
-    tmp_list['tmp_nMaxBitrate'] = -1
-    tmp_list['tmp_vbv_buffer_size'] = -1
+    #tmp_list['tmp_nBitrate'] = -1
+    #tmp_list['tmp_nMaxBitrate'] = -1
+    #tmp_list['tmp_vbv_buffer_size'] = -1
     tmp_list['extra_cls'] = ""
-    tmp_list['tmp_nSrcWidth'] = -1
-    tmp_list['tmp_nSrcHeight'] = -1
-    tmp_list['tmp_fFrameRate'] = -1
+    #tmp_list['tmp_nSrcWidth'] = -1
+    #tmp_list['tmp_nSrcHeight'] = -1
+    #tmp_list['tmp_fFrameRate'] = -1
     tmp_list['do_execute']=0
     tmp_list['log_print']=0
     return tmp_list
@@ -656,10 +552,9 @@ def configure_enc_param(enc, param_list):
             sys.exit()
 
     print tmp_list
-    cons_log = configure_seq_param(param_list, tmp_list['seq_name'], tmp_list['tmp_nSrcWidth'],
-                                   tmp_list['tmp_nSrcHeight'], tmp_list['tmp_fFrameRate'], tag_str)
+    cons_log = configure_seq_param(param_list, tmp_list['seq_name'],tag_str)
 
-    configure_rc_param(param_list, tmp_list)
+    configure_rc_param(param_list)
 
     check_params(param_list)
 
