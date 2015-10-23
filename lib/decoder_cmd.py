@@ -90,12 +90,11 @@ def get_default_dec_param_list():
 def usage():
     help_msg = '''Usage:cl_run_dec.py [option] [value] ...
   options:
-   -e <string> encoder name:ashevcd,hmd,jmd
+   -e <string> decoder name:ashevcd,hmd,jmd
    -i <string> input file name
    -o output the reconstruct file
-   -h print this help
-   -H print the decoder help
-   -V print the decoder version info
+  args:
+  <outputfilename>
    '''
     print help_msg
     return

@@ -33,8 +33,8 @@ def get_default_enc_param_list():
     param_list['nMaxCUDepth'] = 4
     param_list['nQuadtreeTULog2MaxSize'] = 5
     param_list['nQuadtreeTULog2MinSize'] = 2
-    param_list['nQuadtreeTUMaxDepthIntra'] = 3
-    param_list['nQuadtreeTUMaxDepthInter'] = 3
+    param_list['nQuadtreeTUMaxDepthIntra'] = 1
+    param_list['nQuadtreeTUMaxDepthInter'] = 1
 
     # gop
     param_list['nIntraPicInterval'] = 350

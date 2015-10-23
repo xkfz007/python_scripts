@@ -26,7 +26,7 @@ class_i = ('Iduckstakeoff_1280x720_8_25_500', 'Ifcwr_1920x1080_8_25_6987',
            'Itennis_1920x1080_8_25_240', 'Ividyo1_1280x720_8_25_600', 'Ividyo3_1280x720_8_25_600',
            'Ividyo4_1280x720_8_25_600',
            'Ixtslf_1920x1080_8_25_1854')
-class_special = ('Ifcwr_1920x1080_8_25_6987', 'Ixtslf_1920x1080_8_25_1854', 'Inavyflight_1920x1080_8_30_2973')
+class_special = ('Ifcwr_1920x1080_8_25_6987', 'Ixtslf_1920x1080_8_25_1854', 'Inavyflight_1920x1080_8_30_2973','kldby_1920x1080_25')
 class_special2 = ('ztv_720x576_25',)
 class_x = ('Xclownlogoed_3840x2160_8_25_640', 'Xsnake_3840x2160_8_25_353', 'Xsusielogoed_3840x2160_8_25_588')
 class_m=('ClassAmerge_2560x1600_30','ClassBMerge_1920x1080_24','ClassEMerge_1280x720_60','ClassFMerge_1280x720_30')

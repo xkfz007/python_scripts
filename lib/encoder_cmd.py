@@ -207,25 +207,29 @@ def usage():
     help_msg = '''Usage:cl_run_enc.py [option] [value]...
   options:
    -e <string> encoder name:as265,x265,x264,hm,jm
+   -s <string> seqname
+   -E <int>:<int>:<int> resolution width:height:fps
    -i <string> input_path
    -o <string> output_path
-   -I <integer> I frame interval
-   -f <integer> frames to be encoded
-   -F <integer> frame parallelism threads
-   -W <integer> WPP threads
-   -L <integer> Lookahead threads
-   -l <integer> number of lookahead frames
-   -q <integer> qp
-   -r <integer> or <string> ratecontrol method
-   -B <integer> bitrate
-   -V <integer> vbv_max_bitrate
-   -S <integer> vbv_buffer_size
+   -f <int1>:<int2>
+      <int1>: frames to be encoded
+      <int2>: I frame interval
+   -T <int1>:<int2>:<int3> multi-threads
+      <int1>: frame parallelism threads
+      <int2>: WPP threads
+      <int3>: Lookahead threads
+   -r <int/string>:<int1>:<int2>:<int3>:<int4> rate control parameters
+      <int/string>: rate control method
+      <int1>:qp/bitrate
+      <int2>:vbv_max_bitrate
+      <int3>:vbv_buffer_size
+      <int4>:vbv-init-time
+   -R <string> ref number
    -b <integer> bframes
    -M <integer> bref/b-pyramid/hierarchical:0 disabled, 1 enabled
-   -a <integer> aq-mode:0 disabled, 1 Variance AQ, Auto-Variance AQ
-   -s <string> seqname
-   -R <string> ref number
-   -t <integer> use vbv-init-time
+   -D <integer> bframe adaptive
+   -c <integer> scenecut value
+   -G <integer> open-gop:0 disabled, 1 enabled
    -y dump-yuv
    -C <string> extra command lines
    -O <integer> Lowres:0 auto, 1 semi, 2 quater
@@ -234,14 +238,11 @@ def usage():
                          2: 2pass encoding with clipping
                          3: first pass of 2pass encoding (only for x26x)
                          4: second pass of 2pass encoding (only for x26x)
-   -T <string>  stats file (not supported yet)
    -g <string> the 2pass log file (not supported yet)
+   -l <integer> number of lookahead frames
    -P <integer> qp step
+   -a <integer> aq-mode:0 disabled, 1 Variance AQ, Auto-Variance AQ
    -A <integer> cu tree:0 disabled, 1 enabled
-   -E <intxintxfps> resolution: widthxheightxfps
-   -c <integer> scenecut value
-   -G <integer> open-gop:0 disabled, 1 enabled
-   -D <integer> bframe adaptive
    -k <integer> seek frame
    -j <integer> sao: 0 disabled, 1 enabled
    -J <integer> deblock: 0 disabled, 1 enabled
@@ -275,13 +276,29 @@ def usage():
 #        Z=z
 #    return X,Y,Z
 
-def parse_reso_fps(arg,width=-1,height=-1,fps=-1,delimiter='x'):
+def parse_reso_fps(arg,width=-1,height=-1,fps=-1,delimiter=':'):
     n=3
     x,y,z=common_lib.parse_arg(arg,delimiter,n,str(width),str(height),str(fps))
     return int(x),int(y),int(z)
+def parse_rc_param(arg,method=-1,qp_bitrate=-1,vbv_max_rate=-1,vbv_bufsize=-1,vbv_init_time=-1,delimiter=':'):
+    n=5
+    x,y,z,s,t=common_lib.parse_arg(arg,delimiter,n,str(method),str(qp_bitrate),str(vbv_max_rate),str(vbv_bufsize),str(vbv_init_time))
+    method= get_rc_type(x)
+    return int(method),int(y),int(z),int(s),int(t)
+
+def parse_threads(arg,frame_threads=-1,wpp_threads=-1,lookahead_threads=-1,delimiter=':'):
+    n=3
+    x,y,z=common_lib.parse_arg(arg,delimiter,n,str(frame_threads),str(wpp_threads),str(lookahead_threads))
+    return int(x),int(y),int(z)
+
+def parse_frame_num(arg,frames_to_be_encoded=-1,keyframe_int=-1,delimiter=':'):
+    n=2
+    x,y=common_lib.parse_arg(arg,delimiter,n,str(frames_to_be_encoded),str(keyframe_int))
+    return int(x),int(y)
 
 def get_tag(opt, arg):
-    str = opt[1:] + arg
+    new_arg=arg.replace(':','x')
+    str = opt[1:] + new_arg
     return str
 
 
@@ -303,7 +320,7 @@ def parse_enc_cl(enc):
     help=common_lib.HELP(usage,enc.get_exe())
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'i:o:I:f:F:W:L:l:q:r:B:V:S:b:M:a:s:R:e:t:yC:O:p:P:A:E:c:G:D:k:j:J:'+help.get_opt(),
+                                   'i:o:I:f:T:l:q:r:b:M:a:s:R:e:yC:O:p:P:A:E:c:G:D:k:j:J:'+help.get_opt(),
                                    ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)
@@ -334,41 +351,40 @@ def parse_enc_cl(enc):
             opt_list["input_path"] = arg
         elif opt == "-o":
             opt_list["output_path"] = arg
-        elif opt == "-I":
-            opt_list["nIntraPicInterval"] = int(arg)
-            tag_str += get_tag(opt, arg)
         elif opt == "-f":
-            opt_list["frame_num_to_encode"] = int(arg)
+            tmp_value=parse_frame_num(arg)
+            opt_list["frame_num_to_encode"] = int(tmp_value[0])
+            opt_list["nIntraPicInterval"] = int(tmp_value[1])
             tag_str += get_tag(opt, arg)
-        elif opt == "-F":
-            opt_list["frame_threads"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-W":
-            opt_list["wpp_threads"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-L":
-            opt_list["lookahead_threads"] = int(arg)
+        elif opt == "-T":
+            tmp_value=parse_threads(arg)
+            if int(tmp_value[0])>0:
+                opt_list["frame_threads"] = int(tmp_value[0])
+            if int(tmp_value[1])>0:
+                opt_list["wpp_threads"] = int(tmp_value[1])
+            if int(tmp_value[2])>0:
+                opt_list["lookahead_threads"] = int(tmp_value[2])
             tag_str += get_tag(opt, arg)
         elif opt == "-l":
             opt_list["rc_i_lookahead"] = int(arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-q":
-            opt_list["nQp"] = int(arg)
-            tag_str += get_tag(opt, arg)
         elif opt == "-r":
-            opt_list["eRcType"] = get_rc_type(arg)  #int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-B":
-            #tmp_nBitrate = int(arg)
-            opt_list['tmp_nBitrate'] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-V":
-            #tmp_nMaxBitrate = int(arg)
-            opt_list['tmp_nMaxBitrate'] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-S":
-            #tmp_vbv_buffer_size = int(arg)
-            opt_list['tmp_vbv_buffer_size'] = int(arg)
+            tmp_value=parse_rc_param(arg)
+            if int(tmp_value[0])>=0:
+                opt_list["eRcType"] = int(tmp_value[0])
+            if opt_list['eRcType'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP):
+                if int(tmp_value[1])>=0:
+                    opt_list["nQp"] = int(tmp_value[1])
+            else:
+                if int(tmp_value[1])>=0:
+                    opt_list['tmp_nBitrate'] = int(tmp_value[1])
+                if opt_list['eRcType'] in (global_vars.HEVC_RC_CBR, global_vars.HEVC_RC_VBR):
+                    if int(tmp_value[2])>=0:
+                        opt_list['tmp_nMaxBitrate'] = int(tmp_value[2])
+                    if int(tmp_value[3])>=0:
+                        opt_list['tmp_vbv_buffer_size'] = int(tmp_value[3])
+                    if int(tmp_value[4])>=0:
+                        opt_list["vbv_buffer_init_time"] = int(tmp_value[4])
             tag_str += get_tag(opt, arg)
         elif opt == "-b":
             opt_list["nBframe"] = int(arg)
@@ -384,9 +400,6 @@ def parse_enc_cl(enc):
             opt_list['seq_name'] = arg
         elif opt == "-R":
             opt_list["nMaxRefNum"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-t":
-            opt_list["vbv_buffer_init_time"] = int(arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-y":
             opt_list["trace_flag"] |= 2
@@ -530,6 +543,8 @@ def check_params(param_list):
         param_list['frame_num_to_encode'] = get_total_frame_num(
             os.path.join(param_list['input_path'], param_list['input_filename']),
             param_list['nSrcWidth'], param_list['nSrcHeight'])
+    if param_list['nIntraPicInterval']<=0:
+        param_list['nIntraPicInterval']=param_list['fFrameRate']
     return
 
 
@@ -597,7 +612,7 @@ def configure_enc_param(enc, param_list):
     param_len = len(param_list)
     tmp_list_len = len(tmp_list)
 
-    if len(sys.argv) > 1:
+    if len(sys.argv) >= 1:
         #opt_list, tag_str, seq_name, tmp_nBitrate, tmp_nMaxBitrate, tmp_vbv_buffer_size = parse_cl(enc)
         opt_list, tag_str = parse_enc_cl(enc)
         for (k, v) in opt_list.items():

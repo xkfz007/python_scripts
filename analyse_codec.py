@@ -73,10 +73,11 @@ class ANALYZER(object):
 
 def usage():
     msg='''usage:analysis_file.py [options]
-    -e <id> set the encoder or decoder
+    options:
+    -e <id> set the encoder[as265,x265,x264,hm,jm] or decoder [ashevcd,hmd,jmd]
     -i <filename> set input file name
-    --bits <filename> output bits of each frame
-    --qp <filename> output qp of each frame
+    -b/--bits <filename> output bits of each frame
+    -q/--qp <filename> output qp of each frame
   '''
     print msg
     return
@@ -93,7 +94,7 @@ if __name__=='__main__':#obtain_data():
 
     help=lib.common_lib.HELP(usage)
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:i:'+help.get_opt(), ['bits=', 'qps=', 'qp='])
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:i:b:q:'+help.get_opt(), ['bits=', 'qps=', 'qp='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -110,10 +111,10 @@ if __name__=='__main__':#obtain_data():
     qp_output = ''
     qps_output = ''
     for opt, arg in opts:
-        if opt in ('--bits',):
+        if opt in ('--bits','-b'):
             bits_flag = 1
             bits_output = arg
-        elif opt in ('--qp',):
+        elif opt in ('--qp','-q'):
             qp_flag = 1
             qp_output = arg
         elif opt in ('--qps',):
