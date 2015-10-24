@@ -41,7 +41,7 @@ def get_enc_param_cmd_hm(param_list):
     cmd += " --InputBitDepthC=8"
     cmd += " --FrameRate=%s" % param_list['fFrameRate']
     cmd += " --FrameSkip=%s" % param_list['first_frame']
-    cmd += " --SourceWidth=%s" % param_list['nSrcWidth']
+    cmd += " --SourceWidth=%s" % param_list['i_src_width']
     cmd += " --SourceHeight=%s" % param_list['nSrcHeight']
     cmd += " --FramesToBeEncoded=%s" % param_list['frame_num_to_encode']
     # cmd += " --Level=%s"%0

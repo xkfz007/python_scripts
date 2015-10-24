@@ -10,7 +10,7 @@ def get_enc_param_cmd_jm(param_list):
     cmd += " -p StartFrame=%s" % param_list['first_frame']
     cmd += " -p FramesToBeEncoded=%s" % param_list['frame_num_to_encode']
     cmd += " -p FrameRate=%s" % param_list['fFrameRate']
-    cmd += " -p SourceWidth=%s" % param_list['nSrcWidth']
+    cmd += " -p SourceWidth=%s" % param_list['i_src_width']
     cmd += " -p SourceHeight=%s" % param_list['nSrcHeight']
     cmd += " -p YUVFormat=%s" % "1"
     cmd += " -p SourceBitDepthLuma=8"

@@ -94,8 +94,8 @@ class ENCODER(codec_cmd.CODEC):
 def configure_seq_param(param_list, tmp_name, tags=''):
     seq_name = seq_list.guess_seqname(tmp_name)
     org_width, org_height, org_fps = seq_list.get_reso_info(seq_name)
-    if param_list['nSrcWidth'] <= 0:
-        param_list['nSrcWidth'] = int(org_width)
+    if param_list['i_src_width'] <= 0:
+        param_list['i_src_width'] = int(org_width)
 
     if param_list['nSrcHeight'] <= 0:
         param_list['nSrcHeight'] = int(org_height)
@@ -132,14 +132,14 @@ def set_bitrate(param_list,bitrate=-1,factor=2):
                         "448x336": 110,
                         "3840x2160": 8000,
                         }
-       reso = '%sx%s' % (param_list['nSrcWidth'], param_list['nSrcHeight'])
+       reso = '%sx%s' % (param_list['i_src_width'], param_list['nSrcHeight'])
        if base_rate_dict.has_key(reso):
            base_rate=base_rate_dict[reso]
        else:
            base_rate=5000
        bitrate = param_list['fFrameRate'] * base_rate / 30 *factor
     elif bitrate <= 1.0:
-       bitrate *= param_list['nSrcWidth'] * param_list['nSrcHeight'] * param_list['fFrameRate'] / 1000
+       bitrate *= param_list['i_src_width'] * param_list['nSrcHeight'] * param_list['fFrameRate'] / 1000
     param_list['nBitrate'] = bitrate
 
 
@@ -183,6 +183,13 @@ def usage():
       <int1>: number of b-frame
       <int2>: bref/b-pyramid/hierarchical:0 disabled, 1 enabled
       <int3>: bframe adaptive, 0: disabled, 1: fast method, 2: trellis
+   -u <int1>:<int2>:<int3>:<int4>:<int5>:<int6> CU,PU,TU parameters
+      <int1>: nMaxCUSize
+      <int2>: nMaxCUDepth
+      <int3>: nQuadtreeTULog2MaxSize
+      <int4>: nQuadtreeTULog2MinSize
+      <int5>: nQuadtreeTUMaxDepthIntra
+      <int6>: nQuadtreeTUMaxDepthInter
    -c <integer> scenecut value
    -G <integer> open-gop:0 disabled, 1 enabled
    -y dump-yuv
@@ -232,7 +239,7 @@ def parse_encoder_arg_mix(opt_list,arg,opts,vals,delimiter=':'):
 
 
 def parse_reso_fps(opt_list,arg):
-    opts=('nSrcWidth', 'nSrcHeight', 'fFrameRate')
+    opts=('i_src_width', 'nSrcHeight', 'fFrameRate')
     vals=[-1 for i in range(0,len(opts))]
     parse_encoder_arg_int(opt_list,arg,opts,vals)
 
@@ -269,6 +276,16 @@ def parse_rc_param(opt_list,arg):
     if opt_list['eRcType'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP) and opt_list.has_key('nBitrate'):
         opt_list['nQp'] = opt_list['nBitrate']
 
+def parse_unit_param(opt_list,arg):
+    opts=( 'nMaxCUSize',
+           'nMaxCUDepth',
+           'nQuadtreeTULog2MaxSize',
+           'nQuadtreeTULog2MinSize',
+           'nQuadtreeTUMaxDepthIntra',
+           'nQuadtreeTUMaxDepthInter',)
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
 def get_tag(opt, arg):
     new_arg=arg.replace(':','x')
     str = opt[1:] + new_arg
@@ -293,7 +310,7 @@ def parse_enc_cl(enc):
     help=common_lib.HELP(usage,enc.get_exe())
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'i:o:I:f:T:l:q:r:b:a:s:R:e:yC:O:p:P:A:E:c:G:k:j:J:'+help.get_opt(),
+                                   'i:o:I:f:T:l:q:r:b:u:a:s:R:e:yC:O:p:P:A:E:c:G:k:j:J:'+help.get_opt(),
                                    ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)
@@ -338,6 +355,9 @@ def parse_enc_cl(enc):
             tag_str += get_tag(opt, arg)
         elif opt == '-b':
             parse_bframe_param(opt_list,arg)
+            tag_str += get_tag(opt, arg)
+        elif opt == '-u':
+            parse_unit_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == "-a":
             opt_list["rc_i_aq_mode"] = int(arg)
@@ -483,7 +503,7 @@ def check_params(param_list):
     if param_list['frame_num_to_encode'] == 0:
         param_list['frame_num_to_encode'] = get_total_frame_num(
             os.path.join(param_list['input_path'], param_list['input_filename']),
-            param_list['nSrcWidth'], param_list['nSrcHeight'])
+            param_list['i_src_width'], param_list['nSrcHeight'])
     if param_list['nIntraPicInterval']==0:
         param_list['nIntraPicInterval']=param_list['fFrameRate']
     return
@@ -521,7 +541,7 @@ def get_default_tmp_list(param_list):
     #tmp_list['tmp_nMaxBitrate'] = -1
     #tmp_list['tmp_vbv_buffer_size'] = -1
     tmp_list['extra_cls'] = ""
-    #tmp_list['tmp_nSrcWidth'] = -1
+    #tmp_list['tmp_i_src_width'] = -1
     #tmp_list['tmp_nSrcHeight'] = -1
     #tmp_list['tmp_fFrameRate'] = -1
     tmp_list['do_execute']=0

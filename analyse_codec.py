@@ -132,10 +132,10 @@ if __name__=='__main__':#obtain_data():
 
     if bits_flag == 1:
         cmd = cdc.get_bits_cmd(input_file)
-        lib.run_cmd(cmd, bits_output,help.get_do_execute(),0)
+        lib.run_cmd(cmd, help.get_do_execute(), bits_output)
 
     if qp_flag == 1:
         cmd = cdc.get_qp_cmd(input_file)
-        lib.run_cmd(cmd, qp_output,help.get_do_execute(),0)
+        lib.run_cmd(cmd, help.get_do_execute(), qp_output)
         #if help.get_do_execute()==1:
         #   os.system(cmd)

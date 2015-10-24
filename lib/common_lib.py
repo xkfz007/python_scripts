@@ -2,6 +2,7 @@ import platform
 import os
 import subprocess
 import logging
+import  glob
 
 
 def determin_sys():
@@ -106,24 +107,26 @@ def delete_files(path, ext_list):
             if ext in ext_list:
                 os.remove(full_name)
 
-def run_cmd(cmd_line,log_file='',do_execute=0,rec_cl=1):
-   print cmd_line
-   if do_execute==0:
-       return
-   pfile = None
-   #if determin_sys() == "cygwin" and rec_cl==1:
-   #    cmd_line += " 2>&1 |tee -a %s"% log_file
-   if len(log_file)>0:
-      pfile = open(log_file, "w")
-      if rec_cl==1:
-         print >> pfile, "%s" % cmd_line
-         if determin_sys() in ('cygwin','linux'):
-           cmd_line += " 2>&1 |tee -a %s"% log_file
-           pfile.close()
-           pfile=None
+def run_cmd(cmd_line,do_execute=0,log_file='',rec_cl=0):
+    if len(cmd_line)==0:
+        return
+    print cmd_line
+    if do_execute==0:
+        return
+    pfile = None
+    #if determin_sys() == "cygwin" and rec_cl==1:
+    #    cmd_line += " 2>&1 |tee -a %s"% log_file
+    if len(log_file)>0:
+       pfile = open(log_file, "w")
+       if rec_cl==1:
+          print >> pfile, "%s" % cmd_line
+          if determin_sys() in ('cygwin','linux'):
+            cmd_line += " 2>&1 |tee -a %s"% log_file
+            pfile.close()
+            pfile=None
 
-   #os.system(cmd_line)
-   subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
+    #os.system(cmd_line)
+    subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
 
 
 class HELP(object):
@@ -142,11 +145,11 @@ class HELP(object):
     def get_opt(self):
         return HELP.default_opt
     def add_usage(self):
-        msg='additional options:\n'
-        msg+='   -h print this help\n'
+        msg='ADDITIONAL OPTIONS:\n'
+        msg+='   -h  print this help\n'
         if len(self.BIN)>0:
-           msg+='   -H print help of "%s"\n'%self.BIN
-        msg+='   -Y whether to execute the program\n'
+           msg+='   -H  print help of "%s"\n'%self.BIN
+        msg+='   -Y  whether to execute the program\n'
         print msg
 
     def parse_opt(self,opt):
@@ -155,7 +158,7 @@ class HELP(object):
             self.add_usage()
             sys.exit()
         elif opt == '-H':
-            if len(self.BIN):
+            if len(self.BIN)>0:
                os.system(self.BIN+' '+self.help)
             else:
                 logging.error('Executor is not set')
@@ -190,7 +193,7 @@ def parse_arg_internal(arg,delimiter,olst):
         if len(lst[i])>0:
             olst[i]=lst[i]
 
-def parse_arg(arg,delimiter,n,*LS):
+def parse_arg(arg,delimiter,*LS):
     #cnt=arg.count(delimiter)
     #N=cnt+1
     #print 'cnt=%s'%cnt
@@ -208,3 +211,47 @@ def parse_arg(arg,delimiter,n,*LS):
 
     return olst
 
+def getstatusoutput(cmd):
+    p=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, _ = p.communicate()
+
+    if out[-1:] == b'\n':
+        out = out[:-1]
+
+    return (p.returncode, out)
+
+#get_input_file_list and get_input_file_dir_list have reasons to exist
+#In command line situations, python works well with shell globbing for regular directory or file names.
+#However, when it comes to file or directory names with Chinese, the external programs reject these files
+# or directories which are passed from python. This is may caused by the different Chinese encodings
+# between shell and python
+#get the files from the PATTERN, globbing is used
+def get_input_file_list(input_list,pattern):
+
+    if os.path.isdir(pattern):
+        logging.info('"%s" is a directory' % pattern)
+        input_list.extend(get_file_list(pattern))
+    elif os.path.isfile(pattern):
+        logging.info('"%s" is a file' % pattern)
+        input_list.append(pattern)
+    else:  # globbing is needed
+        glob_list=glob.glob(pattern)
+        logging.info('"%s" is glob pattern:%s' % (pattern,glob_list))
+        for i in glob_list:
+            get_input_file_list(input_list,i)
+            # print type(input_file)
+            #print "input_list=%s" % input_list
+
+def get_input_file_or_dir_list(input_list,pattern):
+
+    if os.path.isdir(pattern):
+        logging.info('"%s" is a directory' % pattern)
+        input_list.append(pattern)
+    elif os.path.isfile(pattern):
+        logging.info('"%s" is a file' % pattern)
+        input_list.append(pattern)
+    else:  # globbing is needed
+        glob_list=glob.glob(pattern)
+        logging.info('"%s" is glob pattern:%s' % (pattern,glob_list))
+        for i in glob_list:
+            get_input_file_or_dir_list(input_list,i)

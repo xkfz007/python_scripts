@@ -160,9 +160,13 @@ def parse_arg(arg,delimiter,*LS):
     return olst
 
 
-x,y,z,w=parse_arg('500::2:1',':',0,0,0,0)
-print x,y,z,w
+#x,y,z,w=parse_arg('500::2:1',':',0,0,0,0)
+#print x,y,z,w
 
 #opt=raw_input('Directory "a" does not exist, do you want to create it?(Y/N)')
 #print opt
+
+
+
+
 

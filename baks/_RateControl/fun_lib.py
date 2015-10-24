@@ -14,11 +14,11 @@ def get_reso_info2(seq_name):
     return reso
 
 
-def get_bitrate_for_rc(eRcType, nSrcWidth, nSrcHeight, fFrameRate, factor=2):
+def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate, factor=2):
     nBitrate = 0
     nMaxBitrate = 0
     vbv_buffer_size = 0
-    reso = str(nSrcWidth) + "x" + str(nSrcHeight)
+    reso = str(i_src_width) + "x" + str(nSrcHeight)
     if reso == "2560x1600":
         base_rate = 3200
     elif reso == "1920x1080":
@@ -186,7 +186,7 @@ def get_cmd_line(param_list):
     cmd += " %s" % param_list['trace_flag']
     cmd += " %s" % param_list['measure_quality_flag']
 
-    cmd += " %s" % param_list['nSrcWidth']
+    cmd += " %s" % param_list['i_src_width']
     cmd += " %s" % param_list['nSrcHeight']
     cmd += " %s" % param_list['fFrameRate']
     cmd += " %s" % param_list['frame_num_to_encode']
@@ -281,7 +281,7 @@ def get_cmd_line(param_list):
 
 def set_seq_related_param(param_list, seq_name):
     reso_info = get_reso_info(seq_name)
-    param_list['nSrcWidth'] = reso_info[0]
+    param_list['i_src_width'] = reso_info[0]
     param_list['nSrcHeight'] = reso_info[1]
     param_list['fFrameRate'] = reso_info[2]
 
@@ -298,7 +298,7 @@ def set_seq_related_param(param_list, seq_name):
 
 
 def set_rc_related_param_auto(param_list, factor):
-    rc_param = get_bitrate_for_rc(param_list['eRcType'], param_list['nSrcWidth'], param_list['nSrcHeight'],
+    rc_param = get_bitrate_for_rc(param_list['eRcType'], param_list['i_src_width'], param_list['nSrcHeight'],
                                   param_list['fFrameRate'], factor)
     param_list['nBitrate'] = rc_param[0]
     param_list['nMaxBitrate'] = rc_param[1]

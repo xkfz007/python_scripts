@@ -126,37 +126,18 @@ def get_ffmpeg_opt_list():
     ff_opt_list['acodec']=''
     return ff_opt_list
 
-def get_input_list(input_list,arg):
-
-    if os.path.isdir(arg):
-        logging.info('"%s" is a directory' % arg)
-        input_list.extend(lib.get_file_list(arg))
-    elif os.path.isfile(arg):
-        logging.info('"%s" is a file' % arg)
-        input_list.append(arg)
-    else:  # globbing is needed
-        glob_list=glob.glob(arg)
-        logging.info('"%s" is glob pattern:%s' % (arg,glob_list))
-        for i in glob_list:
-            get_input_list(input_list,i)
-    # print type(input_file)
-    #print "input_list=%s" % input_list
-
 
 
 def parse_reso(arg,width=-2,height=-2,delimiter='x'):
-    n=2
-    x,y=lib.parse_arg(arg,delimiter,n,str(width),str(height))
+    x,y=lib.parse_arg(arg,delimiter,str(width),str(height))
     return int(x),int(y)
 
 def parse_time(arg,startp='',dura='',delimiter='+'):
-    n=2
-    x,y=lib.parse_arg(arg,delimiter,n,startp,dura)
+    x,y=lib.parse_arg(arg,delimiter,startp,dura)
     return x,y
 
 def parse_outpath(arg,output_path='',output_tag='',delimiter=':'):
-    n=2
-    opath,otag=lib.parse_arg(arg,delimiter,n,output_path,output_tag)
+    opath,otag=lib.parse_arg(arg,delimiter,output_path,output_tag)
     print 'opth=%s,otag=%s'%(opath,otag)
     if '.' in opath:
         opath,otag=os.path.split(opath)
@@ -261,7 +242,7 @@ if __name__ == '__main__':
 
     input_list=[]
     for arg in args:
-        get_input_list(input_list,arg)
+        lib.get_input_file_list(input_list,arg)
 
     if len(input_list) == 0:
         logging.error('Input is invalid, please check')
@@ -363,18 +344,20 @@ if __name__ == '__main__':
         cmd_list.append(cmd_line)
 
 
-    if help.get_do_execute()== 1:
-        for cmd in cmd_list:
-            if len(cmd)==0:
-                continue
-            print cmd
-            # os.system(cmd)
-            subprocess.call(cmd, stdout=None, stderr=None, shell=True)
-        if len(merged_file)>0:
-            for i in output_list:
-                if os.path.exists(i):
-                    #os.remove(i)
-                   logging.info('"%s" is deleted'%i)
+    #if help.get_do_execute()== 1:
+    #    for cmd in cmd_list:
+    #        if len(cmd)==0:
+    #            continue
+    #        print cmd
+    #        # os.system(cmd)
+    #        subprocess.call(cmd, stdout=None, stderr=None, shell=True)
+    #    if len(merged_file)>0:
+    #        for i in output_list:
+    #            if os.path.exists(i):
+    #                #os.remove(i)
+    #               logging.info('"%s" is deleted'%i)
+    for cmd in cmd_list:
+        lib.run_cmd(cmd,help.get_do_execute())
 
 
 

@@ -17,19 +17,19 @@ def get_default_enc_param_list():
     param_list['trace_file_cabacrdo'] = "trace_file_cabacrdo.log"
     param_list['trace_file_arch1rdo'] = "trace_file_arch1rdo.log"
 
-    param_list['nSrcWidth'] = 416
+    param_list['i_src_width'] = 416
     param_list['nSrcHeight'] = 240
     param_list['fFrameRate'] = 50
 
     # debug related paramters
-    param_list['printf_flag'] = 1  # 225
-    param_list['trace_flag'] = 0  # 7
-    param_list['measure_quality_flag'] = 1
+    param_list['i_printf_flag'] = 1  # 225
+    param_list['i_trace_flag'] = 0  # 7
+    param_list['b_measure_quality'] = 1
 
     param_list['frame_num_to_encode'] = -1
 
     # cu pu tu
-    param_list['nMaxCUSize'] = 64
+    param_list['nMaxCUSize'] = 6 #log2width
     param_list['nMaxCUDepth'] = 4
     param_list['nQuadtreeTULog2MaxSize'] = 5
     param_list['nQuadtreeTULog2MinSize'] = 2
@@ -145,18 +145,19 @@ def get_enc_param_cmd_as265(param_list):
     cmd += ' "%s"' % param_list['trace_file_cabacrdo']
     cmd += ' "%s"' % param_list['trace_file_arch1rdo']
 
-    cmd += " %s" % param_list['printf_flag']
-    cmd += " %s" % param_list['trace_flag']
-    cmd += " %s" % param_list['measure_quality_flag']
+    cmd += " %s" % param_list['i_printf_flag']
+    cmd += " %s" % param_list['i_trace_flag']
+    cmd += " %s" % param_list['b_measure_quality']
 
-    cmd += " %s" % param_list['nSrcWidth']
+    cmd += " %s" % param_list['i_src_width']
     cmd += " %s" % param_list['nSrcHeight']
     cmd += " %s" % param_list['fFrameRate']
     cmd += " %s" % param_list['frame_num_to_encode']
 
     # cu pu tu
-    tmp_power = {64: 6, 32: 5, 16: 4, 8: 3, 4: 2}
-    cmd += " %s" % tmp_power[param_list['nMaxCUSize']]
+    #tmp_power = {64: 6, 32: 5, 16: 4, 8: 3, 4: 2}
+    #cmd += " %s" % tmp_power[param_list['nMaxCUSize']]
+    cmd += " %s" % param_list['nMaxCUSize']
     cmd += " %s" % param_list['nMaxCUDepth']
     cmd += " %s" % param_list['nQuadtreeTULog2MaxSize']
     cmd += " %s" % param_list['nQuadtreeTULog2MinSize']

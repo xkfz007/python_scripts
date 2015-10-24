@@ -96,7 +96,7 @@ rc_i_pass = 0
 
 for seq_name in _RateControl.classC:
     reso_info = _RateControl.get_reso_info(seq_name)
-    nSrcWidth = int(reso_info[0])
+    i_src_width = int(reso_info[0])
     nSrcHeight = int(reso_info[1])
     fFrameRate = int(reso_info[2])
 
@@ -110,7 +110,7 @@ for seq_name in _RateControl.classC:
     trace_file_cabacrdo = seq_name + "_cabacrdo.log"
     trace_file_arch1rdo = seq_name + "_arch1rdo.log"
 
-    rc_param = _RateControl.get_bitrate_for_rc(rc_methods[eRcType], nSrcWidth, nSrcHeight, fFrameRate)
+    rc_param = _RateControl.get_bitrate_for_rc(rc_methods[eRcType], i_src_width, nSrcHeight, fFrameRate)
     nBitrate = rc_param[0]
     nMaxBitrate = rc_param[1]
     vbv_buffer_size = rc_param[2]
@@ -137,7 +137,7 @@ for seq_name in _RateControl.classC:
     cmd += " %s" % trace_flag
     cmd += " %s" % measure_quality_flag
 
-    cmd += " %s" % nSrcWidth
+    cmd += " %s" % i_src_width
     cmd += " %s" % nSrcHeight
     cmd += " %s" % fFrameRate
     cmd += " %s" % frame_num_to_encode

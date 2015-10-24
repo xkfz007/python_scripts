@@ -28,4 +28,4 @@ cmd_line = lib.get_full_cdec_cmd(dec, param_list)
 ## os.system(cmd_line)
 #print cmd_line
 #subprocess.call(cmd_line, shell=True, stdout=reg_file, stderr=reg_file)
-lib.run_cmd(cmd_line,cons,do_execute)
+lib.run_cmd(cmd_line,do_execute,cons,1)

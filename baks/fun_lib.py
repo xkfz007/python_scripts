@@ -5,11 +5,11 @@ def get_reso_info(seq_name):
     return reso
 
 
-def get_bitrate_for_rc(eRcType, nSrcWidth, nSrcHeight, fFrameRate):
+def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate):
     nBitrate = 0
     nMaxBitrate = 0
     vbv_buffer_size = 0
-    reso = str(nSrcWidth) + "x" + str(nSrcHeight)
+    reso = str(i_src_width) + "x" + str(nSrcHeight)
     if reso == "2560x1600":
         base_rate = 3200
     elif reso == "1920x1080":
