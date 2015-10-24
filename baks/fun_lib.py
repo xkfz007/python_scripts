@@ -5,11 +5,11 @@ def get_reso_info(seq_name):
     return reso
 
 
-def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate):
-    nBitrate = 0
-    nMaxBitrate = 0
-    vbv_buffer_size = 0
-    reso = str(i_src_width) + "x" + str(nSrcHeight)
+def get_bitrate_for_rc(e_rctype, i_src_width, i_src_height, f_framerate):
+    i_bitrate = 0
+    i_max_bitrate = 0
+    i_buffer_size = 0
+    reso = str(i_src_width) + "x" + str(i_src_height)
     if reso == "2560x1600":
         base_rate = 3200
     elif reso == "1920x1080":
@@ -29,19 +29,19 @@ def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate):
     elif reso == "448x336":
         base_rate = 110
 
-    brate = fFrameRate * base_rate / 30
+    brate = f_framerate * base_rate / 30
     factor = 2
-    nBitrate = brate * factor
+    i_bitrate = brate * factor
     # CBR
-    if eRcType == "CBR":
-        nMaxBitrate = nBitrate
-        vbv_buffer_size = 1 * nBitrate
+    if e_rctype == "CBR":
+        i_max_bitrate = i_bitrate
+        i_buffer_size = 1 * i_bitrate
 
     # VBR
-    if eRcType == "VBR":
-        nMaxBitrate = 3 * nBitrate
-        vbv_buffer_size = 1 * nMaxBitrate
+    if e_rctype == "VBR":
+        i_max_bitrate = 3 * i_bitrate
+        i_buffer_size = 1 * i_max_bitrate
 
-    info = [nBitrate, nMaxBitrate, vbv_buffer_size]
+    info = [i_bitrate, i_max_bitrate, i_buffer_size]
     return info
 

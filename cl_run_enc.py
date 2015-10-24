@@ -17,11 +17,11 @@ param_list = lib.get_default_enc_param_list()
 # param_list['encder_exe']=lib.get_encoder_exe()
 #param_list['output_path']="F:/encoder_test_output/as265_output/"
 #param_list['input_path']="E:/sequences/"
-#param_list['frame_num_to_encode']=100
+#param_list['i_frame_num_to_encode']=100
 
 #param_list['input_filename']="BlowingBubbles_416x240_50.yuv"
 #seq_name="BlowingBubbles_416x240_50"
-#param_list['eRcType']=1
+#param_list['e_rctype']=1
 
 cons = "tmp_cons.log"
 #if len(sys.argv)> 1:

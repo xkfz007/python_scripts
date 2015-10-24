@@ -14,11 +14,11 @@ def get_reso_info2(seq_name):
     return reso
 
 
-def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate, factor=2):
-    nBitrate = 0
-    nMaxBitrate = 0
-    vbv_buffer_size = 0
-    reso = str(i_src_width) + "x" + str(nSrcHeight)
+def get_bitrate_for_rc(e_rctype, i_src_width, i_src_height, f_framerate, factor=2):
+    i_bitrate = 0
+    i_max_bitrate = 0
+    i_buffer_size = 0
+    reso = str(i_src_width) + "x" + str(i_src_height)
     if reso == "2560x1600":
         base_rate = 3200
     elif reso == "1920x1080":
@@ -42,23 +42,23 @@ def get_bitrate_for_rc(eRcType, i_src_width, nSrcHeight, fFrameRate, factor=2):
     else:
         base_rate = 5000
 
-    fps = fFrameRate
+    fps = f_framerate
     brate = fps * base_rate / 30
-    nBitrate = brate * factor
+    i_bitrate = brate * factor
     rc_methods = ["CQP", "CBR", "QUALITY_RANK", "VBR", "CONFERENCE", "VBR_TWOPASS_ANALYSE", "VBR_TWOPASS_ENC", "VBR_Q",
                   "ABR"]
-    rc_type = rc_methods[eRcType]
+    rc_type = rc_methods[e_rctype]
     # CBR
     if rc_type == "CBR":
-        nMaxBitrate = nBitrate
-        vbv_buffer_size = 1 * nBitrate
+        i_max_bitrate = i_bitrate
+        i_buffer_size = 1 * i_bitrate
 
     # VBR
     if rc_type == "VBR":
-        nMaxBitrate = 3 * nBitrate
-        vbv_buffer_size = 1 * nMaxBitrate
+        i_max_bitrate = 3 * i_bitrate
+        i_buffer_size = 1 * i_max_bitrate
 
-    return (nBitrate, nMaxBitrate, vbv_buffer_size)
+    return (i_bitrate, i_max_bitrate, i_buffer_size)
 
 
 def init_param_list_default():
@@ -82,23 +82,23 @@ def init_param_list_default():
     param_list['trace_flag'] = 0  #7
     param_list['measure_quality_flag'] = 0
 
-    param_list['frame_num_to_encode'] = 100
+    param_list['i_frame_num_to_encode'] = 100
 
     #cu pu tu
-    param_list['nMaxCUSize'] = 64
-    param_list['nMaxCUDepth'] = 4
-    param_list['nQuadtreeTULog2MaxSize'] = 5
-    param_list['nQuadtreeTULog2MinSize'] = 2
-    param_list['nQuadtreeTUMaxDepthIntra'] = 3
-    param_list['nQuadtreeTUMaxDepthInter'] = 3
+    param_list['i_max_cuwidth'] = 64
+    param_list['i_max_cudepth'] = 4
+    param_list['i_max_tulog2width'] = 5
+    param_list['i_min_tulog2width'] = 2
+    param_list['i_max_intra_tudepth'] = 3
+    param_list['i_min_inter_tudepth'] = 3
 
     #gop
-    param_list['nIntraPicInterval'] = 30
-    param_list['nMaxRefNum'] = 1
-    param_list['bExistRefB'] = 0
-    param_list['nBframe'] = 0
-    param_list['bEnableMultipleSubLayer'] = 0
-    param_list['DecodingRefreshType'] = 2
+    param_list['i_keyint'] = 30
+    param_list['i_maxref'] = 1
+    param_list['b_bframe_pyramid'] = 0
+    param_list['i_bframe'] = 0
+    param_list['b_multiple_sublayer'] = 0
+    param_list['i_decoding_refresh_type'] = 2
 
     param_list['b_open_gop'] = 0
     param_list['i_scenecut_threshold'] = 0
@@ -111,58 +111,58 @@ def init_param_list_default():
     param_list['b_sao'] = 0
 
     #rc
-    param_list['eRcType'] = 0
-    param_list['nQp'] = 33
-    param_list['nBitrate'] = 0
-    param_list['nMaxBitrate'] = 0
-    param_list['vbv_buffer_size'] = 0
-    param_list['vbv_buffer_init_time'] = 0
+    param_list['e_rctype'] = 0
+    param_list['i_qp'] = 33
+    param_list['i_bitrate'] = 0
+    param_list['i_max_bitrate'] = 0
+    param_list['i_buffer_size'] = 0
+    param_list['i_buffer_init_time'] = 0
 
-    #preset
-    param_list['preset'] = 5
+    #i_preset
+    param_list['i_preset'] = 5
 
     #debug parameters
-    param_list['first_frame'] = 0
-    param_list['random_cost'] = 0
-    param_list['force_tu_split'] = 0
-    param_list['force_one_intra_mode'] = 0
-    param_list['b_enable_cfg'] = 1
+    param_list['i_first_frame'] = 0
+    param_list['b_random_cost'] = 0
+    param_list['b_force_tu_split'] = 0
+    param_list['b_force_one_intra_mode'] = 0
+    param_list['b_arcvideo'] = 1
 
     #asm
     param_list['b_asm'] = 1
 
     #architecture and algorithm
-    param_list['architecture_id'] = 2
-    param_list['algorithm_suit_id'] = 0
+    param_list['i_architecture_id'] = 2
+    param_list['i_algorithm_suit_id'] = 0
 
-    param_list['frame_threads'] = 1
-    param_list['wpp_threads'] = 1
-    param_list['lookahead_threads'] = 1
+    param_list['i_frame_threads'] = 1
+    param_list['i_wpp_threads'] = 1
+    param_list['i_lookahead_threads'] = 1
 
-    param_list['rps_method'] = 1
+    param_list['e_rps'] = 1
 
-    param_list['log2_parallel_merge_level'] = 2
-    param_list['slice_temporal_mvp_enabled_flag'] = 1
-    param_list['constrained_intra_pred_flag'] = 0
+    param_list['i_log2_parallel_merge_level'] = 2
+    param_list['b_slice_temporal_mvp_enabled'] = 1
+    param_list['b_constrained_intra_pred'] = 0
 
     param_list['me_method'] = 1
     param_list['i_me_range'] = 32
     param_list['i_subpel_refine'] = 5
     param_list['b_chroma_me'] = 1
 
-    param_list['rc_f_rate_tolerance'] = 1.0
-    param_list['rc_f_rf_constant'] = 23
-    param_list['rc_i_qp_min'] = 0
-    param_list['rc_i_qp_max'] = 51
-    param_list['rc_i_qp_step'] = 4
-    param_list['rc_f_ip_factor'] = 1.4
-    param_list['rc_f_pb_factor'] = 1.3
-    param_list['rc_i_aq_mode'] = 0
-    param_list['rc_f_aq_strength'] = 1.0
-    param_list['rc_i_lookahead'] = 10
-    param_list['rc_b_cutree'] = 0
-    param_list['rc_i_lowres'] = 1
-    param_list['rc_i_pass'] = 0
+    param_list['f_rate_tolerance'] = 1.0
+    param_list['f_rf_constant'] = 23
+    param_list['i_qp_min'] = 0
+    param_list['i_qp_max'] = 51
+    param_list['i_qp_step'] = 4
+    param_list['f_ip_factor'] = 1.4
+    param_list['f_pb_factor'] = 1.3
+    param_list['i_aq_mode'] = 0
+    param_list['f_aq_strength'] = 1.0
+    param_list['i_lookahead'] = 10
+    param_list['b_cutree'] = 0
+    param_list['i_lowres'] = 1
+    param_list['i_pass'] = 0
 
     return param_list
 
@@ -187,25 +187,25 @@ def get_cmd_line(param_list):
     cmd += " %s" % param_list['measure_quality_flag']
 
     cmd += " %s" % param_list['i_src_width']
-    cmd += " %s" % param_list['nSrcHeight']
-    cmd += " %s" % param_list['fFrameRate']
-    cmd += " %s" % param_list['frame_num_to_encode']
+    cmd += " %s" % param_list['i_src_height']
+    cmd += " %s" % param_list['f_framerate']
+    cmd += " %s" % param_list['i_frame_num_to_encode']
 
     # cu pu tu
-    cmd += " %s" % param_list['nMaxCUSize']
-    cmd += " %s" % param_list['nMaxCUDepth']
-    cmd += " %s" % param_list['nQuadtreeTULog2MaxSize']
-    cmd += " %s" % param_list['nQuadtreeTULog2MinSize']
-    cmd += " %s" % param_list['nQuadtreeTUMaxDepthIntra']
-    cmd += " %s" % param_list['nQuadtreeTUMaxDepthInter']
+    cmd += " %s" % param_list['i_max_cuwidth']
+    cmd += " %s" % param_list['i_max_cudepth']
+    cmd += " %s" % param_list['i_max_tulog2width']
+    cmd += " %s" % param_list['i_min_tulog2width']
+    cmd += " %s" % param_list['i_max_intra_tudepth']
+    cmd += " %s" % param_list['i_min_inter_tudepth']
 
     # gop
-    cmd += " %s" % param_list['nIntraPicInterval']
-    cmd += " %s" % param_list['nMaxRefNum']
-    cmd += " %s" % param_list['bExistRefB']
-    cmd += " %s" % param_list['nBframe']
-    cmd += " %s" % param_list['bEnableMultipleSubLayer']
-    cmd += " %s" % param_list['DecodingRefreshType']
+    cmd += " %s" % param_list['i_keyint']
+    cmd += " %s" % param_list['i_maxref']
+    cmd += " %s" % param_list['b_bframe_pyramid']
+    cmd += " %s" % param_list['i_bframe']
+    cmd += " %s" % param_list['b_multiple_sublayer']
+    cmd += " %s" % param_list['i_decoding_refresh_type']
 
     cmd += " %s" % param_list['b_open_gop']
     cmd += " %s" % param_list['i_scenecut_threshold']
@@ -217,43 +217,43 @@ def get_cmd_line(param_list):
     cmd += " %s" % param_list['b_sao']
 
     # rc
-    cmd += " %s" % param_list['eRcType']
-    cmd += " %s" % param_list['nQp']
-    cmd += " %s" % param_list['nBitrate']
-    cmd += " %s" % param_list['nMaxBitrate']
-    cmd += " %s" % param_list['vbv_buffer_size']
-    cmd += " %s" % param_list['vbv_buffer_init_time']
+    cmd += " %s" % param_list['e_rctype']
+    cmd += " %s" % param_list['i_qp']
+    cmd += " %s" % param_list['i_bitrate']
+    cmd += " %s" % param_list['i_max_bitrate']
+    cmd += " %s" % param_list['i_buffer_size']
+    cmd += " %s" % param_list['i_buffer_init_time']
 
-    # preset
-    cmd += " %s" % param_list['preset']
+    # i_preset
+    cmd += " %s" % param_list['i_preset']
 
     # debug ters
-    cmd += " %s" % param_list['first_frame']
-    cmd += " %s" % param_list['random_cost']
-    cmd += " %s" % param_list['force_tu_split']
-    cmd += " %s" % param_list['force_one_intra_mode']
+    cmd += " %s" % param_list['i_first_frame']
+    cmd += " %s" % param_list['b_random_cost']
+    cmd += " %s" % param_list['b_force_tu_split']
+    cmd += " %s" % param_list['b_force_one_intra_mode']
 
-    cmd += " %s" % param_list['b_enable_cfg']
+    cmd += " %s" % param_list['b_arcvideo']
 
     # asm
     cmd += " %s" % param_list['b_asm']
 
     # architecture and algorithm
-    cmd += " %s" % param_list['architecture_id']
-    cmd += " %s" % param_list['algorithm_suit_id']
+    cmd += " %s" % param_list['i_architecture_id']
+    cmd += " %s" % param_list['i_algorithm_suit_id']
 
     # threading
-    cmd += " %s" % param_list['frame_threads']
-    cmd += " %s" % param_list['wpp_threads']
-    cmd += " %s" % param_list['lookahead_threads']
+    cmd += " %s" % param_list['i_frame_threads']
+    cmd += " %s" % param_list['i_wpp_threads']
+    cmd += " %s" % param_list['i_lookahead_threads']
 
     # rps
-    cmd += " %s" % param_list['rps_method']
+    cmd += " %s" % param_list['e_rps']
 
     # pred
-    cmd += " %s" % param_list['log2_parallel_merge_level']
-    cmd += " %s" % param_list['slice_temporal_mvp_enabled_flag']
-    cmd += " %s" % param_list['constrained_intra_pred_flag']
+    cmd += " %s" % param_list['i_log2_parallel_merge_level']
+    cmd += " %s" % param_list['b_slice_temporal_mvp_enabled']
+    cmd += " %s" % param_list['b_constrained_intra_pred']
 
     # analyze
     cmd += " %s" % param_list['me_method']
@@ -262,19 +262,19 @@ def get_cmd_line(param_list):
     cmd += " %s" % param_list['b_chroma_me']
 
     # rc
-    cmd += " %s" % param_list['rc_f_rate_tolerance']
-    cmd += " %s" % param_list['rc_f_rf_constant']
-    cmd += " %s" % param_list['rc_i_qp_min']
-    cmd += " %s" % param_list['rc_i_qp_max']
-    cmd += " %s" % param_list['rc_i_qp_step']
-    cmd += " %s" % param_list['rc_f_ip_factor']
-    cmd += " %s" % param_list['rc_f_pb_factor']
-    cmd += " %s" % param_list['rc_i_aq_mode']
-    cmd += " %s" % param_list['rc_f_aq_strength']
-    cmd += " %s" % param_list['rc_i_lookahead']
-    cmd += " %s" % param_list['rc_b_cutree']
-    cmd += " %s" % param_list['rc_i_lowres']
-    cmd += " %s" % param_list['rc_i_pass']
+    cmd += " %s" % param_list['f_rate_tolerance']
+    cmd += " %s" % param_list['f_rf_constant']
+    cmd += " %s" % param_list['i_qp_min']
+    cmd += " %s" % param_list['i_qp_max']
+    cmd += " %s" % param_list['i_qp_step']
+    cmd += " %s" % param_list['f_ip_factor']
+    cmd += " %s" % param_list['f_pb_factor']
+    cmd += " %s" % param_list['i_aq_mode']
+    cmd += " %s" % param_list['f_aq_strength']
+    cmd += " %s" % param_list['i_lookahead']
+    cmd += " %s" % param_list['b_cutree']
+    cmd += " %s" % param_list['i_lowres']
+    cmd += " %s" % param_list['i_pass']
 
     return cmd
 
@@ -282,8 +282,8 @@ def get_cmd_line(param_list):
 def set_seq_related_param(param_list, seq_name):
     reso_info = get_reso_info(seq_name)
     param_list['i_src_width'] = reso_info[0]
-    param_list['nSrcHeight'] = reso_info[1]
-    param_list['fFrameRate'] = reso_info[2]
+    param_list['i_src_height'] = reso_info[1]
+    param_list['f_framerate'] = reso_info[2]
 
     param_list['output_filename'] = seq_name + "_str.bin"
     param_list['input_filename'] = seq_name + ".yuv"
@@ -298,26 +298,26 @@ def set_seq_related_param(param_list, seq_name):
 
 
 def set_rc_related_param_auto(param_list, factor):
-    rc_param = get_bitrate_for_rc(param_list['eRcType'], param_list['i_src_width'], param_list['nSrcHeight'],
-                                  param_list['fFrameRate'], factor)
-    param_list['nBitrate'] = rc_param[0]
-    param_list['nMaxBitrate'] = rc_param[1]
-    param_list['vbv_buffer_size'] = rc_param[2]
+    rc_param = get_bitrate_for_rc(param_list['e_rctype'], param_list['i_src_width'], param_list['i_src_height'],
+                                  param_list['f_framerate'], factor)
+    param_list['i_bitrate'] = rc_param[0]
+    param_list['i_max_bitrate'] = rc_param[1]
+    param_list['i_buffer_size'] = rc_param[2]
     return;
 
 
-def set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, vbv_buffer_size):
-    param_list['nBitrate'] = bitrate
-    param_list['nMaxBitrate'] = vbv_maxrate
-    param_list['vbv_buffer_size'] = vbv_buffer_size
+def set_rc_related_param_manual(param_list, bitrate, vbv_maxrate, i_buffer_size):
+    param_list['i_bitrate'] = bitrate
+    param_list['i_max_bitrate'] = vbv_maxrate
+    param_list['i_buffer_size'] = i_buffer_size
     if bitrate == 0:
-        param_list['eRcType'] = 0
-    elif vbv_maxrate == 0 or vbv_buffer_size == 0:
-        param_list['eRcType'] = 8
+        param_list['e_rctype'] = 0
+    elif vbv_maxrate == 0 or i_buffer_size == 0:
+        param_list['e_rctype'] = 8
     elif vbv_maxrate <= bitrate:
-        param_list['eRcType'] = 1
+        param_list['e_rctype'] = 1
     else:
-        param_list['eRcType'] = 9
+        param_list['e_rctype'] = 9
 
     return;
 

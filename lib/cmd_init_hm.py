@@ -23,41 +23,41 @@ def get_enc_param_cmd_hm(param_list):
 
     sop_size = 4
     sop_list = SOP_listP
-    if param_list['nIntraPicInterval'] <= 1:
+    if param_list['i_keyint'] <= 1:
         sop_size = 1
-    if param_list['nBframe'] >= 1:
+    if param_list['i_bframe'] >= 1:
         sop_size = 4
         sop_list = SOP_listPB
-    if param_list['nBframe'] >= 1 and param_list['bExistRefB'] == 1:
+    if param_list['i_bframe'] >= 1 and param_list['b_bframe_pyramid'] == 1:
         sop_size = 4
         sop_list = SOP_listB
 
-    if param_list['nIntraPicInterval'] % sop_size != 0:
-        param_list['nIntraPicInterval'] = int(param_list['nIntraPicInterval'] / sop_size) * sop_size
+    if param_list['i_keyint'] % sop_size != 0:
+        param_list['i_keyint'] = int(param_list['i_keyint'] / sop_size) * sop_size
 
     cmd = ""
     cmd += ' --InputFile="%s"' % os.path.join(param_list['input_path'], param_list['input_filename'])
     cmd += " --InputBitDepth=8"
     cmd += " --InputBitDepthC=8"
-    cmd += " --FrameRate=%s" % param_list['fFrameRate']
-    cmd += " --FrameSkip=%s" % param_list['first_frame']
+    cmd += " --FrameRate=%s" % param_list['f_framerate']
+    cmd += " --FrameSkip=%s" % param_list['i_first_frame']
     cmd += " --SourceWidth=%s" % param_list['i_src_width']
-    cmd += " --SourceHeight=%s" % param_list['nSrcHeight']
-    cmd += " --FramesToBeEncoded=%s" % param_list['frame_num_to_encode']
+    cmd += " --SourceHeight=%s" % param_list['i_src_height']
+    cmd += " --FramesToBeEncoded=%s" % param_list['i_frame_num_to_encode']
     # cmd += " --Level=%s"%0
     cmd += ' --BitstreamFile="%s"' % os.path.join(param_list['output_path'], param_list['output_filename'])
     cmd += ' --ReconFile="%s"' % os.path.join(param_list['output_path'], param_list['dump_file_rec'])
     cmd += " --Profile=%s" % "main"
 
-    cmd += " --MaxCUWidth=%s" % param_list['nMaxCUSize']
-    cmd += " --MaxCUHeight=%s" % param_list['nMaxCUSize']
-    cmd += " --MaxPartitionDepth=%s" % param_list['nMaxCUDepth']
-    cmd += " --QuadtreeTULog2MaxSize=%s" % param_list['nQuadtreeTULog2MaxSize']
-    cmd += " --QuadtreeTULog2MinSize=%s" % param_list['nQuadtreeTULog2MinSize']
-    cmd += " --QuadtreeTUMaxDepthInter=%s" % param_list['nQuadtreeTUMaxDepthInter']
-    cmd += " --QuadtreeTUMaxDepthIntra=%s" % param_list['nQuadtreeTUMaxDepthIntra']
-    cmd += " --IntraPeriod=%s" % param_list['nIntraPicInterval']
-    cmd += " --DecodingRefreshType=%s" % param_list['DecodingRefreshType']
+    cmd += " --MaxCUWidth=%s" % param_list['i_max_cuwidth']
+    cmd += " --MaxCUHeight=%s" % param_list['i_max_cuwidth']
+    cmd += " --MaxPartitionDepth=%s" % param_list['i_max_cudepth']
+    cmd += " --QuadtreeTULog2MaxSize=%s" % param_list['i_max_tulog2width']
+    cmd += " --QuadtreeTULog2MinSize=%s" % param_list['i_min_tulog2width']
+    cmd += " --QuadtreeTUMaxDepthInter=%s" % param_list['i_min_inter_tudepth']
+    cmd += " --QuadtreeTUMaxDepthIntra=%s" % param_list['i_max_intra_tudepth']
+    cmd += " --IntraPeriod=%s" % param_list['i_keyint']
+    cmd += " --i_decoding_refresh_type=%s" % param_list['i_decoding_refresh_type']
     cmd += " --GOPSize=%s" % sop_size
 
     me_cl = ('1', '0')  # 0:full search 1:TZ search
@@ -68,7 +68,7 @@ def get_enc_param_cmd_hm(param_list):
     cmd += " --FEN=%s" % 1
     cmd += " --FDM=%s" % 1
 
-    cmd += " --QP=%s" % param_list['nQp']
+    cmd += " --QP=%s" % param_list['i_qp']
     # cmd += " --MaxDeltaQP=%s"%0
     # cmd += " --MaxCuDQPDepth=%s"%0
     #cmd += " --DeltaQpRD=%s"%0
@@ -112,7 +112,7 @@ def get_enc_param_cmd_hm(param_list):
     #cmd += " --TileRowHeightArray=%s"%0
     #cmd += " --LFCrossTileBoundaryFlag=%s"%0
 
-    cmd += " --WaveFrontSynchro=%s" % param_list['wpp_threads']
+    cmd += " --WaveFrontSynchro=%s" % param_list['i_wpp_threads']
 
     #cmd += " --ScalingList=%s"%0
     #cmd += " --ScalingListFile=%s"%0
@@ -120,10 +120,10 @@ def get_enc_param_cmd_hm(param_list):
     #cmd += " --TransquantBypassEnableFlag=%s"%0
     #cmd += " --CUTransquantBypassFlagForce=%s"%0
 
-    cmd += " --SEIDecodedPictureHash=%s" % param_list['bEnableAccessUnitDelimiters']
+    cmd += " --SEIDecodedPictureHash=%s" % param_list['b_enable_access_unit_delimiters']
 
-    cmd += " --RateControl=%s" % param_list['eRcType']
-    cmd += " --TargetBitrate=%s" % param_list['nBitrate']
+    cmd += " --RateControl=%s" % param_list['e_rctype']
+    cmd += " --TargetBitrate=%s" % param_list['i_bitrate']
     cmd += " --KeepHierarchicalBit=%s" % 1
     cmd += " --LCULevelRateControl=%s" % 1
     cmd += " --RCLCUSeparateModel=%s" % 1

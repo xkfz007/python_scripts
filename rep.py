@@ -34,7 +34,7 @@ if __name__ == '__main__':
     except Exception, e:
         print e
 
-    ext=''
+    extension=''
     for opt, arg in opts:
         if opt == '-e':
             extension = arg
@@ -75,6 +75,8 @@ if __name__ == '__main__':
     cmd_list=[]
     for i in file_modify_list:
        if os.path.isfile(i):
+          if len(extension)>0 and not i.lower().endswith(extension.lower()):
+              continue
           cmd='sed -i "s/%s/%s/g" "%s"'%(pattern,replacement,i)
           cmd_list.append(cmd)
 #

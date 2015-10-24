@@ -10,7 +10,7 @@ param_list['encder_exe'] = g_as265_x64ReleaseWithTraceEncoderExePath + g_as265_E
 
 param_list['output_path'] = "f:\\hfz\\_HD-User_D_TEMP\\_Video_data_temp\\_Regression_Temp\\"
 param_list['input_path'] = "E:\\_HD-User_H_DATA\\z_Const_Data__TestResource\\_Video_data_const_hd\\"
-param_list['frame_num_to_encode'] = 1000
+param_list['i_frame_num_to_encode'] = 1000
 mode_list = [1, 3, 8]
 factor_list = range(1, 3)
 # all_seq_list=[_RateControl.classB,_RateControl.classC,_RateControl.classD,_RateControl.classE]
@@ -22,9 +22,9 @@ print seq_list
 def ratecontrol_run_test(seq_list, mode_list, factor_list):
     for seq_name in seq_list:
         #print "==========%s=============" % seq_name
-        for eRcType in mode_list:
-            #print "==========eRcType=%s=============" % eRcType
-            param_list['eRcType'] = eRcType
+        for e_rctype in mode_list:
+            #print "==========e_rctype=%s=============" % e_rctype
+            param_list['e_rctype'] = e_rctype
             for factor in factor_list:
                 #print "==========factor=%s=============" % factor
                 _RateControl.set_seq_related_param(param_list, seq_name)

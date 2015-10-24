@@ -15,25 +15,25 @@ seq_list = ("blowing", 'basketball')
 br_list = (0.0193,)  #0.0289,0.0386,0.0579)
 param_list = lib.get_default_enc_param_list()
 
-param_list['eRcType'] = 1
-param_list['frame_num_to_encode'] = -1
+param_list['e_rctype'] = 1
+param_list['i_frame_num_to_encode'] = -1
 param_list['output_path'] = "F:/encoder_test_output/output0"
 param_list['input_path'] = "f:/sequences/"
-param_list['nIntraPicInterval'] = 300
-param_list['nMaxRefNum'] = 1
-param_list['bExistRefB'] = 1
-param_list['nBframe'] = 3
+param_list['i_keyint'] = 300
+param_list['i_maxref'] = 1
+param_list['b_bframe_pyramid'] = 1
+param_list['i_bframe'] = 3
 param_list['b_open_gop'] = 1
 param_list['i_scenecut_threshold'] = 40
 param_list['i_bframe_adaptive'] = 0
-param_list['preset'] = 5
-param_list['frame_threads'] = 1
-param_list['wpp_threads'] = 1
-param_list['lookahead_threads'] = 1
-param_list['rc_i_aq_mode'] = 1
-param_list['rc_i_lookahead'] = 10
-param_list['rc_b_cutree'] = 1
-param_list['rc_i_lowres'] = 1
+param_list['i_preset'] = 5
+param_list['i_frame_threads'] = 1
+param_list['i_wpp_threads'] = 1
+param_list['i_lookahead_threads'] = 1
+param_list['i_aq_mode'] = 1
+param_list['i_lookahead'] = 10
+param_list['b_cutree'] = 1
+param_list['i_lowres'] = 1
 
 #encoder_list = ("as265", "x265")
 encoder_list = ("as265", )
@@ -50,7 +50,7 @@ for encoder_id in encoder_list:
         seq_name = lib.guess_seqname(name)
         for bitrate in br_list:
             for p in range(1, 3):
-                param_list['rc_i_pass'] = p
+                param_list['i_pass'] = p
                 tag_str = "_" + encoder_id + "_bitrate" + str(bitrate) + "_pass" + str(p)
                 lib.configure_seq_param(param_list, seq_name, tags=tag_str)
                 lib.check_params(param_list)

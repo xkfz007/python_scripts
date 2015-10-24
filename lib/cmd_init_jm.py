@@ -7,11 +7,11 @@ def get_enc_param_cmd_jm(param_list):
     cmd = ""
     # File Input/Output Related Parameters
     cmd += ' -p InputFile="%s"' % os.path.join(param_list['input_path'], param_list['input_filename'])
-    cmd += " -p StartFrame=%s" % param_list['first_frame']
-    cmd += " -p FramesToBeEncoded=%s" % param_list['frame_num_to_encode']
-    cmd += " -p FrameRate=%s" % param_list['fFrameRate']
+    cmd += " -p StartFrame=%s" % param_list['i_first_frame']
+    cmd += " -p FramesToBeEncoded=%s" % param_list['i_frame_num_to_encode']
+    cmd += " -p FrameRate=%s" % param_list['f_framerate']
     cmd += " -p SourceWidth=%s" % param_list['i_src_width']
-    cmd += " -p SourceHeight=%s" % param_list['nSrcHeight']
+    cmd += " -p SourceHeight=%s" % param_list['i_src_height']
     cmd += " -p YUVFormat=%s" % "1"
     cmd += " -p SourceBitDepthLuma=8"
     cmd += " -p SourceBitDepthChroma=8"
@@ -26,18 +26,18 @@ def get_enc_param_cmd_jm(param_list):
     # Primary Control Parameters
     cmd += " -p ProfileIDC=100"
     cmd += " -p LevelIDC=40"
-    cmd += " -p IntraPeriod=%s" % param_list['nIntraPicInterval']
+    cmd += " -p IntraPeriod=%s" % param_list['i_keyint']
     cmd += " -p EnableOpenGOP=%s" % param_list['b_open_gop']
-    cmd += " -p NumberBFrames=%s" % param_list['nBframe']
-    cmd += " -p QPISlice=%s" % param_list['nQp']
-    cmd += " -p QPPSlice=%s" % param_list['nQp']
-    cmd += " -p QPBSlice=%s" % param_list['nQp']
+    cmd += " -p NumberBFrames=%s" % param_list['i_bframe']
+    cmd += " -p QPISlice=%s" % param_list['i_qp']
+    cmd += " -p QPPSlice=%s" % param_list['i_qp']
+    cmd += " -p QPBSlice=%s" % param_list['i_qp']
 
     cmd += " -p DisableSubpelME=0"
     cmd += " -p SearchRange=%s" % param_list['i_me_range']
-    cmd += " -p NumberReferenceFrames=%s" % param_list['nMaxRefNum']
-    cmd += " -p HierarchicalCoding=%s" % param_list['bExistRefB']
-    cmd += " -p SendAUD=%s" % param_list['bEnableAccessUnitDelimiters']
+    cmd += " -p NumberReferenceFrames=%s" % param_list['i_maxref']
+    cmd += " -p HierarchicalCoding=%s" % param_list['b_bframe_pyramid']
+    cmd += " -p SendAUD=%s" % param_list['b_enable_access_unit_delimiters']
 
     #cmd += " -p PSliceSkip=1"
     #cmd += " -p PSliceSearch16x16=1"
@@ -84,8 +84,8 @@ def get_enc_param_cmd_jm(param_list):
     cmd += " -p WeightedPrediction=%s" % param_list['b_weightp']
     cmd += " -p WeightedBiprediction=%s" % param_list['b_weightb']
 
-    cmd += " -p RateControlEnable=%s" % int(param_list['eRcType'] != 0 and param_list['eRcType'] != 9)
-    cmd += " -p Bitrate=%s" % param_list['nBitrate']
+    cmd += " -p RateControlEnable=%s" % int(param_list['e_rctype'] != 0 and param_list['e_rctype'] != 9)
+    cmd += " -p Bitrate=%s" % param_list['i_bitrate']
     cmd += " -p InitialQP=%s" % 0
     cmd += " -p BasicUnit=%s" % 0
     cmd += " -p ChannelType=%s" % 0
