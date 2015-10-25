@@ -33,7 +33,7 @@ if __name__ == '__main__':
     help=lib.HELP(usage,BIN,'--help')
     options='E:'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], options +help.get_opt())
+        opts, args = getopt.gnu_getopt(sys.argv[1:], options +help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
