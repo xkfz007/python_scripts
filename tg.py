@@ -9,14 +9,15 @@ import os
 
 
 def usage():
-    msg='''usage:tg.py [options] [path or file]
-    -e <string> the extension which identify the compression type
-    example: uncompress:
-             tg.py a.tar.gz  : uncompress a.tar.gz to the current directory
-             tg.py a.tar.gz b/ : uncompress a.tar.gz to directory b/
-             tg.py a.txt : compress a.txt to a.tar.gz
-             tg.py a.txt -e xz : compress a.txt to a.xz
-             tg.py b/ : compress directory b/ to b.tar.gz
+    msg='''USAGE:tg.py [OPTIONS] [PATH or FILE]
+    OPTIONS:
+      -e <string> the extension which identify the compression type
+    EXAMPLES:
+      tg.py a.tar.gz  : uncompress a.tar.gz to the current directory
+      tg.py a.tar.gz b/ : uncompress a.tar.gz to directory b/
+      tg.py a.txt : compress a.txt to a.tar.gz
+      tg.py a.txt -e xz : compress a.txt to a.xz
+      tg.py b/ : compress directory b/ to b.tar.gz
   '''
     print msg
     return
@@ -41,13 +42,6 @@ if __name__ == '__main__':
     for opt, arg in opts:
         if opt == "-e":
             extension = arg
-        #elif opt == "-Y":
-        #    do_execute = 1
-        #elif opt == "-h":
-        #    help()
-        #    sys.exit()
-        #elif opt[1] in help.get_opt():
-        #    help.parse_opt(opt)
         else:
             help.parse_opt(opt)
 

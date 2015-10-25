@@ -11,7 +11,7 @@ __author__ = 'hfz2597'
 
 BIN='ffplay.exe'
 def usage():
-    msg='''USAGE: f.py [options]... [FILE]...
+    msg='''USAGE: f.py [OPTIONS]... [FILE]...
    OPTIONS:
      -E <width:height:fps>/<widthxheightxfps>
                               resolution parameters
