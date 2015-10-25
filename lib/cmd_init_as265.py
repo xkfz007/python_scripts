@@ -3,7 +3,6 @@ import common_lib
 
 def get_default_enc_param_list():
     param_list = {}  # dict()  # create a dictinary
-    # param_list['encder_exe'] = "cli_ashevc.exe"
     param_list['output_path'] = "."  # "F:/encoder_test_output/as265_output  "
     param_list['output_filename'] = "as265_str.bin"
     param_list['input_path'] = "f:/sequences/"
@@ -113,7 +112,7 @@ def get_default_enc_param_list():
     param_list['i_decoded_picture_hash_sei'] = 0
 
     param_list['f_rate_tolerance'] = 1.0
-    param_list['f_rf_constant'] = 23
+    param_list['f_rf_constant'] = 28
     param_list['i_qp_min'] = 0
     param_list['i_qp_max'] = 51
     param_list['i_qp_step'] = 4

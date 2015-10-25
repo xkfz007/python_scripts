@@ -104,33 +104,33 @@ def configure_seq_param(param_list, tmp_name, tags=''):
         param_list['f_framerate'] = int(org_fps)
 
     if len(tags) >0:
-        tags = "_" + tags
+        tags = '_' + tags
 
-    param_list['input_filename'] = seq_name + ".yuv"
-    param_list['output_filename'] = seq_name + tags + "_str.bin"
-    param_list['trace_file_cabac'] = seq_name + tags + "_cabac.log"
-    param_list['trace_file_general'] = seq_name + tags + "_general.log"
-    param_list['dump_file_rec'] = seq_name + tags + "_rec.yuv"
-    param_list['trace_file_prd_y'] = seq_name + tags + "_prdy.log"
-    param_list['trace_file_prd_uv'] = seq_name + tags + "_prduv.log"
-    param_list['trace_file_cabacrdo'] = seq_name + tags + "_cabacrdo.log"
-    param_list['trace_file_arch1rdo'] = seq_name + tags + "_arch1rdo.log"
+    param_list['input_filename'] = seq_name + '.yuv'
+    param_list['output_filename'] = seq_name + tags + '_str.bin'
+    param_list['trace_file_cabac'] = seq_name + tags + '_cabac.log'
+    param_list['trace_file_general'] = seq_name + tags + '_general.log'
+    param_list['dump_file_rec'] = seq_name + tags + '_rec.yuv'
+    param_list['trace_file_prd_y'] = seq_name + tags + '_prdy.log'
+    param_list['trace_file_prd_uv'] = seq_name + tags + '_prduv.log'
+    param_list['trace_file_cabacrdo'] = seq_name + tags + '_cabacrdo.log'
+    param_list['trace_file_arch1rdo'] = seq_name + tags + '_arch1rdo.log'
 
-    return seq_name + tags + "_cons.log"
+    return seq_name + tags + '_cons.log'
 
 
 def set_bitrate(param_list,bitrate=-1,factor=2):
     if bitrate<=0:
-       base_rate_dict={ "2560x1600": 3200,
-                        "1920x1080": 1500,
-                        "1280x720": 600,
-                        "1024x768": 568,
-                        "832x480": 300,
-                        "416x240": 75,
-                        "640x480": 222,
-                        "352x288": 73,
-                        "448x336": 110,
-                        "3840x2160": 8000,
+       base_rate_dict={ '2560x1600': 3200,
+                        '1920x1080': 1500,
+                        '1280x720': 600,
+                        '1024x768': 568,
+                        '832x480': 300,
+                        '416x240': 75,
+                        '640x480': 222,
+                        '352x288': 73,
+                        '448x336': 110,
+                        '3840x2160': 8000,
                         }
        reso = '%sx%s' % (param_list['i_src_width'], param_list['i_src_height'])
        if base_rate_dict.has_key(reso):
@@ -158,58 +158,87 @@ def set_buffer_size(param_list,buffer_size=-1):
 
 
 def usage():
-    help_msg = '''Usage:cl_run_enc.py [option] [value]...
-  options:
-   -e <string> encoder name:as265,x265,x264,hm,jm
-   -s <string> seqname
-   -E <int>:<int>:<int> resolution width:height:fps
-   -i <string> input_path
-   -o <string> output_path
-   -f <int1>:<int2>
-      <int1>: frames to be encoded
-      <int2>: I frame interval
-   -T <int1>:<int2>:<int3> multi-threads
-      <int1>: frame parallelism threads
-      <int2>: WPP threads
-      <int3>: Lookahead threads
-   -r <int/string>:<int1>:<int2>:<int3>:<int4> rate control parameters
-      <int/string>: rate control method
-      <int1>:qp/bitrate
-      <int2>:vbv_max_bitrate
-      <int3>:i_buffer_size
-      <int4>:vbv-init-time
-   -R <string> ref number
-   -b <int1>:<int2>:<int3> b-frame parameters
-      <int1>: number of b-frame
-      <int2>: bref/b-pyramid/hierarchical:0 disabled, 1 enabled
-      <int3>: bframe adaptive, 0: disabled, 1: fast method, 2: trellis
-   -u <int1>:<int2>:<int3>:<int4>:<int5>:<int6> CU,PU,TU parameters
-      <int1>: i_max_cuwidth
-      <int2>: i_max_cudepth
-      <int3>: i_max_tulog2width
-      <int4>: i_min_tulog2width
-      <int5>: i_max_intra_tudepth
-      <int6>: i_min_inter_tudepth
-   -c <integer> scenecut value
-   -G <integer> open-gop:0 disabled, 1 enabled
-   -y dump-yuv
-   -C <string> extra command lines
-   -O <integer> Lowres:0 auto, 1 semi, 2 quater
-   -p <integer> rc pass: 0: single pass encoding,
-                         1: 2pass encoding(including first pass and second pass)
-                         2: 2pass encoding with clipping
-                         3: first pass of 2pass encoding (only for x26x)
-                         4: second pass of 2pass encoding (only for x26x)
-   -g <string> the 2pass log file (not supported yet)
-   -l <integer> number of lookahead frames
-   -P <integer> qp step
-   -a <integer> aq-mode:0 disabled, 1 Variance AQ, Auto-Variance AQ
-   -A <integer> cu tree:0 disabled, 1 enabled
-   -k <integer> seek frame
-   -j <integer> sao: 0 disabled, 1 enabled
-   -J <integer> deblock: 0 disabled, 1 enabled
-   --path <string> set the encoder path
-   --log print log
+    help_msg = '''USAGE: cl_run_enc.py [OPTIONS]...
+   OPTIONS:
+     -e <string>              encoder name: as265,x265,x264,hm,jm
+     -s <string>              seqname
+     -i <string>              input_path
+     -o <string>              output_path
+     -T <int:int:int>         multi-threaded parameters
+                                #1: frame parallelism threads [1]
+                                #2: WPP threads [1]
+                                #3: Lookahead threads [1]
+     -E <width:height:fps>    resolution parameters
+     -f <int:int:int>         frames info that will be encoded
+                                #1: Maximum number of frames to encode [-1]
+                                #2: Max number of references to be allowed (1 .. 16) [1]
+                                #3: First frame to encode [0]
+     -g <int:int:int>         gop info
+                                #1: I frame interval [250]
+                                #2: open-gop, 0:disabled, 1:enabled [1]
+                                #3: scenecut, How aggressively to insert extra I-frames [40]
+     -b <int:int:int>         b-frame parameters
+                                #1: number of b-frame
+                                #2: bref/b-pyramid/hierarchical, 0: disabled, 1: enabled
+                                #3: bframe adaptive, 0: disabled, 1: fast method, 2: trellis
+     -r <int/string:int/float:int:int:int>
+                              rate control parameters
+                                #1: rate control method, 0/9:cqp, 8:abr, 1:cbr, 9:vbr, 10:crf(Quality-based VBR)
+                                #2: qp[26] or bitrate[0] or crf[28.0]
+                                #3: the max bitrate
+                                #4: the buffer size
+                                #5: the vbv init time
+     -p <integer>             rate control 2pass [0]
+                                -0: single pass encoding,
+                                -1: 2pass encoding(including first pass and second pass)
+                                -2: 2pass encoding with clipping
+                                -3: first pass of 2pass encoding (only for x26x)
+                                -4: second pass of 2pass encoding (only for x26x)
+     -P <integer>             Preset, trade off performance for compression efficiency [5]
+     -u <int:int:int:int:int:int>
+                              CU,PU,TU parameters
+                                #1: Maximum CU size [6]
+                                #2: Maximum CU search depth [3]
+                                #3: Maximum log2 value of TU size [5]
+                                #4: Minimum log2 value of TU size [2]
+                                #5: Max TU recursive depth for intra CUs [1]
+                                #6: Max TU recursive depth for inter CUs [1]
+     -A <int:int:int:int:int> Analysis
+                                #1: Maximum number of merge candidates [2]
+                                #2: Enable intra in P frames in veryslow presets [1]
+                                #3: Enable intra in B frames in veryslow presets [1]
+                                #4: Enable rectangular motion partitions Nx2N and 2NxN [1]
+                                #5: Enable asymmetric motion partitions, requires #4
+     -F <int:int>             Loop filters (deblock and SAO)
+                                #1: sao, 0:disabled, 1:enabled
+                                #2: deblock, 0:disabled, 1:enabled
+     -a <int:int:float>       adaptive quatization or cu-tree
+                                #1: cu-tree, 0:disabled, 1:enabled [1]
+                                #2: aq-mode, 0:disabled, 1:Variance AQ, 2:Auto-Variance AQ [1]
+                                #3: aq-strength, reduces blocking and blurring in flat and textured areas. [1.0]
+     -q <int:int:int>         qp ralated parameters
+                                #1: Set max QP step [4]
+                                #2: Set min QP [0]
+                                #3: Set max QP [69]
+     -B <int:int:int:int:int> Bitstream info
+                                #1: Emit SPS and PPS headers at each keyframe [0]
+                                #2: Emit access unit delimiters at the start of each access unit [0]
+                                #3: Emit SEI identifying encoder and parameters [1]
+                                #4: Enable HRD parameters signaling [1]
+                                #5: Decoded Picture Hash SEI, 0:disabled, 1:MD5, 2:CRC, 3:Checksum  [0]
+     -L <int:int:float:float:float>
+                              rc ralated lower resolution info
+                                #1: Lowres, 0:auto, 1:semi, 2:quater [1]
+                                #2: Number of frames for frame-type lookahead (determines encoder latency) [20]
+                                #3: Tolerance of ABR ratecontrol and VBV [1.0]
+                                #4: QP factor between I and P [1.40]
+                                #5: QP factor between P and B[1.30]
+     -y                       dump-yuv
+     -C <string>              extra command lines
+
+
+     --path <string>          set the encoder path
+     --log                    print log
    '''
     print help_msg
     return
@@ -223,7 +252,7 @@ def parse_encoder_arg_int(opt_list,arg,opts,vals,delimiter=':'):
            opt_list[opts[i]]=int(vals[i])
 
 def parse_encoder_arg_mix(opt_list,arg,opts,vals,delimiter=':'):
-    typs=list()
+    typs=[]
     for i in vals:
         typs.append(type(i))
 
@@ -250,7 +279,13 @@ def parse_threads(opt_list,arg):
 
 def parse_frame_num(opt_list,arg):
     #default parameter values
-    opts=('i_frame_num_to_encode', 'i_keyint')
+    opts=('i_frame_num_to_encode', 'i_maxref', 'i_first_frame')
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_gop_param(opt_list,arg):
+    #default parameter values
+    opts=('i_keyint', 'b_open_gop','i_scenecut_threshold')
     vals=[-1 for i in range(0,len(opts))]
     parse_encoder_arg_int(opt_list,arg,opts,vals)
 
@@ -264,27 +299,63 @@ def parse_rc_param(opt_list,arg):
     vals=[-1 for i in range(0,len(opts))]
     common_lib.parse_arg_internal(arg,':',vals)
 
+    qp_bitrate_crf=''
     n=len(opts)
     for i in range(0,n):
-        print "opts[%s]=%s,vals[%s]=%s"%(i,opts[i],i,vals[i])
+        print 'opts[%s]=%s,vals[%s]=%s'%(i,opts[i],i,vals[i])
         if opts[i]=='e_rctype': #set rc method
-           opt_list[opts[i]]=get_rc_type(vals[i])
+            opt_list[opts[i]]=get_rc_type(vals[i])
+        elif opts[i]=='i_bitrate':
+            qp_bitrate_crf=vals[i]
         else:
-           if int(vals[i])>=0:
-              opt_list[opts[i]]=int(vals[i])
+            if int(vals[i])>=0:
+                opt_list[opts[i]]=int(vals[i])
 
-    if opt_list['e_rctype'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP) and opt_list.has_key('i_bitrate'):
-        opt_list['i_qp'] = opt_list['i_bitrate']
+    if len(qp_bitrate_crf)>0:
+        if opt_list['e_rctype'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP):
+            opt_list['i_qp'] = int(qp_bitrate_crf)
+        elif opt_list['e_rctype'] == global_vars.HEVC_RC_CRF:
+            opt_list['f_rf_constant'] = float(qp_bitrate_crf)
+        else:
+            opt_list['i_bitrate'] = int(qp_bitrate_crf)
 
 def parse_unit_param(opt_list,arg):
-    opts=( 'i_max_cuwidth',
-           'i_max_cudepth',
-           'i_max_tulog2width',
-           'i_min_tulog2width',
-           'i_max_intra_tudepth',
-           'i_min_inter_tudepth',)
+    opts=('i_max_cuwidth', 'i_max_cudepth',
+          'i_max_tulog2width', 'i_min_tulog2width',
+          'i_max_intra_tudepth', 'i_min_inter_tudepth',)
     vals=[-1 for i in range(0,len(opts))]
     parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_cutree_aq(opt_list,arg):
+    opts=('b_cutree', 'i_aq_mode', 'f_aq_strength', )
+    vals=[-1, -1, -1.0]
+    parse_encoder_arg_mix(opt_list,arg,opts,vals)
+
+def parse_qp_param(opt_list,arg):
+    opts=('i_qp_step', 'i_qp_min', 'i_qp_max', )
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_filter_param(opt_list,arg):
+    opts=('b_sao', 'b_dbl',)
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_analysis_param(opt_list,arg):
+    opts=('i_merge', 'b_pintra', 'b_bintra', 'b_rect', 'b_amp',)
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_bitstream_param(opt_list,arg):
+    opts=('b_repeat_headers', 'b_enable_access_unit_delimiters',
+          'b_emit_hrd_sei', 'b_emit_info_sei', 'i_decoded_picture_hash_sei',)
+    vals=[-1 for i in range(0,len(opts))]
+    parse_encoder_arg_int(opt_list,arg,opts,vals)
+
+def parse_rc_lowres_param(opt_list,arg):
+    opts=('i_lowres', 'i_lookahead', 'f_rate_tolerance', 'f_ip_factor', 'f_pb_factor',)
+    vals=[-1, -1, -1.0, -1.0, -1.0]
+    parse_encoder_arg_mix(opt_list,arg,opts,vals)
 
 def get_tag(opt, arg):
     new_arg=arg.replace(':','x')
@@ -308,9 +379,9 @@ def parse_enc_cl(enc):
         sys.exit()
 
     help=common_lib.HELP(usage,enc.get_exe())
+    options='e:s:i:o:T:E:f:g:b:r:p:P:u:A:F:a:q:B:L:yC:'
     try:
-        opts, args = getopt.getopt(sys.argv[1:],
-                                   'i:o:I:f:T:l:q:r:b:u:a:s:R:e:yC:O:p:P:A:E:c:G:k:j:J:'+help.get_opt(),
+        opts, args = getopt.getopt(sys.argv[1:], options +help.get_opt(),
                                    ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)
@@ -320,89 +391,73 @@ def parse_enc_cl(enc):
 
     opt_list = {}  #dict()
     tag_str = ""
-    #seq_name = ""
-    #tmp_i_bitrate = -1
-    #tmp_i_max_bitrate = -1
-    #tmp_i_buffer_size = -1
 
-    #Help_flag = 0
-    #Version_flag = 0
     Encoder_flag = 0
     Encoder_path=''
 
     for opt, arg in opts:
-        if opt == "-e":
-            #opt_list["encoder_id"] = arg
+        if opt == '-e':
+            #opt_list['encoder_id'] = arg
             enc.set_id(arg.strip())
             help.set_BIN(enc.get_exe())
             help.set_help(enc.get_help())
             Encoder_flag = 1
-        elif opt == "-i":
-            opt_list["input_path"] = arg
-        elif opt == "-o":
-            opt_list["output_path"] = arg
-        elif opt == "-f":
-            parse_frame_num(opt_list,arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-T":
+        elif opt == '-s':
+            opt_list['seq_name'] = arg
+        elif opt == '-i':
+            opt_list['input_path'] = arg
+        elif opt == '-o':
+            opt_list['output_path'] = arg
+        elif opt == '-T':
             parse_threads(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-l":
-            opt_list["i_lookahead"] = int(arg)
+        elif opt == '-E':
+            parse_reso_fps(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-r":
-            parse_rc_param(opt_list,arg)
+        elif opt == '-f':
+            parse_frame_num(opt_list,arg)
+            tag_str += get_tag(opt, arg)
+        elif opt == '-g':
+            parse_gop_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == '-b':
             parse_bframe_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
+        elif opt == '-r':
+            parse_rc_param(opt_list,arg)
+            tag_str += get_tag(opt, arg)
+        elif opt == '-p':
+            opt_list['i_pass'] = int(arg)
+            tag_str += get_tag(opt, arg)
+        elif opt == '-P':
+            opt_list['i_preset'] =int(arg)
+            tag_str += get_tag(opt, arg)
         elif opt == '-u':
             parse_unit_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-a":
-            opt_list["i_aq_mode"] = int(arg)
+        elif opt in ('-A',):
+            parse_analysis_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-s":
-            #seq_name = arg
-            opt_list['seq_name'] = arg
-        elif opt == "-R":
-            opt_list["i_maxref"] = int(arg)
+        elif opt in ('-F',):
+            parse_filter_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-y":
-            opt_list["trace_flag"] |= 2
-        elif opt == "-C":
-            opt_list["extra_cls"] = arg
-            tag_str += get_tag(opt, "")
-        elif opt == "-O":
-            opt_list["i_lowres"] = int(arg)
+        elif opt == '-a':
+            parse_cutree_aq(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-p":
-            opt_list["i_pass"] = int(arg)
+        elif opt == '-q':
+            parse_qp_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-P":
-            opt_list["i_qp_step"] = int(arg)
+        elif opt in ('-B',):
+            parse_bitstream_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-A":
-            opt_list["b_cutree"] = int(arg)
+        elif opt in ('-L',):
+            parse_rc_lowres_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
-        elif opt == "-E":
-            parse_reso_fps(opt_list,arg)#arg.split('x')
-            tag_str += get_tag(opt, arg)
-        elif opt == "-c":
-            opt_list["i_scenecut_threshold"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt == "-G":
-            opt_list["b_open_gop"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt in ("-k",):
-            opt_list["i_first_frame"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt in ("-j",):
-            opt_list["b_sao"] = int(arg)
-            tag_str += get_tag(opt, arg)
-        elif opt in ("-J",):
-            opt_list["b_dbl"] = int(arg)
-            tag_str += get_tag(opt, arg)
+        elif opt == '-y':
+            opt_list['trace_flag'] |= 2
+        elif opt == '-C':
+            opt_list['extra_cls'] = arg
+            tag_str += get_tag(opt, '')
         elif opt =='--path':
             Encoder_path=arg
             Encoder_flag=1

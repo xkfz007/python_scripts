@@ -25,6 +25,7 @@ RC_DICT = {'CQP': HEVC_RC_CQP,
            'VBR': HEVC_RC_VBR,
            'ABR-2': HEVC_RC_ABR_TWOPASS_ANAlYSE,
            'VBR-2': HEVC_RC_VBR_TWOPASS_ANAlYSE,
+           'CRF': HEVC_RC_CRF,
 }
 
 h264_extension = ('.264', '.avc', '.h264')

@@ -177,8 +177,9 @@ if __name__ == '__main__':
         FFMPEG_BIN='ffmpeg'
 
     help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
+    options='o:e:aC:T:r:m:t:'
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'o:e:aC:T:r:m:t:'+help.get_opt())
+        opts, args = getopt.gnu_getopt(sys.argv[1:], options+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
