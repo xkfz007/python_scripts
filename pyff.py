@@ -41,7 +41,7 @@ def usage():
                     -yuv: decode the input to get rawvideo(yuv)
                     -aac/mp3: extract audio from media file
                     -jpg/png/bmp: extract images from media file
-                    -gif:create a gif file from video file
+                    -gif: create a gif file from video file
      -a           extract audio using the extra command lines from -C,
                   ignore the auto generated command lines from extension(-e)
      -o <str:str> output file path or file tag:
@@ -52,7 +52,7 @@ def usage():
      -t <hour:minute:second.xxx-hour:minute:second.xxx>/
         <hour:minute:second.xxx+hour:minute:second.xxx>
                   set the time duration, and in the first format, quotations are needed because of '-'
-     -r <width:height>/<widthxheight>
+     -E <width:height>/<widthxheight>
                   set the output width and height
      -m <string>  merge the input media files to one, only mp4 and mkv is supported
    ARGUMENTS:
@@ -128,8 +128,6 @@ def get_ffmpeg_opt_list():
     ff_opt_list['vcodec']=''
     ff_opt_list['acodec']=''
     return ff_opt_list
-
-
 
 def parse_reso(arg,width=-2,height=-2,delimiter='x'):
     x,y=lib.parse_arg(arg,delimiter,str(width),str(height))
@@ -216,9 +214,9 @@ if __name__ == '__main__':
             extra_cmd = arg
         elif opt == '-T':
             thread_num = arg
-        elif opt == '-r':
-            if 'x' in arg:
-                width,height=parse_reso(arg,width,height,'x')
+        elif opt == '-E':
+            if ':' in arg:
+                width,height=parse_reso(arg,width,height,':')
             else:
                 width,height=parse_reso(arg,width,height)
         elif opt=='-m':
