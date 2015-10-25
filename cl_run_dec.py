@@ -4,7 +4,7 @@ import sys
 import lib
 import subprocess
 
-dec_id = "hmd"
+dec_id = "ashevcd"
 #dec = lib.Decoder_prop(dec_id)
 dec=lib.DECODER(dec_id)
 

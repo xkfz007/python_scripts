@@ -156,6 +156,11 @@ def set_buffer_size(param_list,buffer_size=-1):
        buffer_size = 1 * param_list['i_max_bitrate']
     param_list['i_buffer_size'] = buffer_size
 
+def set_rc_full_param(param_list,bitrate=-1,max_bitrate=-1,buffer_size=-1):
+    set_bitrate(param_list,bitrate)
+    set_max_bitrate(param_list,max_bitrate)
+    set_buffer_size(param_list,buffer_size)
+
 
 def usage():
     help_msg = '''USAGE: cl_run_enc.py [OPTIONS]...
@@ -168,7 +173,8 @@ def usage():
                                 #1: frame parallelism threads [1]
                                 #2: WPP threads [1]
                                 #3: Lookahead threads [1]
-     -E <width:height:fps>    resolution parameters
+     -E <width:height:fps>/<widthxheightxfps>
+                              resolution parameters
      -f <int:int:int>         frames info that will be encoded
                                 #1: Maximum number of frames to encode [-1]
                                 #2: Max number of references to be allowed (1 .. 16) [1]
@@ -269,8 +275,11 @@ def parse_encoder_arg_mix(opt_list,arg,opts,vals,delimiter=':'):
 
 def parse_reso_fps(opt_list,arg):
     opts=('i_src_width', 'i_src_height', 'f_framerate')
-    vals=[-1 for i in range(0,len(opts))]
-    parse_encoder_arg_int(opt_list,arg,opts,vals)
+    vals=[-1,-1,-1.0]
+    if 'x' in arg:
+        parse_encoder_arg_mix(opt_list,arg,opts,vals,'x')
+    else:
+        parse_encoder_arg_mix(opt_list,arg,opts,vals)
 
 def parse_threads(opt_list,arg):
     opts=('i_frame_threads', 'i_wpp_threads', 'i_lookahead_threads')
@@ -583,9 +592,10 @@ def configure_rc_param(param_list):
 
 
     if rc_type != global_vars.HEVC_RC_FIXQUANT and rc_type != global_vars.HEVC_RC_CQP:
-        set_bitrate(param_list,param_list['i_bitrate'])
-        set_max_bitrate(param_list,param_list['i_max_bitrate'])
-        set_buffer_size(param_list,param_list['i_buffer_size'])
+        #set_bitrate(param_list,param_list['i_bitrate'])
+        #set_max_bitrate(param_list,param_list['i_max_bitrate'])
+        #set_buffer_size(param_list,param_list['i_buffer_size'])
+        set_rc_full_param(param_list['i_bitrate'],param_list['i_max_bitrate'],param_list['i_buffer_size'])
 
 
 def get_default_tmp_list(param_list):

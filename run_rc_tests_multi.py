@@ -56,7 +56,7 @@ for encoder_id in encoder_list:
             tag_str = "_" + encoder_id + "_bitrate" + str(bitrate)
             lib.configure_seq_param(param_list, seq_name, tags=tag_str)
             lib.check_params(param_list)
-            lib.set_rc_related_param_semi_auto(param_list, bitrate)
+            lib.set_rc_full_param(param_list, bitrate)
             cmd = lib.get_full_cdec_cmd(enc, param_list)
             #print "%s\n"%cmd
             regression_file = param_list['output_path'] + seq_name + tag_str + "_cons.log"

@@ -1,6 +1,6 @@
 #!/bin/python
 __author__ = 'hfz2597'
-
+#this file is degenerated
 import lib
 import os
 import subprocess

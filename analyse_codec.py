@@ -72,12 +72,12 @@ class ANALYZER(object):
 
 
 def usage():
-    msg='''usage:analysis_file.py [options]
-    options:
-    -e <id> set the encoder[as265,x265,x264,hm,jm] or decoder [ashevcd,hmd,jmd]
-    -i <filename> set input file name
-    -b/--bits <filename> output bits of each frame
-    -q/--qp <filename> output qp of each frame
+    msg='''USAGE:analyse_codec.py [OPTIONS]...
+   OPTIONS:
+     -e <string>         set the encoder(as265,x265,x264,hm,jm) or decoder (ashevcd,hmd,jmd)
+     -i <string>         set input file name
+     -b/--bits <string>  output bits of each frame
+     -q/--qp   <string>  output qp of each frame
   '''
     print msg
     return

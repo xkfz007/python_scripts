@@ -34,26 +34,29 @@ valid_ext_list=h264_name_list+h265_name_list+yuv_name_list+\
 
 
 def usage():
-    help_msg = '''Usage:pyff.py [option] <input1> <input2> ...
-  options:
-   -e <string> the output file extension
-      h264/hevc: get the raw bitstream from media file
-      yuv: decode the input to get rawvideo(yuv)
-      aac,mp3: extract audio from media file
-      jpg,png,bmp: extract images from media file
-      gif:create a gif file from video file
-   -a extract audio using the extra command lines from -C,
-      ignore the auto generated command lines from extension(-e)
-   -o <path>:<tag> output file path or file tag:
-      <path>: if <path> is a dir, it is used, or it is regared as <tag>
-   -C <string> the ffmpeg commands
-   -T <int> set thread num
-   -t <hour:minute:second.xxx-hour:minute:second.xxx> set the time duration
-   -r <int>x<int> set the output width and height
-   -m <filename> merge the input media files to one, only mp4 and mkv is supported
-   arguments:
-   <input1> <input2> <input3> file or directory, support pattern globbing
-           these are the input files that will be processed
+    help_msg = '''USAGE:pyff.py [OPTIONS]... [ARGUMENTS]...
+   OPTIONS:
+     -e <string>  the output file extension
+                    -h264/hevc: get the raw bitstream from media file
+                    -yuv: decode the input to get rawvideo(yuv)
+                    -aac/mp3: extract audio from media file
+                    -jpg/png/bmp: extract images from media file
+                    -gif:create a gif file from video file
+     -a           extract audio using the extra command lines from -C,
+                  ignore the auto generated command lines from extension(-e)
+     -o <str:str> output file path or file tag:
+                    #1: output file path, if it is a dir, it is used, or it is regared as tag
+                    #2: output file tag
+     -C <string>  the ffmpeg commands
+     -T <integer> set thread num
+     -t <hour:minute:second.xxx-hour:minute:second.xxx>/
+        <hour:minute:second.xxx+hour:minute:second.xxx>
+                  set the time duration, and in the first format, quotations are needed because of '-'
+     -r <width:height>/<widthxheight>
+                  set the output width and height
+     -m <string>  merge the input media files to one, only mp4 and mkv is supported
+   ARGUMENTS:
+     file or directory, support pattern globbing,these are the input files that will be processed
    '''
     print help_msg
     return
@@ -163,14 +166,6 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    #FFMPEG_BIN = 'ffmpeg.exe'
-    #for i in ffmpeg_exe_list:
-    #    if os.path.exists(i):
-    #        logging.info("%s exists"%i)
-    #        FFMPEG_BIN=i
-    #        break
-    #    else:
-    #        logging.error("%s does not exist"%i)
     if lib.determin_sys() in ('windows',):
         FFMPEG_BIN='ffmpeg.exe'
     else:
@@ -222,8 +217,10 @@ if __name__ == '__main__':
         elif opt == '-T':
             thread_num = arg
         elif opt == '-r':
-            #width= int(arg)
-            width,height=parse_reso(arg,width,height)
+            if 'x' in arg:
+                width,height=parse_reso(arg,width,height,'x')
+            else:
+                width,height=parse_reso(arg,width,height)
         elif opt=='-m':
             merged_file=arg
         elif opt=='-t':
@@ -231,8 +228,6 @@ if __name__ == '__main__':
                 startp,dura=parse_time(arg,startp,dura)
             elif '-' in arg:
                 startp,endp=parse_time(arg,startp,endp,'-')
-        #elif opt[1] in help.get_opt():
-        #    help.parse_opt(opt)
         else:
             help.parse_opt(opt)
 
@@ -290,9 +285,9 @@ if __name__ == '__main__':
             if len(output_tag) == 0:  # =='':
                output_tag= 'bin'
             if extension in h264_name_list:
-                extension= 'h264'
+                extension= h264_name_list[0]
             elif extension in h265_name_list:
-                extension= 'hevc'
+                extension= h265_name_list[0]
             extra_cmd += ' -c:v copy'
             extra_cmd += ' -an -f %s' % extension
         elif extension in audio_name_list:
@@ -328,14 +323,6 @@ if __name__ == '__main__':
         print cmd_line
         cmd_list.append(cmd_line)
         output_list.append(output_file)
-        #elif os.path.isdir(input_file):
-        #    print '"%s" is a directory' % input_file
-        #    input_file_list2 = lib.get_file_list(input_file)
-        #    print "input_file_list2=%s" % input_file_list2
-        #    for input_file2 in input_file_list2:
-        #        cmd_line = get_cmd_line(input_file2, extension, output_tmp, prepared_cmd, extra_cmd)
-        #        print cmd_line
-        #        cmd_list.append(cmd_line)
     if len(merged_file)>0:
         concat_str = "|".join(output_list)
         print concat_str

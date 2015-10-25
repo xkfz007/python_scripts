@@ -88,13 +88,11 @@ def get_default_dec_param_list():
     return param_list
 
 def usage():
-    help_msg = '''Usage:cl_run_dec.py [option] [value] ...
-  options:
-   -e <string> decoder name:ashevcd,hmd,jmd
-   -i <string> input file name
-   -o output the reconstruct file
-  args:
-  <outputfilename>
+    help_msg = '''USAGE:cl_run_dec.py [OPTIONS]... [OUTPUT_FILENAME]
+   OPTIONS:
+     -e <string> decoder name:ashevcd,hmd,jmd
+     -i <string> input file name
+     -o          output the reconstruct file
    '''
     print help_msg
     return
@@ -105,43 +103,26 @@ def parse_dec_cl(dec, opt_list):
         sys.exit()
 
     help=common_lib.HELP(usage,dec.get_exe())
+    options='e:i:o'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:i:ohHV'+help.get_opt())
+        opts, args = getopt.getopt(sys.argv[1:], options+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
     except Exception, e:
         print e
 
-    #Help_flag = 0
-    #Version_flag = 0
     Output_flag = 0
 
     for opt, arg in opts:
-        if opt == "-i":
-            opt_list["input_filename"] = arg
-        elif opt == "-o":
+        if opt == '-i':
+            opt_list['input_filename'] = arg
+        elif opt == '-o':
             Output_flag = 1
-            # opt_list["output_filename"] = arg
-        #elif opt == "-h":
-        #    usage()
-        #    sys.exit()
-        #elif opt == "-H":
-        #    Help_flag = 1
-        elif opt == "-e":
+        elif opt == '-e':
             dec.set_id(arg.strip())
-        #elif opt == "-v":
-        #    Version_flag = 1
         else:
             help.parse_opt(opt)
-
-    #if Help_flag == 1:
-    #    os.system(dec.get_help_exe())
-    #    sys.exit()
-
-    #if Version_flag == 1:
-    #    os.system(dec.get_version_exe())
-    #    sys.exit()
 
     if len(opt_list['input_filename']) == 0:
         logging.error('Input is not set')
@@ -157,10 +138,10 @@ def parse_dec_cl(dec, opt_list):
     if fext in global_vars.h265_extension and dec.get_id() not in global_vars.h265_decoder_list:
         dec.set_id(global_vars.ashevcd_name_list[0])
 
-    cons_filename = fname + "_" + dec.get_id() + "_cons.log"
+    cons_filename = fname + '_' + dec.get_id() + '_cons.log'
     cons_full = os.path.join(dir_path, cons_filename)
     if Output_flag == 1 and len(opt_list['output_filename']) == 0:
-        output_filename = fname + "_rec.yuv"
+        output_filename = fname + '_rec.yuv'
         opt_list['output_filename'] = os.path.join(dir_path, output_filename)
 
     return cons_full,help.get_do_execute()
