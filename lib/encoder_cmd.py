@@ -184,16 +184,16 @@ def usage():
                                 #2: open-gop, 0:disabled, 1:enabled [1]
                                 #3: scenecut, How aggressively to insert extra I-frames [40]
      -b <int:int:int>         b-frame parameters
-                                #1: number of b-frame
-                                #2: bref/b-pyramid/hierarchical, 0: disabled, 1: enabled
-                                #3: bframe adaptive, 0: disabled, 1: fast method, 2: trellis
+                                #1: number of b-frame [3]
+                                #2: bref/b-pyramid/hierarchical, 0: disabled, 1: enabled [1]
+                                #3: bframe adaptive, 0: disabled, 1: fast method, 2: trellis [0]
      -r <int/string:int/float:int:int:int>
                               rate control parameters
-                                #1: rate control method, 0/9:cqp, 8:abr, 1:cbr, 9:vbr, 10:crf(Quality-based VBR)
-                                #2: qp[26] or bitrate[0] or crf[28.0]
-                                #3: the max bitrate
-                                #4: the buffer size
-                                #5: the vbv init time
+                                #1: rate control method, 0/9:cqp, 8:abr, 1:cbr, 9:vbr, 10:crf(Quality-based VBR) [0]
+                                #2: qp [26] or bitrate [0] or crf [28.0]
+                                #3: the max bitrate [0]
+                                #4: the buffer size [0]
+                                #5: the vbv init time [0]
      -p <integer>             rate control 2pass [0]
                                 -0: single pass encoding,
                                 -1: 2pass encoding(including first pass and second pass)
@@ -214,18 +214,18 @@ def usage():
                                 #2: Enable intra in P frames in veryslow presets [1]
                                 #3: Enable intra in B frames in veryslow presets [1]
                                 #4: Enable rectangular motion partitions Nx2N and 2NxN [1]
-                                #5: Enable asymmetric motion partitions, requires #4
+                                #5: Enable asymmetric motion partitions, requires #4 [0]
      -F <int:int>             Loop filters (deblock and SAO)
-                                #1: sao, 0:disabled, 1:enabled
-                                #2: deblock, 0:disabled, 1:enabled
+                                #1: sao, 0:disabled, 1:enabled [0]
+                                #2: deblock, 0:disabled, 1:enabled [1]
      -a <int:int:float>       adaptive quatization or cu-tree
                                 #1: cu-tree, 0:disabled, 1:enabled [1]
                                 #2: aq-mode, 0:disabled, 1:Variance AQ, 2:Auto-Variance AQ [1]
-                                #3: aq-strength, reduces blocking and blurring in flat and textured areas. [1.0]
+                                #3: aq-strength, reduces blocking and blurring in flat and textured areas [1.0]
      -q <int:int:int>         qp ralated parameters
                                 #1: Set max QP step [4]
                                 #2: Set min QP [0]
-                                #3: Set max QP [69]
+                                #3: Set max QP [51]
      -B <int:int:int:int:int> Bitstream info
                                 #1: Emit SPS and PPS headers at each keyframe [0]
                                 #2: Emit access unit delimiters at the start of each access unit [0]
@@ -463,7 +463,7 @@ def parse_enc_cl(enc):
             parse_rc_lowres_param(opt_list,arg)
             tag_str += get_tag(opt, arg)
         elif opt == '-y':
-            opt_list['trace_flag'] |= 2
+            opt_list['i_trace_flag'] |= 2
         elif opt == '-C':
             opt_list['extra_cls'] = arg
             tag_str += get_tag(opt, '')
@@ -591,11 +591,11 @@ def configure_rc_param(param_list):
             logging.warning('2pass is incompatible with %s' % global_vars.RC_STRING[rc_type])
 
 
-    if rc_type != global_vars.HEVC_RC_FIXQUANT and rc_type != global_vars.HEVC_RC_CQP:
+    if rc_type not in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP,global_vars.HEVC_RC_CRF):
         #set_bitrate(param_list,param_list['i_bitrate'])
         #set_max_bitrate(param_list,param_list['i_max_bitrate'])
         #set_buffer_size(param_list,param_list['i_buffer_size'])
-        set_rc_full_param(param_list['i_bitrate'],param_list['i_max_bitrate'],param_list['i_buffer_size'])
+        set_rc_full_param(param_list,param_list['i_bitrate'],param_list['i_max_bitrate'],param_list['i_buffer_size'])
 
 
 def get_default_tmp_list(param_list):

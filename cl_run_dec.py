@@ -11,10 +11,11 @@ dec=lib.DECODER(dec_id)
 param_list = lib.get_default_dec_param_list()
 
 # lib.configure_dec_param(dec,param_list)
-cons,do_execute = lib.parse_dec_cl(dec, param_list)
+cons,extra_cls,do_execute = lib.parse_dec_cl(dec, param_list)
 print dec
 
 cmd_line = lib.get_full_cdec_cmd(dec, param_list)
+cmd_line += ' '+extra_cls
 
 #reg_file = None
 #if lib.determin_sys() == "cygwin":

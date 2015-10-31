@@ -18,6 +18,8 @@ def get_enc_param_cmd_x26x(param_list):
         if param_list['e_rctype'] == 0:
             cmd += " --ipratio 1.0"
             cmd += " --pbratio 1.0"
+    elif param_list['e_rctype'] == 10:
+        cmd += " --crf %s" % param_list['f_rf_constant']
     else:
         cmd += " --bitrate %s" % param_list['i_bitrate']
         cmd += " --vbv-maxrate %s" % param_list['i_max_bitrate']
@@ -59,7 +61,7 @@ def get_enc_param_cmd_x26x(param_list):
     cmd += " --psnr"
     cmd += " --ssim"
     cmd += " --no-progress"
-    #cmd += "  --log-level debug"
+    cmd += "  --log-level debug"
 
     if param_list['i_pass'] > 0:
         cmd += ' --pass %s' % param_list['i_pass']
@@ -95,7 +97,7 @@ def get_enc_param_cmd_x265(param_list):
     mbtree_cl = ("--no-cutree", "--cutree")
     cmd += " %s" % mbtree_cl[param_list['b_cutree']]
 
-    tmp_flag = param_list['trace_flag'] & 2
+    tmp_flag = param_list['i_trace_flag'] & 2
     if tmp_flag == 2:
         cmd += ' --recon "%s"' % os.path.join(param_list['output_path'], param_list['dump_file_rec'])
 
@@ -116,9 +118,9 @@ def get_enc_param_cmd_x265(param_list):
     gop_cl = ("--no-open-gop", "--open-gop")
     cmd += " %s" % gop_cl[param_list['b_open_gop']]
 
-    cmd += " --ctu %s" % param_list["i_max_cuwidth"]
+    cmd += " --ctu %s" % (1<<param_list["i_max_cuwidth"])
     if global_vars.x265_ver == "v1.6":
-        cmd += " --min-cu-size %s" % (param_list["i_max_cuwidth"] >> (param_list['i_max_cudepth'] - 1))
+        cmd += " --min-cu-size %s" % (1<<(param_list["i_max_cuwidth"]-param_list['i_max_cudepth'] + 1))
         cmd += " --max-tu-size %s" % (1 << param_list['i_max_tulog2width'])
     cmd += " --tu-intra-depth %s" % param_list['i_max_intra_tudepth']
     cmd += " --tu-inter-depth %s" % param_list['i_min_inter_tudepth']
@@ -143,8 +145,8 @@ def get_enc_param_cmd_x265(param_list):
     aud_cl = ("--no-aud", "--aud")
     cmd += " %s" % aud_cl[param_list['b_enable_access_unit_delimiters']]
 
-    hrd_cl = ("--no-hrd", "--hrd")
-    cmd += " %s" % hrd_cl[param_list['b_emit_hrd_sei']]
+    #hrd_cl = ("--no-hrd", "--hrd")
+    #cmd += " %s" % hrd_cl[param_list['b_emit_hrd_sei']]
 
     info_cl = ("--no-info", "--info")
     cmd += " %s" % info_cl[param_list['b_emit_info_sei']]
@@ -170,7 +172,7 @@ def get_enc_param_cmd_x264(param_list):
 
     cmd += " --no-psy"
 
-    tmp_flag = param_list['trace_flag'] & 2
+    tmp_flag = param_list['i_trace_flag'] & 2
     if tmp_flag == 2:
         cmd += ' --dump-yuv "%s"' % os.path.join(param_list['output_path'], param_list['dump_file_rec'])
 

@@ -18,17 +18,17 @@ def get_dec_param_cmd_ashevcd(param_list):
 
 
 def get_dec_param_cmd_jmd(param_list):
-    cmd = ""
-    cmd += " -d null"
-    cmd += " -p silent=0"
+    cmd = ''
+    cmd += ' -d null'
+    cmd += ' -p silent=0'
     cmd += ' -i "%s"' % param_list['input_filename']
-    # if len(param_list['output_filename'])>0:
-    cmd += ' -o "%s"' % param_list['output_filename']
+    if len(param_list['output_filename'])>0:
+        cmd += ' -o "%s"' % param_list['output_filename']
     return cmd
 
 
 def get_dec_param_cmd_hmd(param_list):
-    cmd = ""
+    cmd = ''
     cmd += ' -b "%s"' % param_list['input_filename']
     if len(param_list['output_filename']) > 0:
         cmd += ' -o "%s"' % param_list['output_filename']
@@ -45,7 +45,7 @@ class Decoder_st(codec_cmd.Codec_st):
 common_path = 'c:/tools/'
 ashevcd_st=Decoder_st(global_vars.ashevcd_name_list[0],'ashevcd.exe','',get_dec_param_cmd_ashevcd,common_path)
 jmd_st=Decoder_st(global_vars.jmd_name_list[0],'jmd18.5.exe','-h',get_dec_param_cmd_jmd,common_path)
-hmd_st=Decoder_st(global_vars.hmd_name_list[0],'hmd.exe','--help',get_dec_param_cmd_hmd,common_path)
+hmd_st=Decoder_st(global_vars.hmd_name_list[0],'hmd11.0.exe','--help',get_dec_param_cmd_hmd,common_path)
 
 dec_st_list={global_vars.ashevcd_name_list[0]:ashevcd_st,
              global_vars.jmd_name_list[0]:jmd_st,
@@ -88,11 +88,14 @@ def get_default_dec_param_list():
     return param_list
 
 def usage():
-    help_msg = '''USAGE:cl_run_dec.py [OPTIONS]... [OUTPUT_FILENAME]
+    help_msg = '''USAGE:cl_run_dec.py [OPTIONS]... [FILENAME]
    OPTIONS:
-     -e <string> decoder name:ashevcd,hmd,jmd
-     -i <string> input file name
-     -o          output the reconstruct file
+     -e <string>   decoder name:ashevcd,hmd,jmd
+     -i <string>   input file name
+     -o            output the reconstructed file (auto decide the filename)
+     -C <string>   extra command lines
+   FILENAME:
+     the reconstructed filename
    '''
     print help_msg
     return
@@ -103,7 +106,7 @@ def parse_dec_cl(dec, opt_list):
         sys.exit()
 
     help=common_lib.HELP(usage,dec.get_exe())
-    options='e:i:o'
+    options='e:i:oC:'
     try:
         opts, args = getopt.getopt(sys.argv[1:], options+help.get_opt())
     except getopt.GetoptError as err:
@@ -113,6 +116,7 @@ def parse_dec_cl(dec, opt_list):
         print e
 
     Output_flag = 0
+    extra_cls=''
 
     for opt, arg in opts:
         if opt == '-i':
@@ -121,6 +125,10 @@ def parse_dec_cl(dec, opt_list):
             Output_flag = 1
         elif opt == '-e':
             dec.set_id(arg.strip())
+            help.set_BIN(dec.get_exe())
+            help.set_help(dec.get_help())
+        elif opt=='-C':
+            extra_cls=arg
         else:
             help.parse_opt(opt)
 
@@ -144,7 +152,7 @@ def parse_dec_cl(dec, opt_list):
         output_filename = fname + '_rec.yuv'
         opt_list['output_filename'] = os.path.join(dir_path, output_filename)
 
-    return cons_full,help.get_do_execute()
+    return cons_full,extra_cls,help.get_do_execute()
 
 # def configure_dec_param(dec,param_list):
 # cons_log=parse_dec_cl(dec,param_list)

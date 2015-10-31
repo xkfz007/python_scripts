@@ -15,7 +15,7 @@ import logging
 ffmpeg_exe_list=('ffmpeg','ffmpeg.exe')
 
 h264_name_list = ('h264', 'h.264', 'avc', '264')
-h265_name_list = ('h265', 'h.265', 'hevc', '265')
+h265_name_list = ('hevc', 'h.265', 'h264', '265')
 bsf_for_mp4 = {'h264': 'h264_mp4toannexb',
                'hevc': 'hevc_mp4toannexb'}
 bitstream_name_list=h264_name_list+h265_name_list
@@ -152,9 +152,8 @@ def parse_outpath(arg,output_path='',output_tag='',delimiter=':'):
             logging.info('Diectory "%s" is created.'%arg)
         else:
             logging.error('Diectory "%s" does not exist, using the current directory'%opath)
-            opath=''
-        #else:
-        #    opath,otag=otag,opath
+            #opath=''
+            opath,otag=otag,opath
 
 
     return opath,otag

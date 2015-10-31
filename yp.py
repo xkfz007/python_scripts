@@ -25,6 +25,7 @@ def parse_reso_fps(arg,width=-1,height=-1,fps=-1,delimiter='x'):
     x,y,z=lib.parse_arg(arg,delimiter,str(width),str(height),str(fps))
     return int(x),int(y),int(z)
 
+default_seq_path='f:/sequences/'
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
@@ -56,6 +57,8 @@ if __name__ == '__main__':
     dpath = os.path.dirname(input_file)
     name = os.path.basename(input_file)
     name = lib.seq_list.guess_seqname(name)
+    if len(dpath)==0:
+        dpath=default_seq_path
     input_file= os.path.join(dpath, name+'.yuv')
     if not os.path.exists(input_file):
         logging.error('Input "%s" doesn\'t exist, please check'%input_file)

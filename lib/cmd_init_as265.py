@@ -18,14 +18,14 @@ def get_default_enc_param_list():
 
     param_list['i_src_width'] = 416
     param_list['i_src_height'] = 240
-    param_list['f_framerate'] = 50
+    param_list['f_framerate'] = 0
 
     # debug related paramters
     param_list['i_printf_flag'] = 1  # 225
-    param_list['i_trace_flag'] = 0  # 7
+    param_list['i_trace_flag'] = 4  # 7
     param_list['b_measure_quality'] = 1
 
-    param_list['i_frame_num_to_encode'] = -1
+    param_list['i_frame_num_to_encode'] = 0
 
     # cu pu tu
     param_list['i_max_cuwidth'] = 6 #log2width
@@ -38,13 +38,13 @@ def get_default_enc_param_list():
     # gop
     param_list['i_keyint'] = 350
     param_list['i_maxref'] = 1
-    param_list['b_bframe_pyramid'] = 0
-    param_list['i_bframe'] = 0
+    param_list['b_bframe_pyramid'] = 1
+    param_list['i_bframe'] = 3
     param_list['b_multiple_sublayer'] = 0
     param_list['i_decoding_refresh_type'] = 2
 
-    param_list['b_open_gop'] = 0
-    param_list['i_scenecut_threshold'] = 0
+    param_list['b_open_gop'] = 1
+    param_list['i_scenecut_threshold'] = 40
     param_list['i_bframe_adaptive'] = 0
 
     #feature
@@ -107,7 +107,7 @@ def get_default_enc_param_list():
     param_list['i_interlace_mode'] = 0
     param_list['b_repeat_headers'] = 0
     param_list['b_enable_access_unit_delimiters'] = 0
-    param_list['b_emit_hrd_sei'] = 1
+    param_list['b_emit_hrd_sei'] = 0
     param_list['b_emit_info_sei'] = 1
     param_list['i_decoded_picture_hash_sei'] = 0
 
