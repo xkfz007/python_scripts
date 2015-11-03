@@ -315,18 +315,21 @@ def parse_rc_param(opt_list,arg):
         if opts[i]=='e_rctype': #set rc method
             opt_list[opts[i]]=get_rc_type(vals[i])
         elif opts[i]=='i_bitrate':
-            qp_bitrate_crf=vals[i]
+            qp_bitrate_crf=str(vals[i])
         else:
             if int(vals[i])>=0:
                 opt_list[opts[i]]=int(vals[i])
 
     if len(qp_bitrate_crf)>0:
         if opt_list['e_rctype'] in (global_vars.HEVC_RC_FIXQUANT, global_vars.HEVC_RC_CQP):
-            opt_list['i_qp'] = int(qp_bitrate_crf)
+            if int(qp_bitrate_crf)>=0:
+                opt_list['i_qp'] = int(qp_bitrate_crf)
         elif opt_list['e_rctype'] == global_vars.HEVC_RC_CRF:
-            opt_list['f_rf_constant'] = float(qp_bitrate_crf)
+            if float(qp_bitrate_crf)>=0.0:
+                opt_list['f_rf_constant'] = float(qp_bitrate_crf)
         else:
-            opt_list['i_bitrate'] = int(qp_bitrate_crf)
+            if int(qp_bitrate_crf)>=0:
+                opt_list['i_bitrate'] = int(qp_bitrate_crf)
 
 def parse_unit_param(opt_list,arg):
     opts=('i_max_cuwidth', 'i_max_cudepth',

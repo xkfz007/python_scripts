@@ -22,7 +22,7 @@ def get_default_enc_param_list():
 
     # debug related paramters
     param_list['i_printf_flag'] = 1  # 225
-    param_list['i_trace_flag'] = 4  # 7
+    param_list['i_trace_flag'] = 0  # 7
     param_list['b_measure_quality'] = 1
 
     param_list['i_frame_num_to_encode'] = 0
