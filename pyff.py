@@ -169,7 +169,7 @@ if __name__ == '__main__':
         FFMPEG_BIN='ffmpeg'
 
     help=lib.common_lib.HELP(usage,FFMPEG_BIN,'--help')
-    options='o:e:aC:T:r:m:t:'
+    options='o:e:aC:T:E:m:t:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options+help.get_opt())
     except getopt.GetoptError as err:
@@ -293,8 +293,8 @@ if __name__ == '__main__':
             extra_cmd+=' -vn'
             if auto_audio_flag==1:
                 extra_cmd+=' -c:a copy'
-            else:
-                extra_cmd+=' -b:a 64k'#set bitrate for audio
+            #else:
+            #    extra_cmd+=' -b:a 32k'#set bitrate for audio
         elif extension in image_name_list:
             if len(output_tag) == 0:  # =='':
                output_tag='%3d'
