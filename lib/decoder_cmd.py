@@ -108,7 +108,7 @@ def parse_dec_cl(dec, opt_list):
     help=common_lib.HELP(usage,dec.get_exe())
     options='e:i:oC:'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], options+help.get_opt())
+        opts, args = getopt.gnu_getopt(sys.argv[1:], options+help.get_opt())
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)

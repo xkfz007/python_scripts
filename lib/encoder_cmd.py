@@ -393,7 +393,7 @@ def parse_enc_cl(enc):
     help=common_lib.HELP(usage,enc.get_exe())
     options='e:s:i:o:T:E:f:g:b:r:p:P:u:A:F:a:q:B:L:yC:'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], options +help.get_opt(),
+        opts, args = getopt.gnu_getopt(sys.argv[1:], options +help.get_opt(),
                                    ['path=','log'])
     except getopt.GetoptError as err:
         print str(err)

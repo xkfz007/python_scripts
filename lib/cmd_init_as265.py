@@ -16,8 +16,8 @@ def get_default_enc_param_list():
     param_list['trace_file_cabacrdo'] = "trace_file_cabacrdo.log"
     param_list['trace_file_arch1rdo'] = "trace_file_arch1rdo.log"
 
-    param_list['i_src_width'] = 416
-    param_list['i_src_height'] = 240
+    param_list['i_src_width'] = 0
+    param_list['i_src_height'] = 0
     param_list['f_framerate'] = 0
 
     # debug related paramters
