@@ -341,6 +341,7 @@ if __name__ == '__main__':
     #            if os.path.exists(i):
     #                #os.remove(i)
     #               logging.info('"%s" is deleted'%i)
+    print 'FINAL COMMANDS:'
     for cmd in cmd_list:
         lib.run_cmd(cmd,help.get_do_execute())
 

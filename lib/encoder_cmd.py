@@ -12,13 +12,13 @@ class Encoder_st(codec_cmd.Codec_st):
         return "Encoder_st[id=%s,executor=%s,help=%s,path=%s,get_para_cmd=%s]"% \
                (self.id,self.executor,self.help,self.path,self.get_param_cmd)
 
-common_path = 'd:/workspace/'
+common_path = 'd:/workspace2/'
 x265_path = "x265_v1.5_20150211"
 if global_vars.x265_ver == "v1.6":
     x265_path = "x265_v1.6_20150403"
 hevc_path = 'HEVC_Encoder'
 as265_st=Encoder_st(global_vars.as265_name_list[0],'cli_ashevc.exe','',cmd_init_as265.get_enc_param_cmd_as265,
-                    os.path.join(common_path, 'arcvideo_codes/HEVC_Codec/', hevc_path, 'bin/x64/Release_WithTrace')
+                    os.path.join('d:/workspace/', 'arcvideo_codes/HEVC_Codec/', hevc_path, 'bin/x64/Release_WithTrace')
                     )
 x265_st=Encoder_st(global_vars.x265_name_list[0],'x265.exe','--log-level full --help',cmd_init_x26x.get_enc_param_cmd_x265,
                    os.path.join(common_path, 'src.x265/trunk/', x265_path, 'build/vc10-x86_64/Release')

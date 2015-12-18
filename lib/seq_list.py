@@ -59,26 +59,26 @@ def get_reso_info(seq_name):
     import os.path
     tmp_list = seq_name.split('_')
     print tmp_list
+    width=0
+    height=0
+    fps=0
     if tmp_list[1] not in common_reso_list:
-        logging.error("maybe the resolution is invalid, please check")
-        sys.exit()
-    reso = tmp_list[1].split('x')
-    width = int(reso[0])
-    height = int(reso[1])
-    #if len(tmp_list)==3:
-    #  fps=int(tmp_list[2])
-    #elif len(tmp_list)==5:
-    #  fps= int(tmp_list[3])
-    #else:
-    #  fps=30 #default fps
-    fps = int(tmp_list[2])
-    if fps < 15:
-        if len(tmp_list) == 5:
-            fps = int(tmp_list[3])
-        else:
-            fps = 30  #default fps
-    if fps not in common_fps_list:
-        logging.error("maybe the fps is invalid, please check")
-        sys.exit()
+        logging.warning("maybe the resolution is invalid, please check")
+    else:
+        reso = tmp_list[1].split('x')
+        if type(reso[0])==int:
+            width = int(reso[0])
+        if type(reso[1])==int:
+           height = int(reso[1])
+
+    if len(tmp_list)>2 and type(tmp_list[2])==int:
+        fps = int(tmp_list[2])
+        if fps < 15:
+            if len(tmp_list) == 5:
+                fps = int(tmp_list[3])
+            else:
+                fps = 30  #default fps
+        if fps not in common_fps_list:
+            logging.error("maybe the fps is invalid, please check")
     return (width, height, fps)
 
