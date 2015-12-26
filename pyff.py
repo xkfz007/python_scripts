@@ -47,6 +47,7 @@ def usage():
                     -aac/mp3: extract audio from media file
                     -jpg/png/bmp: extract images from media file
                     -gif: create a gif file from video file
+                    -ts
      -a           extract audio using the extra command lines from -C,
                   ignore the auto generated command lines from extension(-e)
      -o <str:str> output file path or file tag:
@@ -73,8 +74,7 @@ def get_cmd_line(input_file, ext, output_path, output_tag, prepared_cmd, extra_c
         output_path = indir
     assert len(infile) > 0
     fname, fext = os.path.splitext(infile)
-    print 'fname="%s"' % fname
-    print 'fext="%s"' % fext
+    logging.info('fname="%s" fext="%s"' % (fname,fext))
     fext = fext.lower()[1:]
     if ext == 'TS' and fext == 'ts':
         return ('', input_file)
@@ -147,10 +147,10 @@ def parse_time(arg, startp='', dura='', delimiter='+'):
 
 def parse_outpath(arg, output_path='', output_tag='', delimiter=':'):
     opath, otag = lib.parse_arg(arg, delimiter, output_path, output_tag)
-    print 'opth=%s,otag=%s' % (opath, otag)
+    logging.info('opth=%s,otag=%s' % (opath, otag))
     if '.' in opath:
         opath, otag = os.path.split(opath)
-    print 'opth=%s,otag=%s' % (opath, otag)
+    logging.info('opth=%s,otag=%s' % (opath, otag))
     # lib.check_path(opath)
     if len(opath) > 0 and not os.path.isdir(opath):
         #if len(otag)>0:
@@ -206,8 +206,7 @@ if __name__ == '__main__':
     dura = ''
     endp = ''
 
-    print opts
-    print args
+    logging.info("opts=%s args=%s"%(opts,args))
 
     for opt, arg in opts:
         if opt == '-o':
@@ -252,16 +251,17 @@ if __name__ == '__main__':
         dump_value, extension = os.path.splitext(output_tag)
     #    if not output_tag.startswith('_'):
     #        output_tag = '_' + output_tag
-    print "output_tag=%s" % output_tag
-    print type(extension)
-    print 'extension=%s' % extension
+    logging.info("output_tag=%s" % output_tag)
+    logging.info('extension=%s' % extension)
 
     prepared_cmd = FFMPEG_BIN
     prepared_cmd += ' -y'
 
+    #add option -threads
     if len(thread_num) > 0:
         prepared_cmd += ' -threads %s' % thread_num
 
+    #add option duration
     if len(dura) > 0:
         if len(startp) > 0:
             prepared_cmd += ' -ss %s' % startp
@@ -336,19 +336,7 @@ if __name__ == '__main__':
         cmd_list.append(cmd_line)
 
 
-    #if help.get_do_execute()== 1:
-    #    for cmd in cmd_list:
-    #        if len(cmd)==0:
-    #            continue
-    #        print cmd
-    #        # os.system(cmd)
-    #        subprocess.call(cmd, stdout=None, stderr=None, shell=True)
-    #    if len(merged_file)>0:
-    #        for i in output_list:
-    #            if os.path.exists(i):
-    #                #os.remove(i)
-    #               logging.info('"%s" is deleted'%i)
-    print 'FINAL COMMANDS:'
+    logging.info('FINAL COMMANDS:')
     for cmd in cmd_list:
         lib.run_cmd(cmd, help.get_do_execute())
 
