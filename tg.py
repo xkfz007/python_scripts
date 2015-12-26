@@ -23,18 +23,22 @@ compression_name_list=tar_name_list+ zip_name_list
 def usage():
     msg='''USAGE:tg.py [OPTIONS] [PATH or FILE]
     OPTIONS:
-      -e <string> the extension which identify the compression type
+      -e <string> compress files using this extension:
                     -tgz/tar.gz
                     -txz/tar.xz
-                    -bz/bz2
+                    -tbz/tar.bz
+                    -tb2/tar.bz2
                     -zip
       -o <string> the output name of compressed file,include filename and extension
+                  this option is useful when you want to compress several files into one
+      -d          force to uncompress files to a directory
     EXAMPLES:
       tg.py a.tar.gz  : uncompress a.tar.gz to the current directory
       tg.py a.tar.gz b/ : uncompress a.tar.gz to directory b/
       tg.py a.txt : compress a.txt to a.tar.gz
       tg.py a.txt -e xz : compress a.txt to a.xz
       tg.py b/ : compress directory b/ to b.tar.gz
+      tg.py a.txt b.txt c.txt -o a.zip: compress files to a.zip
   '''
     print msg
     return
@@ -59,16 +63,15 @@ if __name__ == '__main__':
 
     help=lib.common_lib.HELP(usage)
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:'+help.get_opt())
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:o:d'+help.get_opt())
     except getopt.GetoptError as err:
-        print str(err)
+        logging.error(str(err))
         sys.exit(2)
     except Exception, e:
         print e
 
     extension = '.zip' #default
-    compress_flag=0  # 0 for uncompress, >=1 for compress
-    #do_execute = 0
+    compress_flag=0  # <=0 for uncompress, >=1 for compress
     input_file=''
 
     for opt, arg in opts:
@@ -78,54 +81,48 @@ if __name__ == '__main__':
         elif opt == '-o':
             input_file=arg
             compress_flag=2
+        elif opt=='-d':
+            compress_flag=-1
         else:
             help.parse_opt(opt)
 
     if len(args) == 0:
-        print "Error: No input is specified, please check"
+        logging.error("No input is specified, please check")
         sys.exit()
 
     if len(input_file)==0:
         input_file=args[0]
 
     fname,fext=os.path.splitext(input_file)
+    logging.info("fname=%s fext=%s"%(fname,fext))
+
     if fname.endswith('.tar'):
         fname2,fext2=os.path.splitext(fname)
         assert fext2=='.tar'
         fname=fname2
         fext=fext2+fext
 
+    logging.info("NEW:fname=%s fext=%s"%(fname,fext))
     #if fext in compression_name_list:
     #    compress_flag=0
 
     cmd=''
-    if compress_flag == 0:
-        print "Uncompress file %s"%input_file
+    if compress_flag <= 0:
+        logging.info("Uncompress file %s"%input_file)
         target_dir='.'
         if len(args)>1:
             if os.path.isfile(args[1]):
                 logging.error('"%s" is a file which should be a directory, please check')
                 sys.exit()
-            elif not os.path.exists(args[1]):
-                os.makedirs(args[1])#create the target directory
             target_dir=args[1]
         else:
-            if not os.path.exists(fname):
-               os.makedirs(fname)#create a directory using the filename
-            target_dir=fname
+            if compress_flag==-1:
+                target_dir=fname
         target_dir=lib.format_path(target_dir)
+        if not os.path.exists(target_dir):
+           os.makedirs(target_dir)#create a directory using the filename
 
         fext=fext.lower()
-        #if fext in gz_name_list:
-        #    cmd+='tar zxvf "%s" -C "%s"'%(input_file,target_dir)
-        #elif fext in xz_name_list:
-        #    cmd+='tar Jxvf "%s" -C "%s"'%(input_file,target_dir)
-        #elif fext in bz_name_list:
-        #    cmd+='tar jxvf "%s" -C "%s"'%(input_file,target_dir)
-        #elif fext in zip_name_list:
-        #    cmd+='unzip "%s" -d "%s"'%(input_file,target_dir)
-        #elif fext in z_name_list:
-        #    cmd+='tar Zxvf "%s" -C "%s"'%(input_file,target_dir)
         if fext in tar_name_list:
             compr=get_compr_app_cmd(fext)
             cmd+='tar %sxvf "%s" -C "%s"'%(compr,input_file,target_dir)
@@ -133,7 +130,7 @@ if __name__ == '__main__':
             cmd+='unzip "%s" -d "%s"'%(input_file,target_dir)
 
     elif compress_flag > 0:
-        print "Compress file %s"%input_file
+        logging.info("Compress file %s"%input_file)
         #if len(extension)==0:
             #extension='.zip'#default compression extension
         if compress_flag ==2 :
