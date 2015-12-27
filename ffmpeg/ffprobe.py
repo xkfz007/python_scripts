@@ -198,8 +198,8 @@ class FFProbe:
       metadata=FFProbe('multimedia-file.mov')
     """
     # type = 0 image, 1 video, 2 audio
-    def __init__(self, input_file):
-        #self.input_file = input_file
+    def __init__(self, input_file, type):
+        self.input_file = input_file
 
         # the following check are removed to improve speed
         # try:
@@ -209,51 +209,89 @@ class FFProbe:
         #   raise IOError('ffprobe not found.')
 
         if os.path.isfile(input_file):
-            #if str(platform.system()) == 'Windows':
-            #    cmd = ["ffprobe", "-show_streams", self.input_file]
-            #else:
-            #    cmd = ["ffprobe -show_streams " + self.input_file]
-            cmd = "ffprobe -show_streams " + input_file
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            self.format = None
-            self.created = None
-            self.duration = None
-            self.start = None
-            self.bitrate = None
-            self.fps = None
-            self.streams = []
-            self.video = []
-            self.audio = []
-            datalines = []
-            for a in iter(p.stdout.readline, b''):
-                if re.match('\[STREAM\]', a):
-                    datalines = []
-                elif re.match('\[\/STREAM\]', a):
-                    self.streams.append(FFStream(datalines))
-                    datalines = []
+            if type == 0:
+                if str(platform.system()) == 'Windows':
+                    cmd = ["ffprobe", "-show_frames", self.input_file]
                 else:
-                    datalines.append(a)
-            for a in iter(p.stderr.readline, b''):
-                if re.match('\[STREAM\]', a):
-                    datalines = []
-                elif re.match('\[\/STREAM\]', a):
-                    self.streams.append(FFStream(datalines))
-                    datalines = []
+                    cmd = ["ffprobe -show_frames " + self.input_file]
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                self.format = None
+                self.created = None
+                self.duration = None
+                self.start = None
+                self.bitrate = None
+                self.fps = None
+                self.streams = []
+                self.image = []
+                datalines = []
+                for a in iter(p.stdout.readline, b''):
+                    if re.match('\[FRAME\]', a):
+                        datalines = []
+                    elif re.match('\[\/FRAME\]', a):
+                        self.streams.append(FFStream(datalines))
+                        datalines = []
+                    else:
+                        datalines.append(a)
+                for a in iter(p.stderr.readline, b''):
+                    if re.match('\[FRAME\]', a):
+                        datalines = []
+                    elif re.match('\[\/FRAME\]', a):
+                        self.streams.append(FFStream(datalines))
+                        datalines = []
+                    else:
+                        datalines.append(a)
+                p.stdout.close()
+                p.stderr.close()
+                for a in self.streams:
+                    self.image.append(a)
+            elif type == 1:
+                if str(platform.system()) == 'Windows':
+                    cmd = ["ffprobe", "-show_streams", self.input_file]
                 else:
-                    datalines.append(a)
-            p.stdout.close()
-            p.stderr.close()
-            for a in self.streams:
-                if a.isAudio():
-                    self.audio.append(a)
-                if a.isVideo():
-                    self.video.append(a)
+                    cmd = ["ffprobe -show_streams " + self.input_file]
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                self.format = None
+                self.created = None
+                self.duration = None
+                self.start = None
+                self.bitrate = None
+                self.fps = None
+                self.streams = []
+                self.video = []
+                self.audio = []
+                datalines = []
+                for a in iter(p.stdout.readline, b''):
+                    if re.match('\[STREAM\]', a):
+                        datalines = []
+                    elif re.match('\[\/STREAM\]', a):
+                        self.streams.append(FFStream(datalines))
+                        datalines = []
+                    else:
+                        datalines.append(a)
+                for a in iter(p.stderr.readline, b''):
+                    if re.match('\[STREAM\]', a):
+                        datalines = []
+                    elif re.match('\[\/STREAM\]', a):
+                        self.streams.append(FFStream(datalines))
+                        datalines = []
+                    else:
+                        datalines.append(a)
+                p.stdout.close()
+                p.stderr.close()
+                for a in self.streams:
+                    if a.isAudio():
+                        self.audio.append(a)
+                    if a.isVideo():
+                        self.video.append(a)
+        else:
+            raise IOError('No such media file ' + input_file)
+
 
 
 
 if __name__ == '__main__':
     print "Module ffprobe"
-    m = FFProbe("e:/movies/conan/[APTX4869][CONAN][689][480P][AVC_AAC][CHS](A29CF385).mp4")
+    m = FFProbe("/cygdrive/e/movies/conan/[APTX4869][CONAN][689][480P][AVC_AAC][CHS](A29CF385).mp4")
     for s in m.streams:
         if s.isVideo():
             framerate = s.frames() / s.durationSeconds()
