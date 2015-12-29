@@ -12,6 +12,33 @@ import sys
 import os
 import platform
 
+class FFFormat:
+    def __init__(self, datalines):
+        for a in datalines:
+            try:
+                (key, val) = a.strip().split('=')
+                self.__dict__[key] = val
+            except:
+                b = 1
+
+    def format(self):
+        """
+        Returns a string representation of the format.
+        """
+        format_name = None
+        if self.__dict__['format_name']:
+            format_name = self.__dict__['format_name']
+        return format_name
+
+    def formatDescription(self):
+        """
+        Returns a long representation of the format.
+        """
+        format_d = None
+        if self.__dict__['format_long_name']:
+            format_d = self.__dict__['format_long_name']
+        return format_d
+
 class FFStream:
     """
     An object representation of an individual stream in a multimedia file.
@@ -41,7 +68,7 @@ class FFStream:
         """
         val = False
         if self.__dict__['codec_type']:
-            if self.codec_type == 'video':
+            if self.__dict__['codec_type'] == 'video':
                 val = True
         return val
 
@@ -51,7 +78,7 @@ class FFStream:
         """
         val = False
         if self.__dict__['codec_type']:
-            if str(self.codec_type) == 'subtitle':
+            if str(self.__dict__['codec_type']) == 'subtitle':
                 val = True
         return val
 
@@ -144,6 +171,7 @@ class FFStream:
             codec_t = self.__dict__['codec_tag_string']
         return codec_t
 
+
     def bitrate(self):
         """
         Returns bitrate as an integer in bps
@@ -192,6 +220,34 @@ class FFStream:
             print "None integer TAG:Orientation"
         return b
 
+
+def get_streams(streams,lines):
+    datalines=[]
+    tag='STREAM'
+    start_tag='\['+tag.upper()+'\]'
+    end_tag='\[\/'+tag.upper()+'\]'
+    for a in iter(lines, b''):
+        if re.match(start_tag, a):
+            datalines = []
+        elif re.match(end_tag, a):
+            streams.append(FFStream(datalines))
+            datalines = []
+        else:
+            datalines.append(a)
+
+def get_format(formats,lines):
+    datalines=[]
+    tag='FORMAT'
+    start_tag='\['+tag.upper()+'\]'
+    end_tag='\[\/'+tag.upper()+'\]'
+    for a in iter(lines, b''):
+        if re.match(start_tag, a):
+            datalines = []
+        elif re.match(end_tag, a):
+            formats.append=FFStream(datalines)
+            datalines = []
+        else:
+            datalines.append(a)
 class FFProbe:
     """
     FFProbe wraps the ffprobe command and pulls the data into an object form::
@@ -215,32 +271,11 @@ class FFProbe:
             #    cmd = ["ffprobe -show_streams " + self.input_file]
             cmd = "ffprobe -show_streams " + input_file
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            self.format = None
-            self.created = None
-            self.duration = None
-            self.start = None
-            self.bitrate = None
-            self.fps = None
             self.streams = []
             self.video = []
             self.audio = []
-            datalines = []
-            for a in iter(p.stdout.readline, b''):
-                if re.match('\[STREAM\]', a):
-                    datalines = []
-                elif re.match('\[\/STREAM\]', a):
-                    self.streams.append(FFStream(datalines))
-                    datalines = []
-                else:
-                    datalines.append(a)
-            for a in iter(p.stderr.readline, b''):
-                if re.match('\[STREAM\]', a):
-                    datalines = []
-                elif re.match('\[\/STREAM\]', a):
-                    self.streams.append(FFStream(datalines))
-                    datalines = []
-                else:
-                    datalines.append(a)
+            get_streams(self.streams,p.stdout.readline)
+            get_streams(self.streams,p.stderr.readline)
             p.stdout.close()
             p.stderr.close()
             for a in self.streams:
@@ -249,6 +284,17 @@ class FFProbe:
                 if a.isVideo():
                     self.video.append(a)
 
+            cmd = "ffprobe -show_format " + input_file
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            self.formats=[]
+            self.format=None
+            get_format(self.formats,p.stdout.readline)
+            get_format(self.formats,p.stderr.readline)
+            p.stdout.close()
+            p.stderr.close()
+            for a in self.formats:
+                if a.format()!=None:
+                    self.format=a
 
 
 if __name__ == '__main__':

@@ -12,6 +12,8 @@ import glob
 import lib
 import logging
 
+from ffprobe import  FFProbe
+
 #ffmpeg_exe_list = ('ffmpeg', 'ffmpeg.exe')
 
 h264_name_list = ('h264', 'h.264', 'avc', '264')
@@ -66,6 +68,21 @@ def usage():
    '''
     print help_msg
     return
+
+def detect_file(input_file):
+    m = FFProbe(input_file)
+    v_num=len(m.video)
+    a_num=len(m.audio)
+    assert v_num==1 and a_num==1
+    vst=m.video
+    ast=m.audio
+    vcodec=vst.codec()
+    acodec=ast.codec()
+    format=m.format
+
+
+
+
 
 
 def get_cmd_line(input_file, ext, output_path, output_tag, prepared_cmd, extra_cmd):
