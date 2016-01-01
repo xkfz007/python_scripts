@@ -4,8 +4,6 @@
 Python wrapper for ffprobe command line tool. ffprobe must exist in the path.
 """
 
-version = '0.5'
-
 import subprocess
 import re
 import sys
@@ -244,7 +242,7 @@ def get_format(formats,lines):
         if re.match(start_tag, a):
             datalines = []
         elif re.match(end_tag, a):
-            formats.append=FFStream(datalines)
+            formats.append(FFStream(datalines))
             datalines = []
         else:
             datalines.append(a)
@@ -271,18 +269,23 @@ class FFProbe:
             #    cmd = ["ffprobe -show_streams " + self.input_file]
             cmd = "ffprobe -show_streams " + input_file
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            self.streams = []
+            self.__streams = []
             self.video = []
             self.audio = []
-            get_streams(self.streams,p.stdout.readline)
-            get_streams(self.streams,p.stderr.readline)
+            self.subtile=[]
+            get_streams(self.__streams,p.stdout.readline)
+            get_streams(self.__streams,p.stderr.readline)
             p.stdout.close()
             p.stderr.close()
-            for a in self.streams:
+            for a in self.__streams:
                 if a.isAudio():
                     self.audio.append(a)
-                if a.isVideo():
+                elif a.isVideo():
                     self.video.append(a)
+                elif a.isSubtile():
+                    self.subtile.append(a)
+
+            #print self.streams
 
             cmd = "ffprobe -show_format " + input_file
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -292,9 +295,12 @@ class FFProbe:
             get_format(self.formats,p.stderr.readline)
             p.stdout.close()
             p.stderr.close()
-            for a in self.formats:
-                if a.format()!=None:
-                    self.format=a
+            #print self.formats
+            #for a in self.formats:
+            #    #if a.format()!=None:
+            #    self.format=a
+            assert len(self.formats)==1
+            self.format=self.formats[0]
 
 
 if __name__ == '__main__':

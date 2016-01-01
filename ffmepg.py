@@ -73,7 +73,7 @@ def detect_file(input_file):
     m = FFProbe(input_file)
     v_num=len(m.video)
     a_num=len(m.audio)
-    assert v_num==1 and a_num==1
+    #assert v_num==1 and a_num==1
     vst=m.video
     ast=m.audio
     vcodec=vst.codec()
