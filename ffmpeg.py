@@ -183,7 +183,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  prepared_cmd, extra_
         ofext=infext
 
     if ofname==infname:#add tag to distinguish in and out
-        oftag='out'
+        oftag+='out'
 
     logging.info('ofname="%s" ofext="%s"' % (ofname,ofext))
 
@@ -312,7 +312,7 @@ if __name__ == '__main__':
 
     help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
     #options = 'o:e:aC:T:E:m:t:'
-    options = 'o:C:T:E:t:'
+    options = 'o:C:T:E:t:m:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
     except getopt.GetoptError as err:
@@ -322,18 +322,24 @@ if __name__ == '__main__':
         print e
 
     #output related
-    output_tag = ''
     output_path = ''
-    output_fname=''
-    output_ext=''
+    output_fname = ''
+    output_tag = ''
+    output_ext = ''
+
+    #merged file related
+    #merged_path=''
+    #merged_fname=''
+    #merged_tag=''
+    #merged_ext=''
+    merged_file = ''
 
     extra_cmd = ''
-    extension = ''
+    #extension = ''
     thread_num = ''
-    auto_audio_flag = 1
+    #auto_audio_flag = 1
     width = -2
     height = -2
-    merged_file = ''
     startp = ''
     dura = ''
     endp = ''
@@ -343,10 +349,10 @@ if __name__ == '__main__':
     for opt, arg in opts:
         if opt == '-o':
             output_path, output_fname,output_tag,output_ext = parse_output(arg)
-        elif opt == '-e':
-            extension = arg
-        elif opt == '-a':
-            auto_audio_flag = 0
+        #elif opt == '-e':
+        #    extension = arg
+        #elif opt == '-a':
+        #    auto_audio_flag = 0
         elif opt == '-C':
             extra_cmd = arg
         elif opt == '-T':
@@ -357,7 +363,9 @@ if __name__ == '__main__':
             else:
                 width, height = parse_reso(arg, width, height)
         elif opt == '-m':
-            merged_file = arg
+            merged_file=arg
+            #merged_path, merged_fname,merged_tag,merged_ext = parse_output(merged_file)
+            #mflag=1
         elif opt == '-t':
             if '+' in arg:
                 startp, dura = parse_time(arg, startp, dura)
@@ -378,7 +386,12 @@ if __name__ == '__main__':
         logging.error('Input is invalid, please check')
         sys.exit()
 
+
     logging.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
+    #logging.info("mpath=%s mfname=%s mtag=%s mext=%s" %(merged_path,merged_fname,merged_tag,merged_ext))
+
+    if len(merged_file)>0:
+        output_ext='ts'
 
     prepared_cmd = FFMPEG_BIN
     prepared_cmd += ' -y'
@@ -413,10 +426,12 @@ if __name__ == '__main__':
         if not os.path.isfile(input_file):
             logging.error('"%s" is not a file, but is in the input_list' % input_file)
             continue
-        cmd_line, output_file = get_cmd_line(input_file, output_path, output_fname,output_tag,output_ext, prepared_cmd, extra_cmd)
+        cmd_line, output_file = get_cmd_line(input_file, output_path, output_fname,output_tag,output_ext,
+                                             prepared_cmd, extra_cmd)
         print cmd_line
         cmd_list.append(cmd_line)
         output_list.append(output_file)
+
     if len(merged_file) > 0:
         concat_str = "|".join(output_list)
         print concat_str
