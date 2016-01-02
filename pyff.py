@@ -15,7 +15,7 @@ import logging
 #ffmpeg_exe_list = ('ffmpeg', 'ffmpeg.exe')
 
 h264_name_list = ('h264', 'h.264', 'avc', '264')
-h265_name_list = ('hevc', 'h.265', 'h264', '265')
+h265_name_list = ('hevc', 'h.265', 'h265', '265')
 bsf_for_mp4 = {'h264': 'h264_mp4toannexb',
                'hevc': 'hevc_mp4toannexb'}
 bitstream_name_list = h264_name_list + h265_name_list
