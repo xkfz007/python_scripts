@@ -21,6 +21,11 @@ if __name__ == '__main__':
     #vcodec=vst.codec()
     #acodec=ast.codec()
     fmt=m.format
-    print vst
-    print ast
-    print fmt
+    print 'format:'
+    print '\tformat_name=%s'%fmt.format()
+    for a in vst:
+        print 'video:'
+        print '\tcodec_name=%s description=%s'%(a.codec(),a.codecDescription())
+    for a in ast:
+        print 'audio:'
+        print '\tcodec_name=%s description=%s language=%s'%(a.codec(),a.codecDescription(),a.language())
