@@ -89,7 +89,8 @@ if __name__ == '__main__':
     pattern_list=[]
     for i in args:
       if not os.path.isdir(i) and not os.path.isfile(i):
-        pattern_list.append(i)
+        tmp=i.replace('(','\(').replace(')','\)')
+        pattern_list.append(tmp)
       else:
         dir_or_file=i
 
