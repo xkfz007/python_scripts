@@ -436,7 +436,8 @@ if __name__ == '__main__':
         concat_str = "|".join(output_list)
         print concat_str
         cmd_line = FFMPEG_BIN
-        cmd_line += ' -i "concat:%s" -c copy -bsf:a aac_adtstoasc %s' % (concat_str, merged_file)
+        #cmd_line += ' -i "concat:%s" -c copy -bsf:a aac_adtstoasc %s' % (concat_str, merged_file)
+        cmd_line += ' -i "concat:%s" -c:v copy -c:a pcm_alaw %s' % (concat_str, merged_file)
         print cmd_line
         cmd_list.append(cmd_line)
 

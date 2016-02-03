@@ -115,4 +115,5 @@ if __name__ == '__main__':
     #print cmd
     #if help.get_do_execute()==1:
     #    os.system(cmd)
-    lib.run_cmd(cmd,help.get_do_execute())
+    #lib.run_cmd(cmd,help.get_do_execute())
+    lib.run_cmd(cmd,1)
