@@ -1,5 +1,7 @@
 #!/bin/python
 __author__ = 'Felix'
+import sys
+sys.path.append('..')
 import lib
 import sys
 import fileinput

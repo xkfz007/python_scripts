@@ -144,7 +144,6 @@ def usage():
                   set the time duration, and in the first format, quotations are needed because of '-'
      -E <width:height>/<widthxheight>
                   set the output width and height
-     -m <string>  merge the input media files to one, only mp4 and mkv is supported
    ARGUMENTS:
      file or directory, support pattern globbing,these are the input files that will be processed
    '''
@@ -256,8 +255,10 @@ ffmpeg.py conan1.mkv -o dir/bb.264:aa
 ffmpeg.py conan1.mkv -o a
 
 '''
-def parse_output(arg, default_opath='', default_otag_oext='', delimiter=':'):
+def parse_output(arg, default_opath='', default_otag_oext='', delimiter='$'):
     opath, otag_oext = lib.parse_arg(arg, delimiter, default_opath, default_otag_oext)
+    if opath.endswith('/') or opath.endswith('\\'):
+        opath=opath[0:-1]
     logging.info('opth=%s,otag_oext=%s' % (opath, otag_oext))
     ofname_oext=''
     if '.' in opath:#format like: movies/conan/1.mp4
@@ -332,7 +333,7 @@ if __name__ == '__main__':
     #merged_fname=''
     #merged_tag=''
     #merged_ext=''
-    merged_file = ''
+    #merged_file = ''
 
     extra_cmd = ''
     #extension = ''
@@ -362,10 +363,6 @@ if __name__ == '__main__':
                 width, height = parse_reso(arg, width, height, ':')
             else:
                 width, height = parse_reso(arg, width, height)
-        elif opt == '-m':
-            merged_file=arg
-            #merged_path, merged_fname,merged_tag,merged_ext = parse_output(merged_file)
-            #mflag=1
         elif opt == '-t':
             if '+' in arg:
                 startp, dura = parse_time(arg, startp, dura)
@@ -390,8 +387,8 @@ if __name__ == '__main__':
     logging.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
     #logging.info("mpath=%s mfname=%s mtag=%s mext=%s" %(merged_path,merged_fname,merged_tag,merged_ext))
 
-    if len(merged_file)>0:
-        output_ext='ts'
+    #if len(merged_file)>0:
+    #    output_ext='ts'
 
     prepared_cmd = FFMPEG_BIN
     prepared_cmd += ' -y'
@@ -432,14 +429,14 @@ if __name__ == '__main__':
         cmd_list.append(cmd_line)
         output_list.append(output_file)
 
-    if len(merged_file) > 0:
-        concat_str = "|".join(output_list)
-        print concat_str
-        cmd_line = FFMPEG_BIN
-        #cmd_line += ' -i "concat:%s" -c copy -bsf:a aac_adtstoasc %s' % (concat_str, merged_file)
-        cmd_line += ' -i "concat:%s" -c:v copy -c:a pcm_alaw %s' % (concat_str, merged_file)
-        print cmd_line
-        cmd_list.append(cmd_line)
+    #if len(merged_file) > 0:
+    #    concat_str = "|".join(output_list)
+    #    print concat_str
+    #    cmd_line = FFMPEG_BIN
+    #    #cmd_line += ' -i "concat:%s" -c copy -bsf:a aac_adtstoasc %s' % (concat_str, merged_file)
+    #    cmd_line += ' -i "concat:%s" -c:v copy -c:a pcm_alaw %s' % (concat_str, merged_file)
+    #    print cmd_line
+    #    cmd_list.append(cmd_line)
 
 
     logging.info('FINAL COMMANDS:')

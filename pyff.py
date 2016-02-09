@@ -176,7 +176,7 @@ if __name__ == '__main__':
     #else:
     #    FFMPEG_BIN = 'ffmpeg'
     FFMPEG_BIN = 'ffmpeg'
-
+    logging.warning('This script is decriped, please use "ffmpeg.py" or "mmcat.py"')
 
     help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
     options = 'o:e:aC:T:E:m:t:'

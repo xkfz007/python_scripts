@@ -255,3 +255,10 @@ def get_input_file_or_dir_list(input_list,pattern):
         logging.info('"%s" is glob pattern:%s' % (pattern,glob_list))
         for i in glob_list:
             get_input_file_or_dir_list(input_list,i)
+
+def format_ext(ext):
+    if not ext.startswith('.'):
+       ext='.'+ext
+
+    ext=ext.lower()
+    return ext
