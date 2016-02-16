@@ -301,7 +301,7 @@ class FFProbe:
             #    cmd = ["ffprobe", "-show_streams", input_file]
             #else:
             #    cmd = ["ffprobe -show_streams " + input_file]
-            cmd = "ffprobe -show_streams " + input_file
+            cmd = 'ffprobe -show_streams "%s"'%input_file
             self.video = []
             self.audio = []
             self.subtitle=[]
@@ -314,7 +314,7 @@ class FFProbe:
                 elif a.isSubtitle():
                     self.subtitle.append(a)
 
-            cmd = "ffprobe -show_format " + input_file
+            cmd = 'ffprobe -show_format "%s"'% input_file
             tmp_formats=get_ffinfo(cmd,'FORMAT')
             assert len(tmp_formats)==1
             self.format=tmp_formats[0]

@@ -20,31 +20,33 @@ class AVFormat:
         self.name=name
         self.extensions=extensions.split(',')
         self.description=description
+        #self.supported_vcodecs=vcodecs.split(',')
+        #self.supported_acodecs=acodecs.split(',')
 
 vfmt_list=[
-    AVFormat('asf',           'asf,wmv,wma',              'ASF (Advanced / Active Streaming Format)'),
-    AVFormat('avi',           'avi',                      'AVI (Audio Video Interleaved)'),
-    AVFormat('f4v',           'f4v',                      'F4V Adobe Flash Video'),
-    AVFormat('flv',           'flv',                      'FLV (Flash Video)'),
-    AVFormat('h261',          'h261',                     'raw H.261'),
-    AVFormat('h263',          'h263',                     'raw H.263'),
-    AVFormat('h264',          'h264,264,avc',             'raw H.264 video'),
-    AVFormat('hevc',          'hevc,265,h265',            'raw HEVC video'),
-    AVFormat('m4v',           'm4v',                      'raw MPEG-4 video'),
-    AVFormat('matroska',      'mkv,mka',                  'Matroska'),
-    AVFormat('mmf',           'mmf',                      'Yamaha SMAF'),
-    AVFormat('mov',           'mov',                      'QuickTime / MOV'),
-    AVFormat('mp4',           'mp4',                      'MP4 (MPEG-4 Part 14)'),
-    AVFormat('mpeg',          'mpg,mpeg',                 'MPEG-1 Systems / MPEG program stream'),
-    AVFormat('mpeg1video',    'mpg,mpeg,m1v',             'raw MPEG-1 video'),
-    AVFormat('mpeg2video',    'm2v',                      'raw MPEG-2 video'),
-    AVFormat('mpegts',        'ts,m2t,m2ts,mts',          'MPEG-TS (MPEG-2 Transport Stream)'),
-    AVFormat('mxf',           'mxf',                      'MXF (Material eXchange Format)'),
-    AVFormat('rawvideo',      'yuv,rgb',                  'raw video'),
-    AVFormat('rm',            'rm,ra,rmvb',               'RealMedia'),
-    AVFormat('swf',           'swf',                      'SWF (ShockWave Flash)'),
-    AVFormat('vc1',           'vc1',                      'raw VC-1 video'),
-    AVFormat('yuv4mpegpipe',  'y4m',                      'YUV4MPEG pipe'),
+    AVFormat('asf',           'asf,wmv,wma',          'ASF (Advanced / Active Streaming Format)'  ),
+    AVFormat('avi',           'avi',                  'AVI (Audio Video Interleaved)'             ),
+    AVFormat('f4v',           'f4v',                  'F4V Adobe Flash Video'                     ),
+    AVFormat('flv',           'flv',                  'FLV (Flash Video)'                         ),
+    AVFormat('h261',          'h261',                 'raw H.261'                                 ),
+    AVFormat('h263',          'h263',                 'raw H.263'                                 ),
+    AVFormat('h264',          'h264,264,avc',         'raw H.264 video'                           ),
+    AVFormat('hevc',          'hevc,265,h265',        'raw HEVC video'                            ),
+    AVFormat('m4v',           'm4v',                  'raw MPEG-4 video'                          ),
+    AVFormat('matroska',      'mkv,mka',              'Matroska'                                  ),
+    AVFormat('mmf',           'mmf',                  'Yamaha SMAF'                               ),
+    AVFormat('mov',           'mov',                  'QuickTime / MOV'                           ),
+    AVFormat('mp4',           'mp4',                  'MP4 (MPEG-4 Part 14)'                      ),
+    AVFormat('mpeg',          'mpg,mpeg',             'MPEG-1 Systems / MPEG program stream'      ),
+    AVFormat('mpeg1video',    'mpg,mpeg,m1v',         'raw MPEG-1 video'                          ),
+    AVFormat('mpeg2video',    'm2v',                  'raw MPEG-2 video'                          ),
+    AVFormat('mpegts',        'ts,m2t,m2ts,mts',      'MPEG-TS (MPEG-2 Transport Stream)'         ),
+    AVFormat('mxf',           'mxf',                  'MXF (Material eXchange Format)'            ),
+    AVFormat('rawvideo',      'yuv,rgb',              'raw video'                                 ),
+    AVFormat('rm',            'rm,ra,rmvb',           'RealMedia'                                 ),
+    AVFormat('swf',           'swf',                  'SWF (ShockWave Flash)'                     ),
+    AVFormat('vc1',           'vc1',                  'raw VC-1 video'                            ),
+    AVFormat('yuv4mpegpipe',  'y4m',                  'YUV4MPEG pipe'                             ),
 
 ]
 afmt_list=[
@@ -161,7 +163,7 @@ def detect_file(input_file):
     return fmt,vst,ast,sst
 
 
-def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  prepared_cmd, extra_cmd):
+def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, extra_cmd):
     infdir, infile = os.path.split(input_file)
     infname, infext = os.path.splitext(infile)
     if infext.startswith('.'):
@@ -186,16 +188,30 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  prepared_cmd, extra_
 
     logging.info('ofname="%s" ofext="%s"' % (ofname,ofext))
 
-    cdec_cmd=''
     #input is video and output is audio, this means audio will be extracted from video
-    if infext in vext_dict.keys():
-        cdec_cmd+=' -c:a copy'
-        if ofext in vext_dict.keys():
-            if len(inf_sst)>0:
-                cdec_cmd+=' -c:s copy'
-        elif ofext in aext_dict.keys():
-            ofext=afmt_dict[inf_ast[0].codec()].extensions[0]
-            cdec_cmd+=' -vn'
+    if infext not in vext_dict.keys():
+        logging.error('Invalid extension "%s" of "%s"'%(infext,input_file))
+        sys.exit()
+
+    vcdec_cmd=''
+    acdec_cmd=''
+    scdec_cmd=''
+
+    if ofext in vext_dict.keys():
+        acdec_cmd=' -c:a copy'
+        if ofext =='mkv':
+            if inf_ast[0].codec()=='cook': #unsupported audio codec of mkv
+                acdec_cmd=' '#use default audio codec
+            if inf_vst[0].codec() in ('rv10','rv20'):#unsuported video codecs of mkv
+                vcdec_cmd=' '#use default video codec
+
+        if len(inf_sst)>0:
+            scdec_cmd=' -c:s copy'
+
+    elif ofext in aext_dict.keys():
+        ofext=afmt_dict[inf_ast[0].codec()].extensions[0]
+        vcdec_cmd=' -vn'
+        acdec_cmd=' -c:a copy'
 
     ofmt=ext_dict[ofext]
     fmt_cmd='-f %s'%ofmt.name
@@ -217,11 +233,14 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  prepared_cmd, extra_
     if len(ofpath) > 0:
         output_file = '%s%s%s' % (ofpath, os.sep, output_file)
 
-    cmd_line = prepared_cmd
+    cmd_line = pre_cmd
     cmd_line += ' -i "%s"' % input_file
-    cmd_line += ' %s' % cdec_cmd
-    cmd_line += ' %s' % fmt_cmd
+    cmd_line += ' %s' % vcdec_cmd
+    cmd_line += ' %s' % acdec_cmd
+    cmd_line += ' %s' % scdec_cmd
+    cmd_line += ' %s' % post_cmd
     cmd_line += ' %s' % extra_cmd
+    cmd_line += ' %s' % fmt_cmd
     cmd_line += ' "%s"' % output_file
     return (cmd_line, output_file)
 
@@ -390,8 +409,10 @@ if __name__ == '__main__':
     #if len(merged_file)>0:
     #    output_ext='ts'
 
-    prepared_cmd = FFMPEG_BIN
-    prepared_cmd += ' -y'
+    pre_cmd = FFMPEG_BIN
+    pre_cmd += ' -y'
+
+    post_cmd=''
 
     #if len(output_tag) == 0:  # =='':
     #    output_tag = "out"
@@ -399,20 +420,20 @@ if __name__ == '__main__':
 
     #add option -threads
     if len(thread_num) > 0:
-        prepared_cmd += ' -threads %s' % thread_num
+        post_cmd += ' -threads %s' % thread_num
 
     #add option duration
     if len(dura) > 0:
         if len(startp) > 0:
-            prepared_cmd += ' -ss %s' % startp
-        prepared_cmd += ' -t %s' % dura
+            pre_cmd += ' -ss %s' % startp
+        pre_cmd += ' -t %s' % dura
     elif len(endp) > 0:
         if len(startp) > 0:
-            extra_cmd += ' -ss %s' % startp
-        extra_cmd += ' -to %s' % endp
+            post_cmd += ' -ss %s' % startp
+        post_cmd += ' -to %s' % endp
 
     if width > 0 or height > 0:  # option -r: resize the input video file
-        extra_cmd += ' -vf scale=%s:%s' % (width, height)
+        post_cmd += ' -vf scale=%s:%s' % (width, height)
         output_tag+='%sx%s'%(width,height)
 
 
@@ -424,7 +445,7 @@ if __name__ == '__main__':
             logging.error('"%s" is not a file, but is in the input_list' % input_file)
             continue
         cmd_line, output_file = get_cmd_line(input_file, output_path, output_fname,output_tag,output_ext,
-                                             prepared_cmd, extra_cmd)
+                                             pre_cmd, post_cmd,extra_cmd)
         print cmd_line
         cmd_list.append(cmd_line)
         output_list.append(output_file)

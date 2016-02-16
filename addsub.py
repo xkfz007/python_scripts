@@ -20,6 +20,7 @@ def usage():
         2: convert srt to ass and use intermediate file
         3: convert srt to ass and use intermediate file with hard code and reencoding
     -e <encoding> gbk,big5,utf-8
+    -T <int>  thread number
     EXAMPLES:
     addsub.py "*.mp4" "*.srt" -o out.mkv -Y
     addsub.py "*.mp4" "*.ass" -o out -Y
@@ -100,7 +101,10 @@ if __name__ == '__main__':
     ext='.mkv'
     fname,fext=os.path.splitext(video_file)
     if len(output_arg)>0:
-       fname=output_arg
+        if output_arg.startswith('-'):
+             fname,fext=os.path.splitext(subtitle_file)
+        else:
+             fname=output_arg
 
     output_file=fname+'.Subtitle'+ext
 

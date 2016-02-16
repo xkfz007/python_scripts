@@ -18,6 +18,7 @@ def usage():
      -I <string>  merge the input media files to one, only mp4 and mkv is supported
      -o <string>  output filename
      -m <mode/method>
+     -T <int> thread number
    ARGUMENTS:
      file or directory, support pattern globbing,these are the input files that will be processed
    '''
@@ -72,7 +73,7 @@ def get_timestamp():
     t=time.mktime(datetime.datetime.now().timetuple())
     return int(t)
 
-def get_cmd_with_script(input_list,do_execute=0):
+def get_cmd_with_script(global_cmd,input_list,do_execute=0):
     content=["file '"+line+"'\n" for line in input_list]
     logging.info(content)
     concat_script='concate_script_%s.txt'%get_timestamp()
@@ -82,16 +83,16 @@ def get_cmd_with_script(input_list,do_execute=0):
             tempf.writelines(content)
         finally:
             tempf.close()
-    cmd ='%s -y -f concat -i "%s"'%(FFMPEG_BIN,concat_script)
+    cmd ='%s -f concat -i "%s"'%(global_cmd,concat_script)
     return cmd
 
-def generate_pipe_cmd(content_str):
+def generate_pipe_cmd(global_cmd,content_str):
     cmd='str=(%s);'%content_str
     cmd+="for i in \"${str[@]}\";do echo \"file '$i'\";done|"
-    cmd+='%s -y -f concat -i pipe:0'%FFMPEG_BIN
+    cmd+='%s -f concat -i pipe:0'%global_cmd
     return cmd
 # for *.mp4 *.flv *.mkv *.avi *.ts
-def get_cmd_with_pipe(input_list):
+def get_cmd_with_pipe(global_cmd,input_list):
     #content=["'"+lib.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
     content=["'"+lib.convert2drivepath(line)+"'" for line in input_list]
     content_str=' '.join(content)
@@ -99,7 +100,7 @@ def get_cmd_with_pipe(input_list):
     #cmd+="for i in \"${str[@]}\";do echo \"file '$i'\";done|"
     #cmd+='%s pipe:0'%default_cmd
     #cmd =" %s;for i in \"${str[@]}\";do echo \"file '$i'\";done"%cmd_sub
-    return generate_pipe_cmd(content_str)
+    return generate_pipe_cmd(global_cmd,content_str)
 
 #def get_cmd_with_pipe2(input_list):
 #    return cmd
@@ -113,7 +114,7 @@ def get_cmd_with_pipe(input_list):
 #    return cmd
 
 # for *.rmvb
-def get_cmd_with_filter(input_list):
+def get_cmd_with_filter(global_cmd,input_list):
     input_cmd_list=[]
     filter_cmd_list=[]
     size=len(input_list)
@@ -125,19 +126,19 @@ def get_cmd_with_filter(input_list):
     filter_cmd_str=' '.join(filter_cmd_list)
     concat_cmd_str='concat=n=%s:v=1:a=1 [v] [a]'%size
     map_cmd_str="-map '[v]' -map '[a]'"
-    cmd=FFMPEG_BIN+' -y '+input_cmd_str+\
+    cmd=global_cmd+' '+input_cmd_str+\
         " -filter_complex '"+filter_cmd_str+" "+concat_cmd_str+"' "+\
         map_cmd_str
     return cmd
 
 # for *.rmvb
-def get_cmd_with_tempfiles(input_list):
+def get_cmd_with_tempfiles(global_cmd,input_list):
     tmpfile_cmd_list=[]
     tmpfile_list=[]
     size=len(input_list)
     for i in range(0,size):
         tmpfile_list.append('intermediate%s.mkv'%i)
-        tmpfile_cmd_list.append('ffmpeg -y -i "%s" -c:v copy intermediate%s.mkv'%(input_list[i],i))
+        tmpfile_cmd_list.append('%s -i "%s" -c:v copy intermediate%s.mkv'%(global_cmd,input_list[i],i))
 
     cmd=';'.join(tmpfile_cmd_list)
 
@@ -146,7 +147,7 @@ def get_cmd_with_tempfiles(input_list):
     #cmd+=";str=(%s);for i in \"${str[@]}\";do echo \"file '$i'\";done|"%' '.join(content)
     #cmd+='ffmpeg -y -f concat -i pipe:0 -c copy '
 
-    return cmd+';'+generate_pipe_cmd(content_str)
+    return cmd+';'+generate_pipe_cmd(global_cmd,content_str)
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
@@ -154,7 +155,7 @@ if __name__ == '__main__':
 
 
     help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
-    options = 'o:i:I:m:'
+    options = 'o:i:I:m:T:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
     except getopt.GetoptError as err:
@@ -169,6 +170,8 @@ if __name__ == '__main__':
     addational_file_list=''
     mode=0
     file_script=''
+    thread_num=-1
+    global_cmd=FFMPEG_BIN+' -y'
 
     for opt, arg in opts:
         if opt == '-o':
@@ -179,8 +182,14 @@ if __name__ == '__main__':
             file_script=arg
         elif opt == '-m':
             mode=int(arg)
+        elif opt == '-T':
+            thread_num=int(arg)
         else:
             help.parse_opt(opt)
+
+    #add option -threads
+    if thread_num > 0:
+        global_cmd+= ' -threads %s' % thread_num
 
     ext='.mkv'#default is mkv
     output_fname='concatenated_file'#default output filename
@@ -190,7 +199,7 @@ if __name__ == '__main__':
     input_list = []
     if len(file_script)>0 and os.path.exists(file_script):
         logging.info('%s will use script "%s" to concatenate files'%(FFMPEG_BIN,file_script))
-        cmd='%s -y -f concat -i "%s"'%(FFMPEG_BIN,file_script)
+        cmd='%s -f concat -i "%s"'%(global_cmd,file_script)
         #parse_script(input_list,file_script)
     else:
         if len(args)==0:
@@ -228,16 +237,17 @@ if __name__ == '__main__':
         else:
             if ext=='.rmvb':
                 ext='.mkv'
-                enc_cmd=''#-c:v copy'#'-c:v libx264'
                 if mode==0:
-                    cmd=get_cmd_with_tempfiles(input_list)
+                    enc_cmd='-c:v copy'#'-c:v libx264'
+                    cmd=get_cmd_with_tempfiles(global_cmd,input_list)
                 elif mode==1:
-                    cmd=get_cmd_with_filter(input_list)
+                    enc_cmd=''#-c:v copy'#'-c:v libx264'
+                    cmd=get_cmd_with_filter(global_cmd,input_list)
             else:
                 if mode==0:#use pipe
-                    cmd=get_cmd_with_pipe(input_list)
+                    cmd=get_cmd_with_pipe(global_cmd,input_list)
                 elif mode==1:#auto to generate script
-                    cmd=get_cmd_with_script(input_list,help.get_do_execute())
+                    cmd=get_cmd_with_script(global_cmd,input_list,help.get_do_execute())
                 #elif mode==2:#auto to generate script
                 #    cmd=get_cmd_with_procsub(input_list)
 
@@ -255,7 +265,9 @@ if __name__ == '__main__':
 
     output_file=output_fname+ext
 
-    cmd+=' %s "%s"'%(enc_cmd,output_file)
+    #cmd+=' %s "%s"'%(enc_cmd,output_file)
+    cmd+=' %s'%enc_cmd
+    cmd+=' "%s"'%output_file
     lib.run_cmd(cmd, help.get_do_execute())
 
     #if os.path.exists(concat_script):
