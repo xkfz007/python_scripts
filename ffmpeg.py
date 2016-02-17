@@ -28,10 +28,6 @@ vfmt_list=[
     AVFormat('avi',           'avi',                  'AVI (Audio Video Interleaved)'             ),
     AVFormat('f4v',           'f4v',                  'F4V Adobe Flash Video'                     ),
     AVFormat('flv',           'flv',                  'FLV (Flash Video)'                         ),
-    AVFormat('h261',          'h261',                 'raw H.261'                                 ),
-    AVFormat('h263',          'h263',                 'raw H.263'                                 ),
-    AVFormat('h264',          'h264,264,avc',         'raw H.264 video'                           ),
-    AVFormat('hevc',          'hevc,265,h265',        'raw HEVC video'                            ),
     AVFormat('m4v',           'm4v',                  'raw MPEG-4 video'                          ),
     AVFormat('matroska',      'mkv,mka',              'Matroska'                                  ),
     AVFormat('mmf',           'mmf',                  'Yamaha SMAF'                               ),
@@ -42,16 +38,23 @@ vfmt_list=[
     AVFormat('mpeg2video',    'm2v',                  'raw MPEG-2 video'                          ),
     AVFormat('mpegts',        'ts,m2t,m2ts,mts',      'MPEG-TS (MPEG-2 Transport Stream)'         ),
     AVFormat('mxf',           'mxf',                  'MXF (Material eXchange Format)'            ),
-    AVFormat('rawvideo',      'yuv,rgb',              'raw video'                                 ),
     AVFormat('rm',            'rm,ra,rmvb',           'RealMedia'                                 ),
     AVFormat('swf',           'swf',                  'SWF (ShockWave Flash)'                     ),
     AVFormat('vc1',           'vc1',                  'raw VC-1 video'                            ),
     AVFormat('yuv4mpegpipe',  'y4m',                  'YUV4MPEG pipe'                             ),
 
 ]
+rawfmt_list=[
+    AVFormat('h261',          'h261',                 'raw H.261'                                 ),
+    AVFormat('h263',          'h263',                 'raw H.263'                                 ),
+    AVFormat('h264',          'h264,264,avc',         'raw H.264 video'                           ),
+    AVFormat('hevc',          'hevc,265,h265',        'raw HEVC video'                            ),
+    AVFormat('rawvideo',      'yuv,rgb',              'raw video'                                 ),
+    AVFormat('raw',           'es,raw',               'raw video'                                 ),
+]
 afmt_list=[
     AVFormat('ac3',          'ac3',                      'raw AC-3'),
-    AVFormat('adts',          'aac',                      'ADTS AAC (Advanced Audio Coding)'),
+    AVFormat('adts',          'adts,aac',                      'ADTS AAC (Advanced Audio Coding)'),
     AVFormat('flac',          'flac',                     'raw FLAC'),
     AVFormat('mp2',           'mp2,mpa,m2a',              'MP2 (MPEG audio layer 2)'),
     AVFormat('mp3',           'mp3',                      'MP3 (MPEG audio layer 3)'),
@@ -64,16 +67,21 @@ ifmt_list=[
     AVFormat('image2',        'bmp,jpeg,jpg,png,tiff',    'image2 sequence'),
 ]
 
-fmt_list=vfmt_list+afmt_list+ifmt_list
+fmt_list=vfmt_list+afmt_list+ifmt_list+rawfmt_list
 
+#format dict
 vfmt_dict={}
 afmt_dict={}
 ifmt_dict={}
+rawfmt_dict={}
 
+#extension dict
 vext_dict={}
 aext_dict={}
 iext_dict={}
+rawext_dict={}
 
+#all format dict
 fmt_dict={}
 ext_dict={}
 for i in vfmt_list:
@@ -97,6 +105,29 @@ for i in ifmt_list:
 fmt_dict.update(ifmt_dict)
 ext_dict.update(iext_dict)
 
+for i in  rawfmt_list:
+    rawfmt_dict[i.name]=i
+    for j in i.extensions:
+        rawext_dict[j]=i
+fmt_dict.update(rawfmt_dict)
+ext_dict.update(rawext_dict)
+
+class BSFilter:
+    def __init__(self,codec,fmt,filter):
+        self.codec=codec
+        self.filter=filter
+        self.fmts=fmt.split(',')
+
+bsf_list=[
+    BSFilter('h264','matroska,mp4,flv,mov','h264_mp4toannexb'),
+    BSFilter('hevc','matroska,mp4,flv,mov','hevc_mp4toannexb'),
+    BSFilter('adts','adts','aac_adtstoasc'),
+]
+
+bsf_cdc_dict= {'h264': 'h264_mp4toannexb',
+               'hevc': 'hevc_mp4toannexb',
+           }
+bsf_fmt_list=['matroska','mp4','flv','mov']
 
 bsf_for_mp4 = {'h264': 'h264_mp4toannexb',
                'hevc': 'hevc_mp4toannexb'}
@@ -168,14 +199,15 @@ def detect_file(input_file):
 def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, extra_cmd):
     infdir, infile = os.path.split(input_file)
     infname, infext = os.path.splitext(infile)
-    if infext.startswith('.'):
-        infext=infext[1:]
+    #if infext.startswith('.'):
+    #    infext=infext[1:]
+    infext=lib.format_ext2(infext)
 
     #detect file info
     inf_fmt,inf_vst,inf_ast,inf_sst=detect_file(input_file)
-    #if infext.lower() not in fmt_dict[inf_fmt.format].extensions:
-    #    logging.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[inf_fmt.format].extensions))
-    #    infext=fmt_list[inf_fmt.format].extensions[0]
+    if infext not in fmt_dict[infext].extensions:
+        logging.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
+        infext=fmt_list[infext].extensions[0]
 
     #normalize the output
     if len(ofpath) == 0:
@@ -185,7 +217,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     if len(ofext)==0:
         ofext=infext
 
-    if ofname==infname:#add tag to distinguish in and out
+    if ofname==infname and ofext==infext:#add tag to distinguish in and out
         oftag+='out'
 
     logging.info('ofname="%s" ofext="%s"' % (ofname,ofext))
@@ -195,35 +227,68 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         logging.error('Invalid extension "%s" of "%s"'%(infext,input_file))
         sys.exit()
 
+    if ofext==ofext.upper():
+       ofmt=ext_dict[ofext.lower()]
+    else:
+       ofmt=ext_dict[ofext]
+
+    fmt_cmd='-f %s'%ofmt.name
+
     vcdec_cmd=''
     acdec_cmd=''
     scdec_cmd=''
 
-    if ofext in vext_dict.keys():
+    #if ofext in vext_dict.keys():
+    if ofmt.name in vfmt_dict.keys():
         acdec_cmd=' -c:a copy'
-        if ofext =='mkv':
+        if ofext==ofext.upper():
+            vcdec_cmd=' -c:v copy'
+        else:
+            #if input is mp4 or mkv format and codec is h264, h264_mp4toannexb is needed
+            if infext in bsf_fmt_list and ofmt.name not in bsf_fmt_list \
+                    and inf_vst[0].codecName() in bsf_cdc_dict.keys():
+                fmt_cmd+=' -bsf:v %s'%bsf_cdc_dict[inf_vst[0].codecName()]
+
+        if ofmt.name =='matroska':
             if inf_ast[0].codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
                 acdec_cmd=' '#use default audio codec
             if inf_vst[0].codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
                 vcdec_cmd=' '#use default video codec
-        #elif ofext=='mp4':
-        #    if inf_ast[0].codecName()
 
         if len(inf_sst)>0:
             scdec_cmd=' -c:s copy'
 
-    elif ofext in aext_dict.keys():
-        ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
+        logging.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
+                     % (inf_fmt.formatName(),ofmt.name,inf_vst[0].codecName()))
+
+    elif ofmt.name in rawfmt_dict.keys():
+        if len(inf_sst)>0:
+            scdec_cmd=' -sn'
+        if len(inf_ast)>0:
+            acdec_cmd=' -an'
+
+        if ofmt.name=='raw':#auto decide the output format
+            fmt_cmd='-f %s'%inf_vst[0].codecName()
+            oftag+='%s'%inf_vst[0].codecName()
+
+    #elif ofext in aext_dict.keys():
+    elif ofmt.name in afmt_dict.keys():
+        #ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
         vcdec_cmd=' -vn'
         acdec_cmd=' -c:a copy'
 
-    ofmt=ext_dict[ofext]
-    fmt_cmd='-f %s'%ofmt.name
-    #if input is mp4 or mkv format and codec is h264, h264_mp4toannexb is needed
-    if infext in bsf_for_mp4_ext_list and ofext not in bsf_for_mp4_ext_list\
-            and inf_vst[0].codecName() in bsf_for_mp4.keys()\
-            and ofext in vext_dict.keys():
-        fmt_cmd+=' -bsf:v %s'%bsf_for_mp4[inf_vst[0].codecName()]
+    elif ofmt.name in ifmt_dict.keys():
+        if len(inf_sst)>0:
+            scdec_cmd=' -sn'
+        if len(inf_ast)>0:
+            acdec_cmd=' -an'
+
+        if ofext==ofext.upper():
+            vcdec_cmd=' -r 1 -vframe 1'
+        else:
+            oftag+='%d'
+
+
 
     #cdec_md=''
     #if len(cdec_md)==0:
@@ -233,7 +298,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     output_file=ofname
     if len(oftag)>0:
         output_file+='_'+oftag
-    output_file+='.'+ofext
+    output_file+='.'+ofext.lower()
     if len(ofpath) > 0:
         output_file = '%s%s%s' % (ofpath, os.sep, output_file)
 
