@@ -194,7 +194,14 @@ def detect_file(input_file):
 
     return fmt,vst,ast,sst
 
-#def get_codec_cmd(ext):
+def get_codec_cmd(vst,vclist,ast,aclist):
+    if ast.codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
+        acdec_cmd=' -c:a libvorbis'#use default audio codec
+        if ast.bitrate()>64000:
+            acdec_cmd+=' -b:a 64k'
+    if vst.codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
+        vcdec_cmd=' -c:a libx264'#use default video codec
+    return vcdec_cmd,acdec_cmd
 
 def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, extra_cmd):
     infdir, infile = os.path.split(input_file)
@@ -240,8 +247,13 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
 
     #if ofext in vext_dict.keys():
     if ofmt.name in vfmt_dict.keys():
-        acdec_cmd=' -c:a copy'
-        if ofext==ofext.upper():
+
+        if inf_ast[0].bitrate()>64000:
+            acdec_cmd=' -c:a libvorbis -b:a 64k'
+        else:
+            acdec_cmd=' -c:a copy'
+
+        if ofext==ofext.upper():#in default situation, we will use copy
             vcdec_cmd=' -c:v copy'
         else:
             #if input is mp4 or mkv format and codec is h264, h264_mp4toannexb is needed
@@ -249,11 +261,30 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
                     and inf_vst[0].codecName() in bsf_cdc_dict.keys():
                 fmt_cmd+=' -bsf:v %s'%bsf_cdc_dict[inf_vst[0].codecName()]
 
-        if ofmt.name =='matroska':
+        if ofmt.name =='matroska' or ofmt.name=='mpegts':
             if inf_ast[0].codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
-                acdec_cmd=' '#use default audio codec
+                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                if inf_ast[0].bitrate()>64000:
+                    acdec_cmd+=' -b:a 64k'
             if inf_vst[0].codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
-                vcdec_cmd=' '#use default video codec
+                vcdec_cmd=' -c:a libx264'#use default video codec
+
+        elif ofmt.name=='mp4':
+            if inf_vst[0].codecName() not in ('h264','hevc','vc1','mpeg2','mpeg4','h263'):
+                vcdec_cmd=' -c:a libx264'#use default video codec
+            if inf_ast[0].codecName() not in ('aac','ac3','eac3','dirac','mp2','mp3','vorbis'):
+                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                if inf_ast[0].bitrate()>64000:
+                    acdec_cmd+=' -b:a 64k'
+
+        elif ofmt.name=='flv':
+            if inf_vst[0].codecName() not in ('flv1','h263','mpeg4','flashsv', 'flashsv2', 'vp6f','vp6','vp6a','h264','hevc'):
+                vcdec_cmd=' -c:a libx264'#use default video codec
+            if inf_ast[0].codecName() not in ('mp3','adpcm_swf','aac','nellymoser','speex'):
+                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                if inf_ast[0].bitrate()>64000:
+                    acdec_cmd+=' -b:a 64k'
+
 
         if len(inf_sst)>0:
             scdec_cmd=' -c:s copy'
@@ -276,6 +307,8 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         #ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
         vcdec_cmd=' -vn'
         acdec_cmd=' -c:a copy'
+        if inf_ast[0].bitrate()>64000 and ofext!=ofext.upper():
+            acdec_cmd=' -c:a libvorbis -b:a 64k'
 
     elif ofmt.name in ifmt_dict.keys():
         if len(inf_sst)>0:
@@ -288,11 +321,6 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         else:
             oftag+='%d'
 
-
-
-    #cdec_md=''
-    #if len(cdec_md)==0:
-    #    cdec_cmd='-map 0 -c copy'
 
     #output_file = '%s_%s.%s' % (ofname, oftag, ofext)
     output_file=ofname
