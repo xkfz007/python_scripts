@@ -22,10 +22,10 @@ if __name__ == '__main__':
     #acodec=ast.codec()
     fmt=m.format
     print 'format:'
-    print '\tformat_name=%s'%fmt.format()
+    print '\tformat_name=%s'%fmt.formatName()
     for a in vst:
         print 'video:'
-        print '\tcodec_name=%s description=%s'%(a.codec(),a.codecDescription())
+        print '\tcodec_name=%s description=%s'%(a.codecName(),a.codecDescription())
     for a in ast:
         print 'audio:'
-        print '\tcodec_name=%s description=%s language=%s'%(a.codec(),a.codecDescription(),a.language())
+        print '\tcodec_name=%s description=%s language=%s'%(a.codecName(),a.codecDescription(),a.language())

@@ -19,7 +19,7 @@ class FFFormat:
             except:
                 b = 1
 
-    def format(self):
+    def formatName(self):
         """
         Returns a string representation of the format.
         """
@@ -142,7 +142,7 @@ class FFStream:
             lang = self.__dict__['TAG:LANGUAGE']
         return lang
 
-    def codec(self):
+    def codecName(self):
         """
         Returns a string representation of the stream codec.
         """

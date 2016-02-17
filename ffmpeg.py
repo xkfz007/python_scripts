@@ -152,6 +152,7 @@ def usage():
     print help_msg
     return
 
+
 def detect_file(input_file):
     m = FFProbe(input_file)
     vst=m.video
@@ -162,6 +163,7 @@ def detect_file(input_file):
 
     return fmt,vst,ast,sst
 
+#def get_codec_cmd(ext):
 
 def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, extra_cmd):
     infdir, infile = os.path.split(input_file)
@@ -200,16 +202,18 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     if ofext in vext_dict.keys():
         acdec_cmd=' -c:a copy'
         if ofext =='mkv':
-            if inf_ast[0].codec()=='cook': #unsupported audio codec of mkv
+            if inf_ast[0].codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
                 acdec_cmd=' '#use default audio codec
-            if inf_vst[0].codec() in ('rv10','rv20'):#unsuported video codecs of mkv
+            if inf_vst[0].codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
                 vcdec_cmd=' '#use default video codec
+        #elif ofext=='mp4':
+        #    if inf_ast[0].codecName()
 
         if len(inf_sst)>0:
             scdec_cmd=' -c:s copy'
 
     elif ofext in aext_dict.keys():
-        ofext=afmt_dict[inf_ast[0].codec()].extensions[0]
+        ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
         vcdec_cmd=' -vn'
         acdec_cmd=' -c:a copy'
 
@@ -217,9 +221,9 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     fmt_cmd='-f %s'%ofmt.name
     #if input is mp4 or mkv format and codec is h264, h264_mp4toannexb is needed
     if infext in bsf_for_mp4_ext_list and ofext not in bsf_for_mp4_ext_list\
-            and inf_vst[0].codec() in bsf_for_mp4.keys()\
+            and inf_vst[0].codecName() in bsf_for_mp4.keys()\
             and ofext in vext_dict.keys():
-        fmt_cmd+=' -bsf:v %s'%bsf_for_mp4[inf_vst[0].codec()]
+        fmt_cmd+=' -bsf:v %s'%bsf_for_mp4[inf_vst[0].codecName()]
 
     #cdec_md=''
     #if len(cdec_md)==0:
@@ -274,7 +278,7 @@ ffmpeg.py conan1.mkv -o dir/bb.264:aa
 ffmpeg.py conan1.mkv -o a
 
 '''
-def parse_output(arg, default_opath='', default_otag_oext='', delimiter='$'):
+def parse_output(arg, default_opath='', default_otag_oext='', delimiter=':'):
     opath, otag_oext = lib.parse_arg(arg, delimiter, default_opath, default_otag_oext)
     if opath.endswith('/') or opath.endswith('\\'):
         opath=opath[0:-1]
@@ -332,7 +336,7 @@ if __name__ == '__main__':
 
     help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
     #options = 'o:e:aC:T:E:m:t:'
-    options = 'o:C:T:E:t:m:'
+    options = 'e:o:C:T:E:t:m:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
     except getopt.GetoptError as err:
@@ -356,6 +360,7 @@ if __name__ == '__main__':
 
     extra_cmd = ''
     #extension = ''
+    muxer=''
     thread_num = ''
     #auto_audio_flag = 1
     width = -2
@@ -369,8 +374,8 @@ if __name__ == '__main__':
     for opt, arg in opts:
         if opt == '-o':
             output_path, output_fname,output_tag,output_ext = parse_output(arg)
-        #elif opt == '-e':
-        #    extension = arg
+        elif opt == '-e':
+            muxer= arg
         #elif opt == '-a':
         #    auto_audio_flag = 0
         elif opt == '-C':

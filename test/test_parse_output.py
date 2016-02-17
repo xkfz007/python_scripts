@@ -170,9 +170,9 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  prepared_cmd, extra_
 
     #detect file info
     inf_fmt,inf_vst,inf_ast,inf_sst=detect_file(input_file)
-    if infext.lower() not in fmt_dict[inf_fmt.format].extensions:
-        logging.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[inf_fmt.format].extensions))
-        infext=fmt_list[inf_fmt.format].extensions[0]
+    if infext.lower() not in fmt_dict[inf_fmt.formatName].extensions:
+        logging.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[inf_fmt.formatName].extensions))
+        infext=fmt_list[inf_fmt.formatName].extensions[0]
 
     #normalize the output
     if len(ofpath) == 0:

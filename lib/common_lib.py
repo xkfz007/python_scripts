@@ -262,3 +262,10 @@ def format_ext(ext):
 
     ext=ext.lower()
     return ext
+
+def format_ext2(ext):
+    if ext.startswith('.'):
+        ext=ext[1:]
+
+    ext=ext.lower()
+    return ext
