@@ -2,7 +2,7 @@ import platform
 import os
 import subprocess
 import logging
-import  glob
+import glob
 
 
 def determin_sys():
@@ -128,6 +128,7 @@ def run_cmd(cmd_line,do_execute=0,log_file='',rec_cl=0):
     #os.system(cmd_line)
     subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
 
+import pylog
 
 class HELP(object):
     default_opt='hHY'
@@ -161,7 +162,7 @@ class HELP(object):
             if len(self.BIN)>0:
                os.system(self.BIN+' '+self.help)
             else:
-                logging.error('Executor is not set')
+                pylog.fflog.error('Executor is not set')
             sys.exit()
         elif opt == '-Y':
          self.set_do_execute()

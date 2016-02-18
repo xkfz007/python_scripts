@@ -3,14 +3,14 @@
 import subprocess
 import time
 from multiprocessing import cpu_count
-import Log
+import pylog
 
 
 class TaskManager:
     m_maxTaskNumber = 1
     TaskKeeper = {}  # TaskKeeper is a dictionary
     # m_cmdListsAndLogFiles = [] # A list to store all the command List
-    m_LogOut = Log.Log()
+    m_LogOut = pylog.Log('taskmanager')
 
     def __init__(self, maxTN=1):
 

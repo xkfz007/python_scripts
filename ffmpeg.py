@@ -12,12 +12,12 @@ import logging
 
 from ffprobe import FFProbe
 
-fflog = logging.getLogger('ffmpeg')
-fflog.setLevel(logging.WARNING)
-hdr=logging.StreamHandler()
-hdr.setFormatter(logging.Formatter('[%(levelname)s]:%(message)s'))
-fflog.addHandler(hdr)
-
+#fflog = logging.getLogger('ffmpeg')
+#fflog.setLevel(logging.WARNING)
+#hdr=logging.StreamHandler()
+#hdr.setFormatter(logging.Formatter('[%(levelname)s]:%(message)s'))
+#fflog.addHandler(hdr)
+fflog=lib.Log('ffmpeg','info')
 
 class AVFormat:
     def __init__(self,name,extensions,description):
@@ -491,7 +491,7 @@ if __name__ == '__main__':
             elif '-' in arg:
                 startp, endp = parse_time(arg, startp, endp, '-')
         elif opt=='-v':
-            fflog.setLevel(logging.DEBUG)
+            fflog.set_level('debug')
         else:
             help.parse_opt(opt)
 

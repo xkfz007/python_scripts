@@ -12,8 +12,9 @@ from common_lib import *
 from cmd_init_x26x import *
 from TaskManager import *
 from seq_list import *
-from Log import *
 from cmd_init_hm import *
 from global_vars import *
 from codec_cmd import *
+from pylog import *
+from pylog import *
 
