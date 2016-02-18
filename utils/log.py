@@ -31,22 +31,22 @@ LEVELS={'debug':   logging.DEBUG,
         'critical':logging.CRITICAL,
         }
 if sys.platform in ('cygwin','linux2'):
-    COLORS={'red':'\033[1;31;40m',
-            'green':'\033[1;32;40m',
-            'yellow':'\033[1;33;40m',
-            'blue': '\033[1;34;40m',
-            'pink': '\033[1;35;40m',
-            'cyan': '\033[1;36;40m',
-            'none':'\033[0m',
+    COLORS={'red'   : '\033[1;31;40m',
+            'green' : '\033[1;32;40m',
+            'yellow': '\033[1;33;40m',
+            'blue'  : '\033[1;34;40m',
+            'pink'  : '\033[1;35;40m',
+            'cyan'  : '\033[1;36;40m',
+            'none'  : '\033[0m',
             }
 elif sys.platform in ('win32',):
-    COLORS={'red':0x04,
-            'green':0x02,
-            'yellow':0x06,
-            'blue':0x01,
-            'cyan':0x03,
-            'pink':0x05,
-            'none':0x08,
+    COLORS={'red'   : 0x04,
+            'green' : 0x02,
+            'yellow': 0x06,
+            'blue'  : 0x01,
+            'cyan'  : 0x03,
+            'pink'  : 0x05,
+            'none'  : 0x08,#FOREGROUND_INTENSITY
     }
 
 class Log:
