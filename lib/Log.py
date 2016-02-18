@@ -4,6 +4,7 @@
 # copy source from http://blog.csdn.net/five3/article/details/7630295
 import sys
 import ctypes
+import logging
 
 if sys.platform == 'linux2':
     from termcolor import colored, cprint
@@ -27,6 +28,34 @@ BACKGROUND_INTENSITY = 0x80  # background color is intensified.
 class Log:
     ''''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winprog/winprog/windows_api_reference.asp
     for information on Windows APIs.'''
+    '''
+    DEBUG: 1
+    ERROR:2
+    WARNING: 3
+    INFO:4
+    '''
+    ERROR=0
+    WARNING=1
+    INFO=2
+    DEBUG=3
+
+    def set_loglevel(self,level):
+        if level==self.ERROR:
+            self.logger.setLevel(logging.ERROR)
+        elif level==self.DEBUG:
+            self.logger.setLevel(logging.DEBUG)
+        elif level==self.WARNING:
+            self.logger.setLevel(logging.WARNING)
+        elif level==self.INFO:
+            self.logger.setLevel(logging.INFO)
+
+    def __init__(self,name,level=2,format='[%(levelname)s]:%(message)s'):
+        self.logger = logging.getLogger(name)
+        #self.logger.setLevel(logging.level)
+        self.hdr=logging.StreamHandler()
+        self.hdr.setFormatter(logging.Formatter(format))
+        self.logger.addHandler(self.hdr)
+        self.set_loglevel(level)
     if sys.platform == 'linux2':
         # red_on_cyan = lambda x: colored(x, 'red', 'on_cyan')
         # print_red_on_cyan = lambda x: cprint(x, 'red', 'on_cyan')
@@ -64,20 +93,23 @@ class Log:
 
         def error(self, print_text):
             self.set_cmd_color(FOREGROUND_RED | FOREGROUND_INTENSITY)
-            print print_text
+            #print print_text
+            self.logger.error(print_text)
             self.reset_color()
 
         def warn(self, print_text):
             self.set_cmd_color(FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-            print print_text
+            #print print_text
+            self.logger.warn(print_text)
             self.reset_color()
 
         def info(self, print_text):
-            print print_text
+            #print print_text
+            self.logger.info(print_text)
 
 
 if __name__ == "__main__":
-    log = Log()
+    log = Log('TEST',2)
     log.info("info")
     log.warn("warn")
     log.info("info")
