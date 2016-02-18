@@ -227,3 +227,14 @@ def format_ext2(ext):
 
     ext=ext.lower()
     return ext
+
+import getopt
+def my_getopt(argv,options,logger=logging.basicConfig()):
+    try:
+        opts, args = getopt.gnu_getopt(argv, options)
+    except getopt.GetoptError as err:
+        logger.error(str(err))
+        sys.exit(2)
+    except Exception, e:
+        logger.error(e)
+    return opts,args

@@ -158,14 +158,7 @@ if __name__ == '__main__':
 
     help = utils.HELP(usage, FFMPEG_BIN, '--help',logger)
     options = 'o:i:I:m:T:'
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
-    except getopt.GetoptError as err:
-        print str(err)
-        sys.exit(2)
-    except Exception, e:
-        print e
-
+    opts,args=utils.my_getopt(sys.argv[1:],options+help.get_opt())
 
     logger.info("opts=%s args=%s"%(opts,args))
     output_arg=''
