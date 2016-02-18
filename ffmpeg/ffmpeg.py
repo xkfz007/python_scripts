@@ -4,10 +4,9 @@
 # Right now, we just need give the glob pattern of the input file name
 # and this is very useful for the Chinese file or directory names
 __author__ = 'hfz2597'
-import sys
-sys.path.append('..')
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import getopt
-import os
 import utils
 #import logging
 #import ffprobe

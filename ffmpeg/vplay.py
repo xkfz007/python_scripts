@@ -1,9 +1,8 @@
 #!/bin/python
 __author__ = 'Felix'
 import time
-import sys
-sys.path.append('..')
-#import logging
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import os.path
 import utils
 

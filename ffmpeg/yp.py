@@ -2,12 +2,10 @@
 #a simple yuv player which is implemented by wrapping ffplay using python
 __author__ = 'hfz2597'
 import getopt
-import sys
-sys.path.append('..')
-import subprocess
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
 import os
-#import logging
 
 BIN='ffplay.exe'
 logger=utils.Log('YP')

@@ -2,9 +2,6 @@
 import getopt
 import sys
 import subprocess
-import lib.seq_list
-import lib.fun_lib
-import os
 
 __author__ = 'hfz2597'
 
