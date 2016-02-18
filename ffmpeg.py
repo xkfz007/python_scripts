@@ -7,12 +7,16 @@ __author__ = 'hfz2597'
 import sys
 import getopt
 import os
-import subprocess
-import glob
 import lib
 import logging
 
 from ffprobe import FFProbe
+
+fflog = logging.getLogger('ffmpeg')
+fflog.setLevel(logging.WARNING)
+hdr=logging.StreamHandler()
+hdr.setFormatter(logging.Formatter('[%(levelname)s]:%(message)s'))
+fflog.addHandler(hdr)
 
 
 class AVFormat:
@@ -177,6 +181,7 @@ def usage():
                   set the time duration, and in the first format, quotations are needed because of '-'
      -E <width:height>/<widthxheight>
                   set the output width and height
+     -v <loglevel>
    ARGUMENTS:
      file or directory, support pattern globbing,these are the input files that will be processed
    '''
@@ -213,7 +218,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     #detect file info
     inf_fmt,inf_vst,inf_ast,inf_sst=detect_file(input_file)
     if infext not in fmt_dict[infext].extensions:
-        logging.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
+        fflog.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
         infext=fmt_list[infext].extensions[0]
 
     #normalize the output
@@ -227,11 +232,11 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     if ofname==infname and ofext==infext:#add tag to distinguish in and out
         oftag+='out'
 
-    logging.info('ofname="%s" ofext="%s"' % (ofname,ofext))
+    fflog.info('ofname="%s" ofext="%s"' % (ofname,ofext))
 
     #input is video and output is audio, this means audio will be extracted from video
     if infext not in vext_dict.keys():
-        logging.error('Invalid extension "%s" of "%s"'%(infext,input_file))
+        fflog.error('Invalid extension "%s" of "%s"'%(infext,input_file))
         sys.exit()
 
     if ofext==ofext.upper():
@@ -289,7 +294,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         if len(inf_sst)>0:
             scdec_cmd=' -c:s copy'
 
-        logging.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
+        fflog.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
                      % (inf_fmt.formatName(),ofmt.name,inf_vst[0].codecName()))
 
     elif ofmt.name in rawfmt_dict.keys():
@@ -375,22 +380,22 @@ def parse_output(arg, default_opath='', default_otag_oext='', delimiter=':'):
     opath, otag_oext = lib.parse_arg(arg, delimiter, default_opath, default_otag_oext)
     if opath.endswith('/') or opath.endswith('\\'):
         opath=opath[0:-1]
-    logging.info('opth=%s,otag_oext=%s' % (opath, otag_oext))
+    fflog.info('opth=%s,otag_oext=%s' % (opath, otag_oext))
     ofname_oext=''
     if '.' in opath:#format like: movies/conan/1.mp4
         opath, ofname_oext= os.path.split(opath)
 
-    logging.info('opth=%s,ofname_oext=%s,otag_oext=%s' % (opath, ofname_oext,otag_oext))
+    fflog.info('opth=%s,ofname_oext=%s,otag_oext=%s' % (opath, ofname_oext,otag_oext))
     if len(opath) > 0 and not os.path.isdir(opath):
         #opt = raw_input('Directory "%s" does not exist, do you want to create it?(Y/N)' % opath)
         #if opt.lower() in 'yes':
         #    os.makedirs(opath)
-        #    logging.info('Diectory "%s" is created.' % arg)
+        #    fflog.info('Diectory "%s" is created.' % arg)
         #else:
-        #    logging.error('Diectory "%s" does not exist, using the current directory' % opath)
+        #    fflog.error('Diectory "%s" does not exist, using the current directory' % opath)
         #    opath='.'
         if len(ofname_oext)==0:
-            logging.warning('Directory does not exist, filename will be created')
+            fflog.warning('Directory does not exist, filename will be created')
             tmp=opath.replace('/','_')
             ofname_oext=tmp.replace('\\','_')
         opath=''
@@ -429,7 +434,7 @@ if __name__ == '__main__':
 
     help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
     #options = 'o:e:aC:T:E:m:t:'
-    options = 'e:o:C:T:E:t:m:'
+    options = 'e:o:C:T:E:t:m:v'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
     except getopt.GetoptError as err:
@@ -462,7 +467,7 @@ if __name__ == '__main__':
     dura = ''
     endp = ''
 
-    logging.info("opts=%s args=%s"%(opts,args))
+    fflog.info("opts=%s args=%s"%(opts,args))
 
     for opt, arg in opts:
         if opt == '-o':
@@ -485,11 +490,13 @@ if __name__ == '__main__':
                 startp, dura = parse_time(arg, startp, dura)
             elif '-' in arg:
                 startp, endp = parse_time(arg, startp, endp, '-')
+        elif opt=='-v':
+            fflog.setLevel(logging.DEBUG)
         else:
             help.parse_opt(opt)
 
     if len(args) == 0:
-        logging.error('No input is specified, please check')
+        fflog.error('No input is specified, please check')
         sys.exit()
 
     input_list = []
@@ -497,12 +504,12 @@ if __name__ == '__main__':
         lib.get_input_file_list(input_list, arg)
 
     if len(input_list) == 0:
-        logging.error('Input is invalid, please check')
+        fflog.error('Input is invalid, please check')
         sys.exit()
 
 
-    logging.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
-    #logging.info("mpath=%s mfname=%s mtag=%s mext=%s" %(merged_path,merged_fname,merged_tag,merged_ext))
+    fflog.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
+    #fflog.info("mpath=%s mfname=%s mtag=%s mext=%s" %(merged_path,merged_fname,merged_tag,merged_ext))
 
     #if len(merged_file)>0:
     #    output_ext='ts'
@@ -540,7 +547,7 @@ if __name__ == '__main__':
     for input_file in input_list:
         print input_file
         if not os.path.isfile(input_file):
-            logging.error('"%s" is not a file, but is in the input_list' % input_file)
+            fflog.error('"%s" is not a file, but is in the input_list' % input_file)
             continue
         cmd_line, output_file = get_cmd_line(input_file, output_path, output_fname,output_tag,output_ext,
                                              pre_cmd, post_cmd,extra_cmd)
@@ -558,7 +565,7 @@ if __name__ == '__main__':
     #    cmd_list.append(cmd_line)
 
 
-    logging.info('FINAL COMMANDS:')
+    fflog.info('FINAL COMMANDS:')
     for cmd in cmd_list:
         lib.run_cmd(cmd, help.get_do_execute())
 
