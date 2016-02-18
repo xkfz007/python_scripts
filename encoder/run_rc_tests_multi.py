@@ -63,6 +63,6 @@ for encoder_id in encoder_list:
             #os.system(cmd)
             tm.newTask(cmd, regression_file)
             cnt = cnt + 1
-            logout.warn("task_progress:%s/%s" % (cnt, total_task_num))
+            logout.warning("task_progress:%s/%s" % (cnt, total_task_num))
 
 tm.clearAllTask()

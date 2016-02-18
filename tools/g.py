@@ -2,9 +2,10 @@
 # grep wrapper
 __author__ = 'hfz2597'
 import sys
+sys.path.append('..')
 import getopt
 import os
-import lib.common_lib
+import utils
 BIN='grep'
 def usage():
   msg='''USAGE: g.py [OPTIONS]... PATTERN [PATH/FILE]...
@@ -32,7 +33,7 @@ if __name__ == '__main__':
       usage() #usage()
       sys.exit()
 
-    help=lib.common_lib.HELP(usage,BIN,'--help')
+    help=utils.HELP(usage,BIN,'--help')
 
     options='iwxnorIabLl'
     try:
@@ -116,4 +117,4 @@ if __name__ == '__main__':
     #if help.get_do_execute()==1:
     #    os.system(cmd)
     #lib.run_cmd(cmd,help.get_do_execute())
-    lib.run_cmd(cmd,1)
+    utils.run_cmd(cmd,1)

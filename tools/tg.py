@@ -2,10 +2,11 @@
 # uncompress file under linux
 __author__ = 'hfz2597'
 import sys
-import lib
+sys.path.append('..')
+import utils
 import getopt
 import os
-import logging
+#import logging
 gz_name_list=('.tar.gz','.tgz','.gz')
 xz_name_list=('.tar.xz','.txz','.xz')
 bz_name_list=('.tar.bz','.tbz','.bz',
@@ -61,11 +62,12 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    help=lib.common_lib.HELP(usage)
+    logger=utils.Log('TG')
+    help=utils.HELP(usage,m_log=logger)
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:o:d'+help.get_opt())
     except getopt.GetoptError as err:
-        logging.error(str(err))
+        logger.error(str(err))
         sys.exit(2)
     except Exception, e:
         print e
@@ -87,14 +89,14 @@ if __name__ == '__main__':
             help.parse_opt(opt)
 
     if len(args) == 0:
-        logging.error("No input is specified, please check")
+        logger.error("No input is specified, please check")
         sys.exit()
 
     if len(input_file)==0:
         input_file=args[0]
 
     fname,fext=os.path.splitext(input_file)
-    logging.info("fname=%s fext=%s"%(fname,fext))
+    logger.info("fname=%s fext=%s"%(fname,fext))
 
     if fname.endswith('.tar'):
         fname2,fext2=os.path.splitext(fname)
@@ -102,23 +104,23 @@ if __name__ == '__main__':
         fname=fname2
         fext=fext2+fext
 
-    logging.info("NEW:fname=%s fext=%s"%(fname,fext))
+    logger.info("NEW:fname=%s fext=%s"%(fname,fext))
     #if fext in compression_name_list:
     #    compress_flag=0
 
     cmd=''
     if compress_flag <= 0:
-        logging.info("Uncompress file %s"%input_file)
+        logger.info("Uncompress file %s"%input_file)
         target_dir='.'
         if len(args)>1:
             if os.path.isfile(args[1]):
-                logging.error('"%s" is a file which should be a directory, please check')
+                logger.error('"%s" is a file which should be a directory, please check')
                 sys.exit()
             target_dir=args[1]
         else:
             if compress_flag==-1:
                 target_dir=fname
-        target_dir=lib.format_path(target_dir)
+        target_dir=utils.format_path(target_dir)
         if not os.path.exists(target_dir):
            os.makedirs(target_dir)#create a directory using the filename
 
@@ -130,7 +132,7 @@ if __name__ == '__main__':
             cmd+='unzip "%s" -d "%s"'%(input_file,target_dir)
 
     elif compress_flag > 0:
-        logging.info("Compress file %s"%input_file)
+        logger.info("Compress file %s"%input_file)
         #if len(extension)==0:
             #extension='.zip'#default compression extension
         if compress_flag ==2 :
@@ -150,7 +152,7 @@ if __name__ == '__main__':
             cmd+='"%s" '%i
 
     else:
-        logging.error('invaild value of compress_flag, please check')
+        logger.error('invaild value of compress_flag, please check')
         sys.exit()
 
     print cmd

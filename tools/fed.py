@@ -2,8 +2,9 @@
 __author__ = 'Felix'
 #file encoding detect
 import sys
+sys.path.append('..')
 import chardet
-import lib
+import utils
 def usage():
     help_msg = '''USAGE:fed.py <filename>
    '''
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     args=sys.argv[1:]
     input_list=[]
     for arg in args:
-         lib.get_input_file_list(input_list, arg)
+         utils.get_input_file_list(input_list, arg)
     #print input_list
     for i in input_list:
         f=open(i,'r')

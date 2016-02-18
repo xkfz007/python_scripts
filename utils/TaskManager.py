@@ -3,14 +3,14 @@
 import subprocess
 import time
 from multiprocessing import cpu_count
-import pylog
+import log
 
 
 class TaskManager:
     m_maxTaskNumber = 1
     TaskKeeper = {}  # TaskKeeper is a dictionary
     # m_cmdListsAndLogFiles = [] # A list to store all the command List
-    m_LogOut = pylog.Log('taskmanager')
+    m_LogOut = log.Log('taskmanager')
 
     def __init__(self, maxTN=1):
 
@@ -18,7 +18,7 @@ class TaskManager:
             self.m_LogOut.error("  %d workers, %d cpu cores\n" % (maxTN, cpu_count()))
             self.m_maxTaskNumber = cpu_count() - 1
         else:
-            self.m_LogOut.warn("  %d workers, %d cpu cores\n" % (maxTN, cpu_count()))
+            self.m_LogOut.warning("  %d workers, %d cpu cores\n" % (maxTN, cpu_count()))
             self.m_maxTaskNumber = maxTN
         self.TaskKeeper = {}
         # self.m_cmdListsAndLogFiles = []
@@ -35,10 +35,10 @@ class TaskManager:
             if command != "":
                 if outFileName != None:
                     outFile = open(outFileName, 'w')
-                    self.m_LogOut.warn("Add new task: " + command + '\n')
+                    self.m_LogOut.warning("Add new task: " + command + '\n')
                     self.TaskKeeper.update({command: subprocess.Popen(command, stdout=outFile, stderr=outFile)})
                 else:
-                    self.m_LogOut.warn("Add new task: " + command + '\n')
+                    self.m_LogOut.warning("Add new task: " + command + '\n')
                     self.TaskKeeper.update({command: subprocess.Popen(command, stdout=None, stderr=None)})
 
         else:

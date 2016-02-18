@@ -2,15 +2,17 @@
 #coding=utf-8
 __author__ = 'Felix'
 import sys
-import lib
+sys.path.append('..')
+import utils
 import getopt
 import os.path
 
-import logging
-logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
+#import logging
+#logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
 FFMPEG_BIN = 'ffmpeg'
 #default_cmd= '%s -y -f concat -i'%FFMPEG_BIN
+logger=utils.Log('MMCAT')
 
 def usage():
     help_msg = '''USAGE:pyff.py [OPTIONS]... [ARGUMENTS]...
@@ -36,7 +38,7 @@ def parse_file_list(flist,ifile):
             if os.path.exists(chn):
                 flist.append(chn)
             else:
-                logging.warning('file "%s" does not exist, ignored'%chn)
+                logger.warning('file "%s" does not exist, ignored'%chn)
 def parse_script(flist,script):
     import codecs
     with open(script,'r') as f:
@@ -62,9 +64,9 @@ def parse_script(flist,script):
         if os.path.exists(path):
             flist.append(path)
         else:
-            logging.error('file "%s" does not exist'%path)
+            logger.error('file "%s" does not exist'%path)
             #sys.exit()
-    print flist
+    #print flist
 
 
 def get_timestamp():
@@ -75,7 +77,7 @@ def get_timestamp():
 
 def get_cmd_with_script(global_cmd,input_list,do_execute=0):
     content=["file '"+line+"'\n" for line in input_list]
-    logging.info(content)
+    logger.info(content)
     concat_script='concate_script_%s.txt'%get_timestamp()
     if do_execute==1:
         tempf = open(concat_script, 'w')
@@ -94,7 +96,7 @@ def generate_pipe_cmd(global_cmd,content_str):
 # for *.mp4 *.flv *.mkv *.avi *.ts
 def get_cmd_with_pipe(global_cmd,input_list):
     #content=["'"+lib.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
-    content=["'"+lib.convert2drivepath(line)+"'" for line in input_list]
+    content=["'"+utils.convert2drivepath(line)+"'" for line in input_list]
     content_str=' '.join(content)
     #cmd='str=(%s);'%content_str
     #cmd+="for i in \"${str[@]}\";do echo \"file '$i'\";done|"
@@ -154,7 +156,7 @@ if __name__ == '__main__':
         sys.exit()
 
 
-    help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
+    help = utils.HELP(usage, FFMPEG_BIN, '--help',logger)
     options = 'o:i:I:m:T:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
@@ -165,7 +167,7 @@ if __name__ == '__main__':
         print e
 
 
-    logging.info("opts=%s args=%s"%(opts,args))
+    logger.info("opts=%s args=%s"%(opts,args))
     output_arg=''
     addational_file_list=''
     mode=0
@@ -198,12 +200,12 @@ if __name__ == '__main__':
 
     input_list = []
     if len(file_script)>0 and os.path.exists(file_script):
-        logging.info('%s will use script "%s" to concatenate files'%(FFMPEG_BIN,file_script))
+        logger.info('%s will use script "%s" to concatenate files'%(FFMPEG_BIN,file_script))
         cmd='%s -f concat -i "%s"'%(global_cmd,file_script)
         #parse_script(input_list,file_script)
     else:
         if len(args)==0:
-            logging.error('No input file is specified.')
+            logger.error('No input file is specified.')
             sys.exit()
 
         if 0:#len(args)==1 and '*' in args[0] and not args[0].endswith('rmvb'):
@@ -211,21 +213,21 @@ if __name__ == '__main__':
            pass
         else:
             for arg in args:
-                lib.get_input_file_list(input_list, arg)
+                utils.get_input_file_list(input_list, arg)
 
         #if len(addational_file_list)>0 and os.path.exists(addational_file_list):
         #    logging.info('files in "%s" will be parsed'%addational_file_list)
         #    parse_file_list(input_list,addational_file_list)
 
         if len(input_list) == 0:
-            logging.error('No input file is specified, and No files will be concatenated.')
+            logger.error('No input file is specified, and No files will be concatenated.')
             sys.exit()
 
         #TODO
         dummy,tmp_ext=os.path.splitext(input_list[0])
         #if lib.format_ext(tmp_ext)!='.rmvb':
         if len(tmp_ext)>0:
-            ext=lib.format_ext(tmp_ext)
+            ext=utils.format_ext(tmp_ext)
 
         if 0:#len(input_list) == 1:
             #if not '*' in input_list[0]:
@@ -253,22 +255,22 @@ if __name__ == '__main__':
 
     if len(output_arg)>0:
         if output_arg.startswith('.'):
-            ext=lib.format_ext(output_arg)
+            ext=utils.format_ext(output_arg)
         else:
             tmp_name,tmp_ext=os.path.splitext(output_arg)
             if len(tmp_name)>0:
                 output_fname=tmp_name
             if len(tmp_ext)>0:
-                ext=lib.format_ext(tmp_ext)
+                ext=utils.format_ext(tmp_ext)
 
-    ext=lib.format_ext(ext)
+    ext=utils.format_ext(ext)
 
     output_file=output_fname+ext
 
     #cmd+=' %s "%s"'%(enc_cmd,output_file)
     cmd+=' %s'%enc_cmd
     cmd+=' "%s"'%output_file
-    lib.run_cmd(cmd, help.get_do_execute())
+    utils.run_cmd(cmd, help.get_do_execute())
 
     #if os.path.exists(concat_script):
     #    logging.info('file "%s" will be removed.'%concat_script)

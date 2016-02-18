@@ -120,15 +120,13 @@ def run_cmd(cmd_line,do_execute=0,log_file='',rec_cl=0):
        pfile = open(log_file, "w")
        if rec_cl==1:
           print >> pfile, "%s" % cmd_line
-          if determin_sys() in ('cygwin','linux'):
+          if sys.platform  in ('cygwin','linux2'):
             cmd_line += " 2>&1 |tee -a %s"% log_file
             pfile.close()
             pfile=None
 
     #os.system(cmd_line)
     subprocess.call(cmd_line, shell=True, stdout=pfile, stderr=pfile)
-
-import pylog
 
 def parse_arg_bak(arg,delimiter,X,Y):
     cnt=arg.count(delimiter)

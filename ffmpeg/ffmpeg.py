@@ -5,19 +5,21 @@
 # and this is very useful for the Chinese file or directory names
 __author__ = 'hfz2597'
 import sys
+sys.path.append('..')
 import getopt
 import os
-import lib
-import logging
-
+import utils
+#import logging
+#import ffprobe
 from ffprobe import FFProbe
 
+logger=utils.Log('ADDSUB')
 #fflog = logging.getLogger('ffmpeg')
 #fflog.setLevel(logging.WARNING)
 #hdr=logging.StreamHandler()
 #hdr.setFormatter(logging.Formatter('[%(levelname)s]:%(message)s'))
 #fflog.addHandler(hdr)
-fflog=lib.Log('ffmpeg','info')
+#fflog=lib.Log('ffmpeg','info')
 
 class AVFormat:
     def __init__(self,name,extensions,description):
@@ -213,12 +215,12 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     infname, infext = os.path.splitext(infile)
     #if infext.startswith('.'):
     #    infext=infext[1:]
-    infext=lib.format_ext2(infext)
+    infext=utils.format_ext2(infext)
 
     #detect file info
     inf_fmt,inf_vst,inf_ast,inf_sst=detect_file(input_file)
     if infext not in fmt_dict[infext].extensions:
-        fflog.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
+        logger.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
         infext=fmt_list[infext].extensions[0]
 
     #normalize the output
@@ -232,11 +234,11 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     if ofname==infname and ofext==infext:#add tag to distinguish in and out
         oftag+='out'
 
-    fflog.info('ofname="%s" ofext="%s"' % (ofname,ofext))
+    logger.info('ofname="%s" ofext="%s"' % (ofname,ofext))
 
     #input is video and output is audio, this means audio will be extracted from video
     if infext not in vext_dict.keys():
-        fflog.error('Invalid extension "%s" of "%s"'%(infext,input_file))
+        logger.error('Invalid extension "%s" of "%s"'%(infext,input_file))
         sys.exit()
 
     if ofext==ofext.upper():
@@ -294,7 +296,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         if len(inf_sst)>0:
             scdec_cmd=' -c:s copy'
 
-        fflog.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
+        logger.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
                      % (inf_fmt.formatName(),ofmt.name,inf_vst[0].codecName()))
 
     elif ofmt.name in rawfmt_dict.keys():
@@ -348,12 +350,12 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
 
 
 def parse_reso(arg, width=-2, height=-2, delimiter='x'):
-    x, y = lib.parse_arg(arg, delimiter, str(width), str(height))
+    x, y = utils.parse_arg(arg, delimiter, str(width), str(height))
     return int(x), int(y)
 
 
 def parse_time(arg, startp='', dura='', delimiter='+'):
-    x, y = lib.parse_arg(arg, delimiter, startp, dura)
+    x, y = utils.parse_arg(arg, delimiter, startp, dura)
     return x, y
 
 
@@ -377,15 +379,15 @@ ffmpeg.py conan1.mkv -o a
 
 '''
 def parse_output(arg, default_opath='', default_otag_oext='', delimiter=':'):
-    opath, otag_oext = lib.parse_arg(arg, delimiter, default_opath, default_otag_oext)
+    opath, otag_oext = utils.parse_arg(arg, delimiter, default_opath, default_otag_oext)
     if opath.endswith('/') or opath.endswith('\\'):
         opath=opath[0:-1]
-    fflog.info('opth=%s,otag_oext=%s' % (opath, otag_oext))
+    logger.info('opth=%s,otag_oext=%s' % (opath, otag_oext))
     ofname_oext=''
     if '.' in opath:#format like: movies/conan/1.mp4
         opath, ofname_oext= os.path.split(opath)
 
-    fflog.info('opth=%s,ofname_oext=%s,otag_oext=%s' % (opath, ofname_oext,otag_oext))
+    logger.info('opth=%s,ofname_oext=%s,otag_oext=%s' % (opath, ofname_oext,otag_oext))
     if len(opath) > 0 and not os.path.isdir(opath):
         #opt = raw_input('Directory "%s" does not exist, do you want to create it?(Y/N)' % opath)
         #if opt.lower() in 'yes':
@@ -395,7 +397,7 @@ def parse_output(arg, default_opath='', default_otag_oext='', delimiter=':'):
         #    fflog.error('Diectory "%s" does not exist, using the current directory' % opath)
         #    opath='.'
         if len(ofname_oext)==0:
-            fflog.warning('Directory does not exist, filename will be created')
+            logger.warning('Directory does not exist, filename will be created')
             tmp=opath.replace('/','_')
             ofname_oext=tmp.replace('\\','_')
         opath=''
@@ -432,29 +434,22 @@ if __name__ == '__main__':
 
     FFMPEG_BIN = 'ffmpeg'
 
-    help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
+    help = utils.HELP(usage, FFMPEG_BIN, '--help',logger)
     #options = 'o:e:aC:T:E:m:t:'
     options = 'e:o:C:T:E:t:m:v'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
     except getopt.GetoptError as err:
-        print str(err)
+        logger.error(str(err))
         sys.exit(2)
     except Exception, e:
-        print e
+        logger.error(e)
 
     #output related
     output_path = ''
     output_fname = ''
     output_tag = ''
     output_ext = ''
-
-    #merged file related
-    #merged_path=''
-    #merged_fname=''
-    #merged_tag=''
-    #merged_ext=''
-    #merged_file = ''
 
     extra_cmd = ''
     #extension = ''
@@ -467,7 +462,7 @@ if __name__ == '__main__':
     dura = ''
     endp = ''
 
-    fflog.info("opts=%s args=%s"%(opts,args))
+    logger.info("opts=%s args=%s"%(opts,args))
 
     for opt, arg in opts:
         if opt == '-o':
@@ -491,28 +486,24 @@ if __name__ == '__main__':
             elif '-' in arg:
                 startp, endp = parse_time(arg, startp, endp, '-')
         elif opt=='-v':
-            fflog.set_level('debug')
+            logger.set_level('debug')
         else:
             help.parse_opt(opt)
 
     if len(args) == 0:
-        fflog.error('No input is specified, please check')
+        logger.error('No input is specified, please check')
         sys.exit()
 
     input_list = []
     for arg in args:
-        lib.get_input_file_list(input_list, arg)
+        utils.get_input_file_list(input_list, arg)
 
     if len(input_list) == 0:
-        fflog.error('Input is invalid, please check')
+        logger.error('Input is invalid, please check')
         sys.exit()
 
 
-    fflog.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
-    #fflog.info("mpath=%s mfname=%s mtag=%s mext=%s" %(merged_path,merged_fname,merged_tag,merged_ext))
-
-    #if len(merged_file)>0:
-    #    output_ext='ts'
+    logger.info("opath=%s ofname=%s otag=%s oext=%s" %(output_path,output_fname,output_tag,output_ext))
 
     pre_cmd = FFMPEG_BIN
     pre_cmd += ' -y'
@@ -547,27 +538,17 @@ if __name__ == '__main__':
     for input_file in input_list:
         print input_file
         if not os.path.isfile(input_file):
-            fflog.error('"%s" is not a file, but is in the input_list' % input_file)
+            logger.error('"%s" is not a file, but is in the input_list' % input_file)
             continue
         cmd_line, output_file = get_cmd_line(input_file, output_path, output_fname,output_tag,output_ext,
                                              pre_cmd, post_cmd,extra_cmd)
-        print cmd_line
+        #print cmd_line
         cmd_list.append(cmd_line)
         output_list.append(output_file)
 
-    #if len(merged_file) > 0:
-    #    concat_str = "|".join(output_list)
-    #    print concat_str
-    #    cmd_line = FFMPEG_BIN
-    #    #cmd_line += ' -i "concat:%s" -c copy -bsf:a aac_adtstoasc %s' % (concat_str, merged_file)
-    #    cmd_line += ' -i "concat:%s" -c:v copy -c:a pcm_alaw %s' % (concat_str, merged_file)
-    #    print cmd_line
-    #    cmd_list.append(cmd_line)
-
-
-    fflog.info('FINAL COMMANDS:')
+    logger.info('FINAL COMMANDS:')
     for cmd in cmd_list:
-        lib.run_cmd(cmd, help.get_do_execute())
+        utils.run_cmd(cmd, help.get_do_execute())
 
 
 

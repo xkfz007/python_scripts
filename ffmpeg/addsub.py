@@ -1,16 +1,16 @@
 #!/bin/python
 __author__ = 'Felix'
 import sys
-import lib
+sys.path.append('..')
+import utils
 import getopt
 import os.path
 import glob
-import chardet
-
-import logging
-logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
+#import logging
+#logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
 FFMPEG_BIN = 'ffmpeg'
+logger=utils.Log('ADDSUB')
 def usage():
     help_msg = '''USAGE:addsub.py [option] <video> <subtitle>
     -o <output_file>
@@ -43,7 +43,8 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    help = lib.common_lib.HELP(usage, FFMPEG_BIN, '--help')
+
+    help = utils.HELP(usage, FFMPEG_BIN, '--help',logger)
     options = 'o:m:e:'
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options + help.get_opt())
@@ -54,7 +55,7 @@ if __name__ == '__main__':
         print e
 
 
-    logging.info("opts=%s args=%s"%(opts,args))
+    logger.info("opts=%s args=%s"%(opts,args))
 
     output_arg=''
     mode=1
@@ -71,26 +72,26 @@ if __name__ == '__main__':
             help.parse_opt(opt)
 
     if len(args)>2:
-        logging.error('Too much input,please check')
+        logger.error('Too much input,please check')
         sys.exit()
 
     glob_list=glob.glob(args[0])
-    logging.info('"%s" is glob pattern:%s' % (args[0],glob_list))
+    logger.info('"%s" is glob pattern:%s' % (args[0],glob_list))
     if len(glob_list)>1:
-        logging.error('Too much input video files,please check')
+        logger.error('Too much input video files,please check')
         sys.exit()
     elif len(glob_list)<1:
-        logging.error('Too little input video files,please check')
+        logger.error('Too little input video files,please check')
         sys.exit()
     video_file=glob_list[0]
 
     glob_list=glob.glob(args[1])
-    logging.info('"%s" is glob pattern:%s' % (args[1],glob_list))
+    logger.info('"%s" is glob pattern:%s' % (args[1],glob_list))
     if len(glob_list)>1:
-        logging.error('Too much input subtitle files,please check')
+        logger.error('Too much input subtitle files,please check')
         sys.exit()
     elif len(glob_list)<1:
-        logging.error('Too little input subtitle files,please check')
+        logger.error('Too little input subtitle files,please check')
         sys.exit()
     subtitle_file=glob_list[0]
 
@@ -138,9 +139,6 @@ if __name__ == '__main__':
         #        pass
         #        cmd+='%s -y -i "%s" -vf \'ass="%s"\' -c:a copy "%s"'%(FFMPEG_BIN,video_file,tmp_sub_file,output_file)
 
-    lib.run_cmd(cmd, help.get_do_execute())
-
-
-
+    utils.run_cmd(cmd, help.get_do_execute())
 
 

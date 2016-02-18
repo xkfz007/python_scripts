@@ -2,16 +2,20 @@
 __author__ = 'Felix'
 import time
 import sys
-import logging
+sys.path.append('..')
+#import logging
 import os.path
-logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
+import utils
+
+logger=utils.Log('VPLAY')
+#logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
 def task():
     print "task ..."
 
 def timer(n):
     while True:
-        print time.strftime('%Y-%m-%d %X',time.localtime())
+        logger.info(time.strftime('%Y-%m-%d %X',time.localtime()))
         task()
         time.sleep(n)
 
@@ -67,10 +71,10 @@ class MyThread(threading.Thread):
     #    return self.res
 
     def run(self):
-        logging.info('staring [', self.name, '] at: ', time.ctime())
+        logger.info('staring [', self.name, '] at: ', time.ctime())
         #self.res = self.func(*self.args)
         self.func(*self.args)
-        logging.info('\t [', self.name, '] done at: ', time.ctime())
+        logger.info('\t [', self.name, '] done at: ', time.ctime())
 
 
 def play_channels(channel_list,step=1):
@@ -83,14 +87,14 @@ def play_channels(channel_list,step=1):
         #cmd='vlc --video-on-top %s'%url
         cmd='vlc %s'%url
         #cmd='ffplay %s'%url
-        logging.info('start to play %s:%s'%(cha,url))
+        logger.info('start to play %s:%s'%(cha,url))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         #p = subprocess.Popen(cmd)
-        logging.info('playing %s'%url)
+        logger.info('playing %s'%url)
         time.sleep(2.0*60)
-        logging.info('time up, terminating....')
+        logger.info('time up, terminating....')
         p.terminate()
-        logging.info('terminated')
+        logger.info('terminated')
 
 
 def test_loop(label,num):
@@ -142,11 +146,11 @@ if __name__=='__main__':
     ]
 
     if len(sys.argv) == 1:
-        logging.error('Not enough parameters!')
+        logger.error('Not enough parameters!')
         sys.exit()
 
     if not os.path.exists(sys.argv[1]):
-        logging.error('File %s does not exist!'%sys.argv[1])
+        logger.error('File %s does not exist!'%sys.argv[1])
         sys.exit()
     input_file=sys.argv[1]
     f=open(input_file,'r')
@@ -160,7 +164,7 @@ if __name__=='__main__':
         chn=chn.strip(' ')
         if not chn.startswith('#') and len(chn)>0:
             chn_list.append(chn)
-            print chn
+            logger.info(chn)
 
     #thread.start_new_thread(play_channels,(channel_released_list,))
     #thread.start_new_thread(play_channels,(channel_unreleased_list,))

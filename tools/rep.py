@@ -3,9 +3,11 @@ __author__ = 'hfz2597'
 import commands
 import os
 import sys
-import lib.common_lib
+sys.path.append('..')
+import utils
 import getopt
 import logging
+
 def usage():
     msg='''USAGE: rep.py [OPTIONS]... PATTERN REPLACEMENT [PATH/FILE]...
    OPTIONS:
@@ -23,7 +25,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
         sys.exit()
-    help=lib.common_lib.HELP(usage)
+    logger=utils.Log('REP')
+    help=utils.HELP(usage,m_log=logger)
     #do_execute=0
     options='e:'
     try:
@@ -42,10 +45,10 @@ if __name__ == '__main__':
             help.parse_opt(opt)
 
     if len(args) == 0:
-        logging.error('No PATTERN is specified, please check')
+        logger.error('No PATTERN is specified, please check')
         sys.exit()
     elif len(args) == 1:
-        logging.error('No REPLACEMENT is specified, please check')
+        logger.error('No REPLACEMENT is specified, please check')
         sys.exit()
 
     print 'args=%s'%args
@@ -59,9 +62,9 @@ if __name__ == '__main__':
 
     dir_file_list=[]
     for i in input_list:
-        lib.get_input_file_or_dir_list(dir_file_list,i)
+        utils.get_input_file_or_dir_list(dir_file_list,i)
 
-    print 'dir_file_list=%s'%dir_file_list
+    logger.info('dir_file_list=%s'%dir_file_list)
 
     file_modify_list=[]
     for i in dir_file_list:
@@ -70,7 +73,7 @@ if __name__ == '__main__':
         (status,output)=commands.getstatusoutput(cmd)
         file_modify_list.extend(output.splitlines())
 
-    print 'file_modify_list=%s'%file_modify_list
+    logger.info('file_modify_list=%s'%file_modify_list)
 
     cmd_list=[]
     for i in file_modify_list:
@@ -81,4 +84,4 @@ if __name__ == '__main__':
           cmd_list.append(cmd)
 #
     for cmd in cmd_list:
-        lib.run_cmd(cmd,help.get_do_execute())
+        utils.run_cmd(cmd,help.get_do_execute())

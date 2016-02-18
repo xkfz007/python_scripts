@@ -84,9 +84,9 @@ class Log:
         self.logger.error(text)
         self.reset_color()
 
-    def warn(self, text):
+    def warning(self, text):
         self.set_cmd_color('yellow')
-        self.logger.warn(text)
+        self.logger.warning(text)
         self.reset_color()
 
     def info(self, text):
@@ -99,10 +99,10 @@ class Log:
 if __name__ == "__main__":
     log = Log('TEST','info')
     log.info("info")
-    log.warn("warn")
+    log.warning("warn")
     log.info("info")
-    log.warn("warn")
+    log.warning("warn")
     log.error("error")
     log.info("info")
-    log.warn("warn")
+    log.warning("warn")
     log.error("error")

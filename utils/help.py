@@ -6,19 +6,26 @@ import log
 
 class HELP(object):
     default_opt='hHY'
-    def __init__(self,usage,BIN='',help='--help'):
+    #m_LogOut = log.Log('HELP')
+    def __init__(self,usage,BIN='',help='--help',m_log= log.Log('HELP')):
         self.usage=usage
         self.BIN=BIN
         self.help=help
         self.do_execute=0
+        self.m_LogOut=m_log
+
     def set_BIN(self,BIN):
         self.BIN=BIN
+
     def set_help(self,help):
         self.help=help
+
     def set_do_execute(self,do_execute=1):
         self.do_execute=do_execute
+
     def get_opt(self):
         return HELP.default_opt
+
     def add_usage(self):
         msg='ADDITIONAL OPTIONS:\n'
         msg+='   -h  print this help\n'
@@ -36,12 +43,13 @@ class HELP(object):
             if len(self.BIN)>0:
                 os.system(self.BIN+' '+self.help)
             else:
-                pylog.fflog.error('Executor is not set')
+                self.m_LogOut.error('Executor is not set')
             sys.exit()
         elif opt == '-Y':
             self.set_do_execute()
         else:
-            logging.warning('unknown option:%s'%opt)
+            self.m_LogOut.warning('unknown option:%s'%opt)
 
     def get_do_execute(self):
         return self.do_execute
+

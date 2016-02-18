@@ -2,9 +2,10 @@
 # find wrapper: search for files in a directory hierarchy
 __author__ = 'hfz2597'
 import sys
+sys.path.append('..')
 import getopt
 import os
-import lib.common_lib
+import utils
 BIN='find'
 def usage():
   msg='''USAGE: f.py [OPTIONS]... PATTERN [PATH]...
@@ -31,7 +32,7 @@ if __name__ == '__main__':
       usage()
       sys.exit()
 
-    help=lib.common_lib.HELP(usage,BIN,'--help')
+    help=utils.HELP(usage,BIN,'--help')
     #do_execute=0
     options='ifde:m:'
     try:
@@ -102,4 +103,4 @@ if __name__ == '__main__':
     #print cmd
     #if help.get_do_execute()==1:
     #    os.system(cmd)
-    lib.run_cmd(cmd,help.get_do_execute())
+    utils.run_cmd(cmd,help.get_do_execute())
