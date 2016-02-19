@@ -6,13 +6,10 @@
 __author__ = 'hfz2597'
 import os,sys
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import getopt
 import utils
-#import logging
-#import ffprobe
 from ffprobe import FFProbe
 
-logger=utils.Log('ADDSUB')
+logger=utils.Log('FFMPEG','info')
 #fflog = logging.getLogger('ffmpeg')
 #fflog.setLevel(logging.WARNING)
 #hdr=logging.StreamHandler()

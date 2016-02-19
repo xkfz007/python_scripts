@@ -4,8 +4,6 @@ __author__ = 'Felix'
 import os,sys
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
-import getopt
-import os.path
 
 #import logging
 #logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')

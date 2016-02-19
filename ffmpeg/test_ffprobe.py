@@ -1,12 +1,13 @@
 #!/bin/python
 __author__ = 'Felix'
 
-import sys
-sys.path.append("..")
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ffprobe import FFProbe
-import logging
+import utils
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def test_ff():
     if len(sys.argv[1:])!=1:
         logging.error("Wrong number of input arguments!")
         sys.exit()
@@ -29,3 +30,9 @@ if __name__ == '__main__':
     for a in ast:
         print 'audio:'
         print '\tcodec_name=%s description=%s language=%s'%(a.codecName(),a.codecDescription(),a.language())
+
+if __name__ == "__main__":
+    log = utils.Log('TEST','info')
+    log.info("info")
+    log.warning("warning")
+    log.error("error")

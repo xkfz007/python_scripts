@@ -62,6 +62,7 @@ class Log:
         self.hdr.setFormatter(logging.Formatter(format))
         self.logger.addHandler(self.hdr)
         self.set_level(level)
+        self.logger.propagate=0
 
     if sys.platform in ('cygwin','linux2'):
         def set_cmd_color(self, color):
@@ -99,10 +100,5 @@ class Log:
 if __name__ == "__main__":
     log = Log('TEST','info')
     log.info("info")
-    log.warning("warn")
-    log.info("info")
-    log.warning("warn")
-    log.error("error")
-    log.info("info")
-    log.warning("warn")
+    log.warning("warning")
     log.error("error")
