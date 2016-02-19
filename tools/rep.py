@@ -1,13 +1,11 @@
 #!/bin/python
 __author__ = 'hfz2597'
 import commands
-import os
-import sys
-sys.path.append('..')
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
-import getopt
-import logging
 
+logger=utils.Log('REP')
 def usage():
     msg='''USAGE: rep.py [OPTIONS]... PATTERN REPLACEMENT [PATH/FILE]...
    OPTIONS:
@@ -25,17 +23,10 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         usage()
         sys.exit()
-    logger=utils.Log('REP')
     help=utils.HELP(usage,m_log=logger)
     #do_execute=0
     options='e:'
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+help.get_opt())
-    except getopt.GetoptError as err:
-        print str(err)
-        sys.exit(2)
-    except Exception, e:
-        print e
+    opts,args=utils.my_getopt(sys.argv[1:],options+help.get_opt())
 
     extension=''
     for opt, arg in opts:
@@ -51,7 +42,7 @@ if __name__ == '__main__':
         logger.error('No REPLACEMENT is specified, please check')
         sys.exit()
 
-    print 'args=%s'%args
+    logger.info('args=%s'%args)
     pattern=args[0]
     replacement=args[1]
 

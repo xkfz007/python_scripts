@@ -1,10 +1,11 @@
 #!/bin/python
 __author__ = 'Felix'
 #file encoding detect
-import sys
-sys.path.append('..')
-import chardet
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
+import chardet
+
 def usage():
     help_msg = '''USAGE:fed.py <filename>
    '''

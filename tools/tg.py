@@ -1,12 +1,12 @@
 #!/bin/python
 # uncompress file under linux
 __author__ = 'hfz2597'
-import sys
-sys.path.append('..')
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
-import getopt
-import os
-#import logging
+
+logger=utils.Log('TG')
+
 gz_name_list=('.tar.gz','.tgz','.gz')
 xz_name_list=('.tar.xz','.txz','.xz')
 bz_name_list=('.tar.bz','.tbz','.bz',
@@ -62,15 +62,8 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    logger=utils.Log('TG')
     help=utils.HELP(usage,m_log=logger)
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'e:o:d'+help.get_opt())
-    except getopt.GetoptError as err:
-        logger.error(str(err))
-        sys.exit(2)
-    except Exception, e:
-        print e
+    opts,args=utils.my_getopt(sys.argv[1:],options+help.get_opt())
 
     extension = '.zip' #default
     compress_flag=0  # <=0 for uncompress, >=1 for compress

@@ -1,12 +1,11 @@
 #!/bin/python
 # find wrapper: search for files in a directory hierarchy
 __author__ = 'hfz2597'
-import sys
-sys.path.append('..')
-import getopt
-import os
+import os,sys
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
 BIN='find'
+logger=utils.Log('FIND')
 def usage():
   msg='''USAGE: f.py [OPTIONS]... PATTERN [PATH]...
    OPTIONS:
@@ -32,16 +31,10 @@ if __name__ == '__main__':
       usage()
       sys.exit()
 
-    help=utils.HELP(usage,BIN,'--help')
+    help=utils.HELP(usage,BIN,'--help',logger)
     #do_execute=0
     options='ifde:m:'
-    try:
-      opts, args = getopt.gnu_getopt(sys.argv[1:], ':'+options+help.get_opt())
-    except getopt.GetoptError as err:
-      print str(err)
-      sys.exit(2)
-    except Exception, e:
-      print e
+    opts,args=utils.my_getopt(sys.argv[1:],options+help.get_opt())
 
 
     opt_list=''
@@ -84,7 +77,7 @@ if __name__ == '__main__':
         dir_or_file=i
 
     if len(name_pat_list)==0:
-      print 'BAD'
+      logger.error('BAD')
       sys.exit()
     else:
       name_pat2='\( '+name_opts+' '
