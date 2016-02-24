@@ -316,7 +316,11 @@ class FFProbe:
 
             cmd = 'ffprobe -show_format "%s"'% input_file
             tmp_formats=get_ffinfo(cmd,'FORMAT')
-            assert len(tmp_formats)==1
+            #print tmp_formats
+            #assert len(tmp_formats)==1
+            if len(tmp_formats)<1:
+                print 'Invaild format, please check'
+                sys.exit()
             self.format=tmp_formats[0]
 
 

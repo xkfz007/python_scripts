@@ -215,9 +215,9 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
 
     #detect file info
     inf_fmt,inf_vst,inf_ast,inf_sst=detect_file(input_file)
-    if infext not in fmt_dict[infext].extensions:
-        logger.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
-        infext=fmt_list[infext].extensions[0]
+    #if infext not in fmt_dict[infext].extensions:
+    #    logger.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
+    #    infext=fmt_list[infext].extensions[0]
 
     #normalize the output
     if len(ofpath) == 0:
@@ -227,10 +227,10 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     if len(ofext)==0:
         ofext=infext
 
-    if ofname==infname and ofext==infext:#add tag to distinguish in and out
-        oftag+='out'
+    #if ofname==infname and ofext==infext:#add tag to distinguish in and out
+    #    oftag+='out'
 
-    logger.info('ofname="%s" ofext="%s"' % (ofname,ofext))
+    #logger.info('ofname="%s" ofext="%s"' % (ofname,ofext))
 
     #input is video and output is audio, this means audio will be extracted from video
     if infext not in vext_dict.keys():
@@ -251,10 +251,11 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     #if ofext in vext_dict.keys():
     if ofmt.name in vfmt_dict.keys():
 
-        if inf_ast[0].bitrate()>64000:
-            acdec_cmd=' -c:a libvorbis -b:a 64k'
-        else:
-            acdec_cmd=' -c:a copy'
+        #if inf_ast[0].bitrate()>96000:
+        #    acdec_cmd='  -b:a 96k -c:a libvorbis'
+        #else:
+        #    acdec_cmd=' -c:a copy'
+        acdec_cmd=' -c:a copy'
 
         if ofext==ofext.upper():#in default situation, we will use copy
             vcdec_cmd=' -c:v copy'
@@ -267,8 +268,8 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         if ofmt.name =='matroska' or ofmt.name=='mpegts':
             if inf_ast[0].codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
                 acdec_cmd=' -c:a libvorbis'#use default audio codec
-                if inf_ast[0].bitrate()>64000:
-                    acdec_cmd+=' -b:a 64k'
+                #if inf_ast[0].bitrate()>64000:
+                #    acdec_cmd+=' -b:a 64k'
             if inf_vst[0].codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
                 vcdec_cmd=' -c:a libx264'#use default video codec
 
@@ -277,16 +278,16 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
                 vcdec_cmd=' -c:a libx264'#use default video codec
             if inf_ast[0].codecName() not in ('aac','ac3','eac3','dirac','mp2','mp3','vorbis'):
                 acdec_cmd=' -c:a libvorbis'#use default audio codec
-                if inf_ast[0].bitrate()>64000:
-                    acdec_cmd+=' -b:a 64k'
+                #if inf_ast[0].bitrate()>64000:
+                #    acdec_cmd+=' -b:a 64k'
 
         elif ofmt.name=='flv':
             if inf_vst[0].codecName() not in ('flv1','h263','mpeg4','flashsv', 'flashsv2', 'vp6f','vp6','vp6a','h264','hevc'):
                 vcdec_cmd=' -c:a libx264'#use default video codec
             if inf_ast[0].codecName() not in ('mp3','adpcm_swf','aac','nellymoser','speex'):
                 acdec_cmd=' -c:a libvorbis'#use default audio codec
-                if inf_ast[0].bitrate()>64000:
-                    acdec_cmd+=' -b:a 64k'
+                #if inf_ast[0].bitrate()>64000:
+                #    acdec_cmd+=' -b:a 64k'
 
 
         if len(inf_sst)>0:
@@ -310,8 +311,10 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         #ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
         vcdec_cmd=' -vn'
         acdec_cmd=' -c:a copy'
-        if inf_ast[0].bitrate()>64000 and ofext!=ofext.upper():
-            acdec_cmd=' -c:a libvorbis -b:a 64k'
+        #if inf_ast[0].bitrate()>64000 and ofext!=ofext.upper():
+        #    acdec_cmd=' -c:a libvorbis -b:a 64k'
+        if ofext!=ofext.upper():
+            acdec_cmd=' -c:a libvorbis'
 
     elif ofmt.name in ifmt_dict.keys():
         if len(inf_sst)>0:
@@ -324,12 +327,16 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         else:
             oftag+='%d'
 
+    #ensure input filename and output filename are different
+    if len(oftag)==0 and ofname==infname and ofext.lower()==infext.lower():
+        oftag+='out'
 
     #output_file = '%s_%s.%s' % (ofname, oftag, ofext)
     output_file=ofname
     if len(oftag)>0:
         output_file+='_'+oftag
     output_file+='.'+ofext.lower()
+
     if len(ofpath) > 0:
         output_file = '%s%s%s' % (ofpath, os.sep, output_file)
 
