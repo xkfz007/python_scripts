@@ -13,14 +13,16 @@ FFMPEG_BIN = 'ffmpeg'
 logger=utils.Log('MMCAT')
 
 def usage():
-    help_msg = '''USAGE:pyff.py [OPTIONS]... [ARGUMENTS]...
+    help_msg = '''USAGE:mmcat.py [OPTIONS]... [ARGUMENTS]...
    OPTIONS:
-     -I <string>  merge the input media files to one, only mp4 and mkv is supported
+     -I <filname>  merge the input media files to one, only mp4 and mkv is supported
+                   When the filename contains Chinese characters, this option is used
      -o <string>  output filename
      -m <mode/method>
      -T <int> thread number
    ARGUMENTS:
-     file or directory, support pattern globbing,these are the input files that will be processed
+     <files> or <directory>  support pattern globbing,these are the input files that will be processed
+                             When the there is no Chinses characters, this method is better
    '''
     print help_msg
     return
@@ -160,7 +162,7 @@ if __name__ == '__main__':
 
     logger.info("opts=%s args=%s"%(opts,args))
     output_arg=''
-    addational_file_list=''
+    #addational_file_list=''
     mode=0
     file_script=''
     thread_num=-1
@@ -169,8 +171,8 @@ if __name__ == '__main__':
     for opt, arg in opts:
         if opt == '-o':
             output_arg=arg
-        elif opt == '-i':
-            addational_file_list=arg
+        #elif opt == '-i':
+        #    addational_file_list=arg
         elif opt == '-I':
             file_script=arg
         elif opt == '-m':

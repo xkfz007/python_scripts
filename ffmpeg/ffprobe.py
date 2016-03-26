@@ -19,22 +19,22 @@ class FFFormat:
             except:
                 b = 1
 
-    def formatName(self):
+    def formatName(self,tag='format_name'):
         """
         Returns a string representation of the format.
         """
         format_name = None
-        if self.__dict__['format_name']:
-            format_name = self.__dict__['format_name']
+        if self.__dict__[tag]:
+            format_name = self.__dict__[tag]
         return format_name
 
-    def formatDescription(self):
+    def formatDescription(self,tag='format_long_name'):
         """
         Returns a long representation of the format.
         """
         format_d = None
-        if self.__dict__['format_long_name']:
-            format_d = self.__dict__['format_long_name']
+        if self.__dict__[tag]:
+            format_d = self.__dict__[tag]
         return format_d
 
 class FFStream:
@@ -50,173 +50,116 @@ class FFStream:
             except:
                 b = 1
 
-    def isAudio(self):
-        """
-        Is this stream labelled as an audio stream?
-        """
+    def isAudio(self,tag='codec_type'):
         val = False
-        if self.__dict__['codec_type']:
-            if str(self.__dict__['codec_type']) == 'audio':
+        if self.__dict__[tag]:
+            if str(self.__dict__[tag]) == 'audio':
                 val = True
         return val
 
-    def isVideo(self):
-        """
-        Is the stream labelled as a video stream.
-        """
+    def isVideo(self,tag='codec_type'):
         val = False
-        if self.__dict__['codec_type']:
-            if self.__dict__['codec_type'] == 'video':
+        if self.__dict__[tag]:
+            if self.__dict__[tag] == 'video':
                 val = True
         return val
 
-    def isSubtitle(self):
-        """
-        Is the stream labelled as a subtitle stream.
-        """
+    def isSubtitle(self,tag='codec_type'):
         val = False
-        if self.__dict__['codec_type']:
-            if str(self.__dict__['codec_type']) == 'subtitle':
+        if self.__dict__[tag]:
+            if str(self.__dict__[tag]) == 'subtitle':
                 val = True
         return val
 
-    def frameSize(self):
-        """
-        Returns the pixel frame size as an integer tuple (width,height) if the stream is a video stream.
-        Returns None if it is not a video stream.
-        """
+    def frameSize(self,tag1='width',tag2='height'):
         size = None
         if self.isVideo():
-            if self.__dict__['width'] and self.__dict__['height']:
+            if self.__dict__[tag1] and self.__dict__[tag2]:
                 try:
-                    size = (int(self.__dict__['width']), int(self.__dict__['height']))
+                    size = (int(self.__dict__[tag1]), int(self.__dict__[tag2]))
                 except Exception as e:
-                    print "None integer size %s:%s" % (str(self.__dict__['width']), str(+self.__dict__['height']))
+                    print "None integer size %s:%s" % (str(self.__dict__[tag1]), str(+self.__dict__[tag2]))
                     size = (0, 0)
         return size
 
-    def pixelFormat(self):
-        """
-        Returns a string representing the pixel format of the video stream. e.g. yuv420p.
-        Returns none is it is not a video stream.
-        """
+    def pixelFormat(self,tag='pix_fmt'):
         f = None
         if self.isVideo():
-            if self.__dict__['pix_fmt']:
-                f = self.__dict__['pix_fmt']
+            if self.__dict__[tag]:
+                f = self.__dict__[tag]
         return f
 
-    def frames(self):
-        """
-        Returns the length of a video stream in frames. Returns 0 if not a video stream.
-        """
+    def frames(self,tag='nb_frames'):
         f = 0
         if self.isVideo() or self.isAudio():
-            if self.__dict__['nb_frames']:
+            if self.__dict__[tag]:
                 try:
-                    f = int(self.__dict__['nb_frames'])
+                    f = int(self.__dict__[tag])
                 except Exception as e:
                     print "None integer frame count"
         return f
 
-    def durationSeconds(self):
-        """
-        Returns the runtime duration of the video stream as a floating point number of seconds.
-        Returns 0.0 if not a video stream.
-        """
+    def durationSeconds(self,tag='duration'):
         f = 0.0
         if self.isVideo() or self.isAudio():
-            if self.__dict__['duration']:
+            if self.__dict__[tag]:
                 try:
-                    f = float(self.__dict__['duration'])
+                    f = float(self.__dict__[tag])
                 except Exception as e:
                     print "None numeric duration"
         return f
 
-    def language(self):
-        """
-        Returns language tag of stream. e.g. eng
-        """
+    def language(self,tag='TAG:language'):
         lang = None
-        if self.__dict__['TAG:LANGUAGE']:
-            lang = self.__dict__['TAG:LANGUAGE']
+        if self.__dict__[tag]:
+            lang = self.__dict__[tag]
         return lang
 
-    def codecName(self):
-        """
-        Returns a string representation of the stream codec.
-        """
+    def codecName(self,tag='codec_name'):
         codec_name = None
-        if self.__dict__['codec_name']:
-            codec_name = self.__dict__['codec_name']
+        if self.__dict__[tag]:
+            codec_name = self.__dict__[tag]
         return codec_name
 
-    def codecDescription(self):
-        """
-        Returns a long representation of the stream codec.
-        """
+    def codecDescription(self,tag='codec_long_name'):
         codec_d = None
-        if self.__dict__['codec_long_name']:
-            codec_d = self.__dict__['codec_long_name']
+        if self.__dict__[tag]:
+            codec_d = self.__dict__[tag]
         return codec_d
 
-    def codecTag(self):
-        """
-        Returns a short representative tag of the stream codec.
-        """
+    def codecTag(self,tag='codec_tag_string'):
         codec_t = None
-        if self.__dict__['codec_tag_string']:
-            codec_t = self.__dict__['codec_tag_string']
+        if self.__dict__[tag]:
+            codec_t = self.__dict__[tag]
         return codec_t
 
 
-    def bitrate(self):
-        """
-        Returns bitrate as an integer in bps
-        """
+    def bitrate(self,tag='bit_rate'):
         b = 0
-        if self.__dict__['bit_rate']:
+        if self.__dict__[tag]:
             try:
-                b = int(self.__dict__['bit_rate'])
+                b = int(self.__dict__[tag])
             except Exception as e:
                 print "None integer bitrate"
         return b
 
-    def fps(self):
-        """
-        Returns the runtime duration of the video stream as a floating point number of seconds.
-        Returns 0.0 if not a video stream.
-        """
+    def fps(self,tag='avg_frame_rate'):
         f = 0.0
         if self.isVideo():
-            if self.__dict__['avg_frame_rate']:
+            if self.__dict__[tag]:
                 try:
-                    f = float(self.__dict__['avg_frame_rate'])
+                    f = float(self.__dict__[tag])
                 except Exception as e:
                     print "None numeric duration"
         return f
 
-    def video_rotate(self):
-        """
-        Returns bitrate as an integer in bps
-        """
-        b = 0
+    def index(self):
+        idx = 0
         try:
-            b = int(self.__dict__['TAG:rotate'])
+            idx = int(self.__dict__['index'])
         except Exception as e:
-            print "None integer TAG:rotate"
-        return b
-
-    def image_rotate(self):
-        """
-        Returns bitrate as an integer in bps
-        """
-        b = 0
-        try:
-            b = int(self.__dict__['TAG:Orientation'])
-        except Exception as e:
-            print "None integer TAG:Orientation"
-        return b
+            print "None index"
+        return idx
 
 FFTYPE_LIST={'STREAM':FFStream,
              'FORMAT':FFFormat,}

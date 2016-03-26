@@ -9,6 +9,8 @@ sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils
 from ffprobe import FFProbe
 
+
+
 logger=utils.Log('FFMPEG','info')
 #fflog = logging.getLogger('ffmpeg')
 #fflog.setLevel(logging.WARNING)
@@ -44,14 +46,13 @@ vfmt_list=[
     AVFormat('swf',           'swf',                  'SWF (ShockWave Flash)'                     ),
     AVFormat('vc1',           'vc1',                  'raw VC-1 video'                            ),
     AVFormat('yuv4mpegpipe',  'y4m',                  'YUV4MPEG pipe'                             ),
-
+    AVFormat('rawvideo',      'yuv,rgb',              'raw video'                                 ),
 ]
 rawfmt_list=[
     AVFormat('h261',          'h261',                 'raw H.261'                                 ),
     AVFormat('h263',          'h263',                 'raw H.263'                                 ),
     AVFormat('h264',          'h264,264,avc',         'raw H.264 video'                           ),
     AVFormat('hevc',          'hevc,265,h265',        'raw HEVC video'                            ),
-    AVFormat('rawvideo',      'yuv,rgb',              'raw video'                                 ),
     AVFormat('raw',           'es,raw',               'raw video'                                 ),
 ]
 afmt_list=[
@@ -156,6 +157,16 @@ valid_ext_list = h264_name_list + \
                  image_name_list + \
                  gif_name_list
 
+VIDEO_ENCODER_DEFAULT='libx264'
+AUDIO_ENCODER_DEFAULT='aac'
+ENCODER_TRANSPARENT='copy'
+VIDEO_ENC_CMD='-c:v'
+AUDIO_ENC_CMD='-c:a'
+SUBTITLE_ENC_CMD='-c:s'
+VIDEO_DISABLED='-vn'
+AUDIO_DISABLED='-an'
+SUBTITLE_DISABLED='-sn'
+
 
 def usage():
     help_msg = '''USAGE:pyff.py [OPTIONS]... [ARGUMENTS]...
@@ -190,21 +201,21 @@ def usage():
 def detect_file(input_file):
     m = FFProbe(input_file)
     vst=m.video
-    assert len(vst)<=1
+    #assert len(vst)<=1
     ast=m.audio
     sst=m.subtitle
     fmt=m.format
 
     return fmt,vst,ast,sst
 
-def get_codec_cmd(vst,vclist,ast,aclist):
-    if ast.codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
-        acdec_cmd=' -c:a libvorbis'#use default audio codec
-        if ast.bitrate()>64000:
-            acdec_cmd+=' -b:a 64k'
-    if vst.codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
-        vcdec_cmd=' -c:a libx264'#use default video codec
-    return vcdec_cmd,acdec_cmd
+#def get_codec_cmd(vst,vclist,ast,aclist):
+#    if ast.codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
+#        acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,AUDIO_ENCODER_DEFAULT)#use default audio codec
+#        if ast.bitrate()>64000:
+#            acdec_cmd+=' -b:a 64k'
+#    if vst.codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
+#        vcdec_cmd=' %s %s'%(VIDEO_ENC_CMD,VIDEO_ENCODER_DEFAULT)#use default video codec
+#    return vcdec_cmd,acdec_cmd
 
 def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, extra_cmd):
     infdir, infile = os.path.split(input_file)
@@ -218,6 +229,27 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     #if infext not in fmt_dict[infext].extensions:
     #    logger.warning('Invaild extension of %s, it should be %s'%(infext,fmt_list[infext].extensions))
     #    infext=fmt_list[infext].extensions[0]
+
+    #in_astream=inf_ast[0]
+    #in_sstream=inf_sst[0]
+
+    #map_cmd=''
+    #idx=0
+    #bitrate=inf_vst[idx].bitrate
+    ##frameSize=inf_vst[idx].frameSize
+    #if len(inf_vst)>1:
+    #    for i in inf_vst:
+    #        if i.bitrate>bitrate:
+    #            bitrate=i.bitrate
+    #            idx=i
+    #in_vstream=inf_vst[idx]
+    #map_cmd+=' -map 0:%s'%idx
+
+    #idx=0
+    #if len(inf_ast)>1:
+    #    for i in inf_ast:
+
+
 
     #normalize the output
     if len(ofpath) == 0:
@@ -242,6 +274,11 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
     else:
        ofmt=ext_dict[ofext]
 
+    if ofmt.name=='raw':#auto decide the output format
+        #fmt_cmd='-f %s'%inf_vst[0].codecName()
+        #oftag+='%s'%inf_vst[0].codecName()
+        ofmt=ext_dict[inf_vst[0].codecName]
+
     fmt_cmd='-f %s'%ofmt.name
 
     vcdec_cmd=''
@@ -255,10 +292,10 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
         #    acdec_cmd='  -b:a 96k -c:a libvorbis'
         #else:
         #    acdec_cmd=' -c:a copy'
-        acdec_cmd=' -c:a copy'
+        acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,ENCODER_TRANSPARENT)
 
         if ofext==ofext.upper():#in default situation, we will use copy
-            vcdec_cmd=' -c:v copy'
+            vcdec_cmd=' %s %s'%(VIDEO_ENC_CMD,ENCODER_TRANSPARENT)
         else:
             #if input is mp4 or mkv format and codec is h264, h264_mp4toannexb is needed
             if infext in bsf_fmt_list and ofmt.name not in bsf_fmt_list \
@@ -267,69 +304,60 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
 
         if ofmt.name =='matroska' or ofmt.name=='mpegts':
             if inf_ast[0].codecName() in ('atrac3','cook','ra_288','sipr'): #unsupported audio codec of mkv
-                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,AUDIO_ENCODER_DEFAULT)#use default audio codec
                 #if inf_ast[0].bitrate()>64000:
                 #    acdec_cmd+=' -b:a 64k'
             if inf_vst[0].codecName() in ('rv10','rv20'):#unsuported video codecs of mkv
-                vcdec_cmd=' -c:a libx264'#use default video codec
+                vcdec_cmd=' %s %s'%(VIDEO_ENC_CMD,VIDEO_ENCODER_DEFAULT)#use default video codec
 
         elif ofmt.name=='mp4':
             if inf_vst[0].codecName() not in ('h264','hevc','vc1','mpeg2','mpeg4','h263'):
-                vcdec_cmd=' -c:a libx264'#use default video codec
+                vcdec_cmd=' %s %s'%(VIDEO_ENC_CMD,VIDEO_ENCODER_DEFAULT)#use default video codec
             if inf_ast[0].codecName() not in ('aac','ac3','eac3','dirac','mp2','mp3','vorbis'):
-                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,AUDIO_ENCODER_DEFAULT)#use default audio codec
                 #if inf_ast[0].bitrate()>64000:
                 #    acdec_cmd+=' -b:a 64k'
 
         elif ofmt.name=='flv':
             if inf_vst[0].codecName() not in ('flv1','h263','mpeg4','flashsv', 'flashsv2', 'vp6f','vp6','vp6a','h264','hevc'):
-                vcdec_cmd=' -c:a libx264'#use default video codec
+                vcdec_cmd=' %s %s'%(VIDEO_ENC_CMD,VIDEO_ENCODER_DEFAULT)#use default video codec
             if inf_ast[0].codecName() not in ('mp3','adpcm_swf','aac','nellymoser','speex'):
-                acdec_cmd=' -c:a libvorbis'#use default audio codec
+                acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,AUDIO_ENCODER_DEFAULT)#use default audio codec
                 #if inf_ast[0].bitrate()>64000:
                 #    acdec_cmd+=' -b:a 64k'
 
 
         if len(inf_sst)>0:
-            scdec_cmd=' -c:s copy'
+            scdec_cmd=' %s %s'%(SUBTITLE_ENC_CMD,ENCODER_TRANSPARENT)
 
         logger.info('inf_fmt.name=%s ofmt.name=%s inf_vst.name=%s'
                      % (inf_fmt.formatName(),ofmt.name,inf_vst[0].codecName()))
 
-    elif ofmt.name in rawfmt_dict.keys():
-        if len(inf_sst)>0:
-            scdec_cmd=' -sn'
-        if len(inf_ast)>0:
-            acdec_cmd=' -an'
-
-        if ofmt.name=='raw':#auto decide the output format
-            fmt_cmd='-f %s'%inf_vst[0].codecName()
-            oftag+='%s'%inf_vst[0].codecName()
-
-    #elif ofext in aext_dict.keys():
     elif ofmt.name in afmt_dict.keys():
         #ofext=afmt_dict[inf_ast[0].codecName()].extensions[0]
-        vcdec_cmd=' -vn'
-        acdec_cmd=' -c:a copy'
+        vcdec_cmd=' %s'%VIDEO_DISABLED
+        acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,ENCODER_TRANSPARENT)
         #if inf_ast[0].bitrate()>64000 and ofext!=ofext.upper():
         #    acdec_cmd=' -c:a libvorbis -b:a 64k'
         if ofext!=ofext.upper():
-            acdec_cmd=' -c:a libvorbis'
+            acdec_cmd=' %s %s'%(AUDIO_ENC_CMD,AUDIO_ENCODER_DEFAULT)
 
+    #elif ofmt.name in ifmt_dict.keys() or ofmt.name in rawfmt_dict.keys():
+    #    if len(inf_sst)>0:
+    #        scdec_cmd=' %s'%SUBTITLE_DISABLED
+    #    if len(inf_ast)>0:
+    #        acdec_cmd=' %s'%AUDIO_DISABLED
     elif ofmt.name in ifmt_dict.keys():
-        if len(inf_sst)>0:
-            scdec_cmd=' -sn'
-        if len(inf_ast)>0:
-            acdec_cmd=' -an'
-
         if ofext==ofext.upper():
             vcdec_cmd=' -r 1 -vframe 1'
         else:
             oftag+='%d'
 
+
     #ensure input filename and output filename are different
     if len(oftag)==0 and ofname==infname and ofext.lower()==infext.lower():
-        oftag+='out'
+        oftag+='%s'%inf_vst[0].codecName()
+        #oftag+='out'
 
     #output_file = '%s_%s.%s' % (ofname, oftag, ofext)
     output_file=ofname
@@ -342,6 +370,7 @@ def get_cmd_line(input_file, ofpath, ofname, oftag, ofext,  pre_cmd, post_cmd, e
 
     cmd_line = pre_cmd
     cmd_line += ' -i "%s"' % input_file
+    #cmd_line += ' %s' % map_cmd
     cmd_line += ' %s' % vcdec_cmd
     cmd_line += ' %s' % acdec_cmd
     cmd_line += ' %s' % scdec_cmd
