@@ -10,6 +10,7 @@ import utils
 
 FFMPEG_BIN = 'ffmpeg'
 #default_cmd= '%s -y -f concat -i'%FFMPEG_BIN
+DEFAULT_CONCAT_CMD='-f concat -safe 0'
 logger=utils.Log('MMCAT')
 
 def usage():
@@ -85,19 +86,29 @@ def get_cmd_with_script(global_cmd,input_list,do_execute=0):
             tempf.writelines(content)
         finally:
             tempf.close()
-    cmd ='%s -f concat -i "%s"'%(global_cmd,concat_script)
+    #cmd ='%s -f concat -i "%s"'%(global_cmd,concat_script)
+    cmd ='%s %s -i "%s"'%(global_cmd,DEFAULT_CONCAT_CMD,concat_script)
     return cmd
 
 def generate_pipe_cmd(global_cmd,content_str):
     cmd='str=(%s);'%content_str
     cmd+="for i in \"${str[@]}\";do echo \"file '$i'\";done|"
-    cmd+='%s -f concat -i pipe:0'%global_cmd
+    cmd+='%s %s -i pipe:0'%(global_cmd,DEFAULT_CONCAT_CMD)
+    return cmd
+
+def generate_pipe_cmd2(global_cmd,content_str):
+    cmd="echo %s|tr ';' '\\n'|"%content_str
+    cmd+='%s %s -i pipe:0'%(global_cmd,DEFAULT_CONCAT_CMD)
     return cmd
 # for *.mp4 *.flv *.mkv *.avi *.ts
 def get_cmd_with_pipe(global_cmd,input_list):
-    #content=["'"+lib.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
-    content=["'"+utils.convert2drivepath(line)+"'" for line in input_list]
+    content=["'"+utils.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
+    #content=["'"+utils.convert2drivepath(line)+"'" for line in input_list]
+    #content=["file '"+line+"'" for line in input_list]
+    #content=["'"+line+"'" for line in input_list]
+    logger.info(content)
     content_str=' '.join(content)
+    #content_str=content_str.decode('utf-8')
     #cmd='str=(%s);'%content_str
     #cmd+="for i in \"${str[@]}\";do echo \"file '$i'\";done|"
     #cmd+='%s pipe:0'%default_cmd
@@ -107,14 +118,21 @@ def get_cmd_with_pipe(global_cmd,input_list):
 #def get_cmd_with_pipe2(input_list):
 #    return cmd
 
-#def get_cmd_with_procsub(input_list):
-#    content=["'"+lib.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
-#    content_str=' '.join(content)
-#    cmd0='str=(%s);'%content_str
-#    cmd0+="for i in \"${str[@]}\";do echo \"file '$i'\";done"
-#    cmd='%s <(%s)'%(default_cmd,cmd0)
-#    return cmd
+def get_cmd_with_procsub(global_cmd, input_list):
+    content=["'"+utils.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
+    content_str=' '.join(content)
+    cmd0='str=\(%s\);'%content_str
+    cmd0+="for i in \"${str[@]}\";do echo \"file '$i'\";done"
+    cmd='%s %s -i <(%s)'%(global_cmd, DEFAULT_CONCAT_CMD,cmd0)
+    return cmd
 
+def get_cmd_with_procsub2(global_cmd, input_list):
+    content=["file '"+utils.convert2drivepath(os.path.realpath(line))+"'" for line in input_list]
+    content_str='\\n'.join(content)
+    #cmd0="echo -e \"%s\"|tr ';' '\\n'"%content_str
+    cmd0="echo -e \"%s\""%content_str
+    cmd='%s %s -i <(%s)'%(global_cmd, DEFAULT_CONCAT_CMD,cmd0)
+    return cmd
 # for *.rmvb
 def get_cmd_with_filter(global_cmd,input_list):
     input_cmd_list=[]
@@ -194,7 +212,7 @@ if __name__ == '__main__':
     input_list = []
     if len(file_script)>0 and os.path.exists(file_script):
         logger.info('%s will use script "%s" to concatenate files'%(FFMPEG_BIN,file_script))
-        cmd='%s -f concat -i "%s"'%(global_cmd,file_script)
+        cmd='%s %s -i "%s"'%(global_cmd,DEFAULT_CONCAT_CMD,file_script)
         #parse_script(input_list,file_script)
     else:
         if len(args)==0:
@@ -243,8 +261,8 @@ if __name__ == '__main__':
                     cmd=get_cmd_with_pipe(global_cmd,input_list)
                 elif mode==1:#auto to generate script
                     cmd=get_cmd_with_script(global_cmd,input_list,help.get_do_execute())
-                #elif mode==2:#auto to generate script
-                #    cmd=get_cmd_with_procsub(input_list)
+                elif mode==2:#use sub process
+                    cmd=get_cmd_with_procsub2(global_cmd,input_list)
 
     if len(output_arg)>0:
         if output_arg.startswith('.'):
