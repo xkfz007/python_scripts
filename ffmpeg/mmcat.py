@@ -78,7 +78,7 @@ def get_timestamp():
 
 def get_cmd_with_script(global_cmd,input_list,do_execute=0):
     content=["file '"+line+"'\n" for line in input_list]
-    logger.info(content)
+    logger.info(' '.join(content))
     concat_script='concate_script_%s.txt'%get_timestamp()
     if do_execute==1:
         tempf = open(concat_script, 'w')
@@ -257,10 +257,10 @@ if __name__ == '__main__':
                     enc_cmd=''#-c:v copy'#'-c:v libx264'
                     cmd=get_cmd_with_filter(global_cmd,input_list)
             else:
-                if mode==0:#use pipe
-                    cmd=get_cmd_with_pipe(global_cmd,input_list)
-                elif mode==1:#auto to generate script
+                if mode==0:#auto to generate script
                     cmd=get_cmd_with_script(global_cmd,input_list,help.get_do_execute())
+                elif mode==1:#use pipe
+                    cmd=get_cmd_with_pipe(global_cmd,input_list)
                 elif mode==2:#use sub process
                     cmd=get_cmd_with_procsub2(global_cmd,input_list)
 
