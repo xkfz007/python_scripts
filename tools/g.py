@@ -23,6 +23,10 @@ def usage():
                           print only names of FILEs containing no match
      -l, --files-with-matches
                           print only names of FILEs containing matches
+         --include=FILE_PATTERN  search only files that match FILE_PATTERN
+         --exclude=FILE_PATTERN  skip files and directories matching FILE_PATTERN
+         --exclude-from=FILE     skip files matching any file pattern from FILE
+         --exclude-dir=PATTERN   directories that match PATTERN will be skipped.
   '''
   print msg
   return
@@ -36,40 +40,28 @@ if __name__ == '__main__':
     help=utils.HELP(usage,BIN,'--help',logger)
 
     options='iwxnorIabLl'
+    long_options=['include=','exclude=','exclude-from=','exclude-dir=']
 
-    opts,args=utils.my_getopt(sys.argv[1:],options+help.get_opt())
+    opts,args=utils.my_getopt_long(sys.argv[1:],options+help.get_opt(),long_options)
+    print opts
+    print args
 
     #do_execute=0
-    opt_list='I'
+    opt_list='In'
+    long_opt_list=[]
     for opt, arg in opts:
-      #if opt == '-i':
-      #  opt_list+='i'
-      #elif opt == '-w':
-      #  opt_list+='w'
-      #elif opt == '-x':
-      #  opt_list+='x'
-      #elif opt == '-n':
-      #  opt_list+='n'
-      #elif opt == '-o':
-      #  opt_list+='o'
-      #elif opt == '-r':
-      #  opt_list+='r'
-      #print opt
       if opt[1] in options:
         if not opt[1] in opt_list:
           opt_list+=opt[1]
+      elif opt[2:]+'=' in long_options:
+          long_opt_list.append((opt,arg))
       #elif opt == '-h':
       #    usage()
       #    sys.exit()
-      #elif opt == '-H':
-      #    os.system(BIN+' --help')
-      #    sys.exit()
-      #elif opt == '-Y':
-      #    do_execute=1
-      #elif opt[1] in help.get_opt():
-      #    help.parse_opt(opt)
       else:
         help.parse_opt(opt)
+    print opt_list
+    print long_opt_list
 
     #print 'opts=%s'%opt_list
     #for i in args:
@@ -85,6 +77,7 @@ if __name__ == '__main__':
     for i in args:
       if not os.path.isdir(i) and not os.path.isfile(i):
         tmp=i.replace('(','\(').replace(')','\)').strip(' ')
+#         tmp=tmp.replace('-','\-')
         pattern_list.append(tmp)
       else:
         dir_or_file=i
@@ -107,6 +100,8 @@ if __name__ == '__main__':
     cmd+=' -%s'%opt_list
     cmd+=' "%s"'%pattern
     cmd+=' %s'%dir_or_file
+    for k, v in long_opt_list:
+        cmd+=' %s=%s'%(k,v)
     #print cmd
     #if help.get_do_execute()==1:
     #    os.system(cmd)

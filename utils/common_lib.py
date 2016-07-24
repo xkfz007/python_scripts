@@ -238,3 +238,13 @@ def my_getopt(argv,options,logger=logging.basicConfig()):
     except Exception, e:
         logger.error(e)
     return opts,args
+
+def my_getopt_long(argv,options,long_options, logger=logging.basicConfig()):
+    try:
+        opts, args = getopt.gnu_getopt(argv, options,long_options)
+    except getopt.GetoptError as err:
+        logger.error(str(err))
+        sys.exit(2)
+    except Exception, e:
+        logger.error(e)
+    return opts,args

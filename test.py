@@ -167,6 +167,24 @@ def parse_arg(arg,delimiter,*LS):
 #print opt
 
 
+import json
+class entry:
+    def __init__(self,index,time,frame):
+        self.index=index
+        self.time=time
+        self.frame=frame
 
+data={"filename":"video1.mp4",
+      "blackframe":[],
+      "staticframe":[],
+      "mosaic":[]
+}
+s = json.dumps(data,indent=4)
+print s
+a=data["blackframe"]
+a.append(entry(1,"ddddd","200"))
+s = json.dumps(data,indent=4)
+
+print s
 
 
