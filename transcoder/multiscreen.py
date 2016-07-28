@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 __author__ = 'Felix'
 import subprocess
 import os, sys
@@ -18,6 +18,42 @@ import logging
 # [tmp2][lowerleft] overlay=shortest=0:eof_action=pass:y=240 [tmp3]; \
 # [tmp3][lowerright] overlay=shortest=0:eof_action=pass:x=320:y=240[out]" \
 # -map '[out]' -c:v libx264 -f flv  rtmp://172.16.68.206:19350/live/multi_screen
+
+# ffmpeg -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
+#    -filter_complex "nullsrc=size=640x480 [base]; \
+#    [0:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
+#    [1:v] setpts=PTS-STARTPTS, scale=320x240 [upperright]; \
+#    [2:v] setpts=PTS-STARTPTS, scale=320x240 [lowerleft]; \
+#    [3:v] setpts=PTS-STARTPTS, scale=320x240 [lowerright]; \
+#    [base][upperleft] overlay=shortest=1 [tmp1]; \
+#    [tmp1][upperright] overlay=shortest=1:x=320 [tmp2]; \
+#    [tmp2][lowerleft] overlay=shortest=1:y=240 [tmp3]; \
+#    [tmp3][lowerright] overlay=shortest=1:x=320:y=240[tmp4];\
+#    movie=giphy.gif[logo1];movie=giphy.gif[logo2];\
+#    movie=giphy.gif[logo3];movie=giphy.gif[logo4];\
+#    [tmp4][logo1]overlay=x=20:y=20[tt1];\
+#    [tt1][logo2]overlay=x=340:y=20[tt2];\
+#    [tt2][logo3]overlay=x=20:y=260[tt3];\
+#    [tt3][logo4]overlay=x=340:y=260[out]"\
+#    -map '[out]' -c:v libx264  -f mpegts udp://235.1.1.2:48880
+
+
+# ffmpeg -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
+#    -filter_complex "nullsrc=size=640x480 [base]; \
+#    [0:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
+#    [1:v] setpts=PTS-STARTPTS, scale=320x240 [upperright]; \
+#    [2:v] setpts=PTS-STARTPTS, scale=320x240 [lowerleft]; \
+#    [3:v] setpts=PTS-STARTPTS, scale=320x240 [lowerright]; \
+#    [base][upperleft] overlay=shortest=1 [tmp1]; \
+#    [tmp1][upperright] overlay=shortest=1:x=320 [tmp2]; \
+#    [tmp2][lowerleft] overlay=shortest=1:y=240 [tmp3]; \
+#    [tmp3][lowerright] overlay=shortest=1:x=320:y=240[tmp4];\
+#    [tmp4]drawtext=fontfile='C\:/Windows/Fonts/Calibri.ttf':text="AAAA":fontsize=30:fontcolor=white:x=20:y=20[tt1];\                                                                     
+#    [tt1]drawtext =fontfile='C\:/Windows/Fonts/Calibri.ttf':text="BBBB":fontsize=30:fontcolor=white:x=340:y=20[tt2];\
+#    [tt2]drawtext =fontfile='C\:/Windows/Fonts/Calibri.ttf':text="CCCC":fontsize=30:fontcolor=white:x=20:y=260[tt3];\
+#    [tt3]drawtext =fontfile='C\:/Windows/Fonts/Calibri.ttf':text="DDDD":fontsize=30:fontcolor=white:x=340:y=260[out]"\
+#    -map '[out]' -c:v libx264  -f mpegts udp://235.1.1.2:48880
+ 
 def get_single_win(idx="", pid="", name="", win_w=320, win_h=240):
     stream_idx = "[%s:v]" % (idx)
     scale = "%sx%s" % (win_w, win_h)
@@ -111,13 +147,15 @@ def get_output_cl(output):
 def usage():
     help_msg = '''USAGE:multiscreen.py [OPTIONS]... <stream1> <stream2> ...
    OPTIONS:
-     -i <string>         the input stream file list
-     -o <string>         output address 
-     -s <width>x<height> output screen size 
-     -w <col>x<row>      output windows
-     -v <string>         loglevel
+     -i <string|string>/<file>   the input stream file list or multi input streams seperated by '|'
+     -o <file>                   output address 
+     -s <width>x<height>         output screen size 
+     -w <col>x<row>              output windows
+     -v <string>                 loglevel
+     -l <string|string>          logos of each window seprated by '|' 
+     -t <string|string>          text of each window sepated by '|'
    Example:
-     multiscreen.py -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 "udp://235.1.1.1:48880"  "udp://235.1.1.1:48880"  "udp://235.1.1.1:48880"  "udp://235.1.1.1:48880" 
+     multiscreen.py -i "udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880" -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 
    '''
     print help_msg
     return
@@ -151,7 +189,7 @@ if __name__ == '__main__':
     except Exception, e:
         logging.error(e)
 
-    input_stream_file = ''
+    input_stream_list_or_file = ''
     output = ''
     input_list = []
     width = -1
@@ -168,7 +206,7 @@ if __name__ == '__main__':
 
     for opt, arg in opts:
         if opt == '-i':
-            input_stream_file = arg
+            input_stream_list_or_file = arg
         elif opt == '-o':
             output = arg
         elif opt == '-s':
@@ -185,21 +223,25 @@ if __name__ == '__main__':
     
     logging.basicConfig(level=loglevel, format='[%(levelname)s]:%(message)s')
 
-    if len(args) != 0:
-         for arg in args:
-              input_list.append(arg)
+    # if len(args) != 0:
+    #     for arg in args:
+    #          input_list.append(arg)
 
-    if len(input_stream_file) > 0 and os.path.exist(input_stream_file):
-        logging.info("Reading input from file '%s'" % input_stream_file)
 
-        f = open(input_stream_file, 'r')
-        lines = f.readlines()
-        f.close()
-        for line in lines:
-            chn = line.strip('\n')
-            chn = chn.strip(' ')
-            if not chn.startswith('#'):
-                input_list.append(chn)
+    if len(input_stream_list_or_file) > 0:
+        if os.path.exist(input_stream_list_or_file):
+            logging.info("Reading input from file '%s'" % input_stream_list_or_file)
+
+            f = open(input_stream_list_or_file, 'r')
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                chn = line.strip('\n')
+                chn = chn.strip(' ')
+                if not chn.startswith('#'):
+                    input_list.append(chn)
+        else:
+            input_list.extend(input_stream_list_or_file.split('|'))
     
     if width == -1 or height == -1:
         logging.error("Invalid value of width or height")
@@ -233,10 +275,18 @@ if __name__ == '__main__':
     #            ]
     # output='udp://235.1.1.2:48880'
 
-    cmd = FFMPEG_BIN + " "
-    cmd += get_input_cl(input_list[0:win_cnt], pid_list) + " "
-    cmd += get_filter_cl(cols, rows, width, height, pid_list) + " "
-    cmd += get_output_cl(output)
+    # cmd = FFMPEG_BIN + " "
+    # cmd += get_input_cl(input_list[0:win_cnt], pid_list) + " "
+    # cmd += get_filter_cl(cols, rows, width, height, pid_list) + " "
+    # cmd += get_output_cl(output)
+    cl_list = []
+    cl_list.append(FFMPEG_BIN)
+    cl_list.append(get_input_cl(input_list[0:win_cnt], pid_list)) 
+    cl_list.append(get_filter_cl(cols, rows, width, height, pid_list)) 
+    cl_list.append(get_output_cl(output))
+    
+    cmd = ' '.join(cl_list)
+
     
     logging.info(cmd)
 
