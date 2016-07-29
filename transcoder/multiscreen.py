@@ -3,8 +3,9 @@ __author__ = 'Felix'
 import subprocess
 import os, sys
 import getopt
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import logging
+import platform
 # logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
 # ffmpeg -nhb -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
@@ -41,12 +42,12 @@ import logging
 # ffmpeg -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
 #    -filter_complex "nullsrc=size=640x480 [base]; \
 #    [0:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
-#    [1:v] setpts=PTS-STARTPTS, scale=320x240 [upperright]; \
-#    [2:v] setpts=PTS-STARTPTS, scale=320x240 [lowerleft]; \
-#    [3:v] setpts=PTS-STARTPTS, scale=320x240 [lowerright]; \
 #    [base][upperleft] overlay=shortest=1 [tmp1]; \
+#    [1:v] setpts=PTS-STARTPTS, scale=320x240 [upperright]; \
 #    [tmp1][upperright] overlay=shortest=1:x=320 [tmp2]; \
+#    [2:v] setpts=PTS-STARTPTS, scale=320x240 [lowerleft]; \
 #    [tmp2][lowerleft] overlay=shortest=1:y=240 [tmp3]; \
+#    [3:v] setpts=PTS-STARTPTS, scale=320x240 [lowerright]; \
 #    [tmp3][lowerright] overlay=shortest=1:x=320:y=240[tmp4];\
 #    [tmp4]drawtext=fontfile='C\:/Windows/Fonts/Calibri.ttf':text="AAAA":fontsize=30:fontcolor=white:x=20:y=20[tt1];\                                                                     
 #    [tt1]drawtext =fontfile='C\:/Windows/Fonts/Calibri.ttf':text="BBBB":fontsize=30:fontcolor=white:x=340:y=20[tt2];\
@@ -101,23 +102,103 @@ def get_all_overlay(col_cnt, row_cnt, win_w, win_h):
     logging.debug("all_overlay=" + cmd)
     return cmd
 
-def get_filter_cl(col_cnt, row_cnt, width, height, pid_list):
+# [0:p:3801:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
+# [base][upperleft] overlay=shortest=0:eof_action=pass [tmp1];\
+# [1:p:3702:v] setpts=PTS-STARTPTS, scale=320x240 [upperright]; \
+# [tmp1][upperright] overlay=shortest=0:eof_action=pass:x=320 [tmp2]; \
+# [2:p:4301:v] setpts=PTS-STARTPTS, scale=320x240 [lowerleft]; \
+# [tmp2][lowerleft] overlay=shortest=0:eof_action=pass:y=240 [tmp3]; \
+# [3:p:4302:v] setpts=PTS-STARTPTS, scale=320x240 [lowerright]; \
+# [tmp3][lowerright] overlay=shortest=0:eof_action=pass:x=320:y=240[out]" \
+def get_single_cell(idx, pid, scale, sin, inter, sout, x, y):
+    stream_idx = "[%s:v]" % (idx)
+#     scale = "%sx%s" % (w, h)
+    if len(pid) != 0:
+        stream_idx = "[%s:p:%s:v]" % (idx, pid)
+        
+    cmd = "%s setpts=PTS-STARTPTS, scale=%s [%s];" % (stream_idx, scale, inter)
+    cmd += "[%s][%s]overlay=shortest=0:eof_action=pass:x=%s:y=%s[%s]" % (sin, inter, x, y, sout)
+    return cmd
+def get_single_logo(sin, inter, sout, logo_path, logo_w, logo_h, logo_x, logo_y):
+    cmd = 'movie="%s",scale=%sx%s[%s];[%s][%s]overlay=x=%s:y=%s[%s]' % \
+    (logo_path, logo_w, logo_h, inter, sin, inter, logo_x, logo_y, sout)
+    
+    return cmd;
+
+def get_cell(input, background, output, w, h, x, y, logo='', text='', use_tsrc=0):
+    cmd_list = [];
+    cmd = '[%s]setpts=PTS-STARTPTS,scale=%sx%s[scaled_input]' % (input, w, h)
+    cmd_list.append(cmd)
+    overlayed = 'overlayed_input'
+    cmd = '[%s][scaled_input]overlay=x=%s:y=%s[%s]' % (background, x, y, overlayed)
+    tmp_output = overlayed
+    cmd_list.append(cmd)
+    if len(logo) > 0:
+        watermarked = 'watermarked_input'
+        cmd = "movie=filename='%s',scale=%sx%s[logo]" % (logo, w / 8, h / 8)
+        cmd=cmd.replace('\\', '\\\\').replace(':', '\:')
+        cmd_list.append(cmd)
+        cmd = '[%s][logo]overlay=x=%s:y=%s[%s]' % (tmp_output, x + 10, y + 10, watermarked)
+        tmp_output = watermarked
+        cmd_list.append(cmd)
+    if len(text) > 0:
+        texted = 'texted_input'
+        sysinfo = platform.system()
+        sysinfo = sysinfo.upper()
+        if sysinfo.find("WINDOWS") or sysinfo.find("CYGWIN") >= 0:
+             font_path = 'C\:/Windows/Fonts/Calibri.ttf'
+        elif sysinfo.find("LINUX") >= 0:
+             font_path = '/usr/share/fonts/truetype/freefont/FreeSerif.ttf'
+        cmd = "[%s]drawtext=fontfile='%s':text='%s':fontsize=%s:fontcolor=yellow:x=%s:y=%s[%s]" % (tmp_output, font_path, text, w/8,x + 10, y + 10, texted)
+        tmp_output = texted
+        cmd_list.append(cmd)
+    full_cmd = ';'.join(cmd_list).replace(tmp_output, output)
+    
+    return full_cmd
+
+def get_cells(count, cols, rows, w, h, pid_list, logo_list, text_list):
+
+    cell_list = []
+    for i in range(count):
+        input = "%s:v" % i
+        pid = pid_list[i]
+        if len(pid) != 0:
+            input = "%s:p:%s:v" % (i, pid)
+        background = 'stream_' + str(i)
+        output = 'stream_' + str(i + 1)
+        if i == 0:
+            background = 'base'
+        if i == count - 1:
+            output = 'out'
+        x = (i % cols) * w
+        y = (i / cols) * h
+        logo = logo_list[i]
+        text = text_list[i]
+        ccmd = get_cell(input, background, output, w, h, x, y, logo, text)
+        cell_list.append(ccmd)
+
+    full_cmd = ';'.join(cell_list)
+
+    return full_cmd
+
+def get_filter_cl(count, col_cnt, row_cnt, width, height, pid_list, logo_list, text_list):
     win_w = width / col_cnt;
     win_h = height / row_cnt;
-    cmd = '-filter_complex "nullsrc=size=%sx%s [base];' % (width, height)
-    cmd += get_all_wins(col_cnt, row_cnt, win_w, win_h, pid_list)
-    cmd += ';'
-    cmd += get_all_overlay(col_cnt, row_cnt, win_w, win_h)
-    cmd += '"'
+    cell_cl = get_cells(count, col_cnt, row_cnt, win_w, win_h, pid_list,logo_list,text_list)
+    cmd = '-filter_complex "nullsrc=size=%sx%s [base];%s"' % (width, height, cell_cl)
     logging.debug("filter_cl=" + cmd)
     return cmd
 
 def get_input_cl(input_list, pid_list):
-    cmd = ""
+    in_list=[]
     cnt = len(input_list)
     for i in range(cnt):
         input = input_list[i]
         logging.debug(input)
+        if len(input)==0:
+            logging.warning('Empty input found, use testsrc instead')
+            in_list.append('-f lavfi -i testsrc')
+            continue
         if input.startswith("udp://"):
             input = input[6:]
             logging.debug(input)
@@ -128,8 +209,9 @@ def get_input_cl(input_list, pid_list):
                      pid_list[i] = "%s" % pid
             input = "udp://%s?overrun_nonfatal=1&buffer_size=100000000&fifo_size=10000000" % addr
         
-        cmd += '-i "%s" ' % input
+        in_list.append('-i "%s"' % input)
             
+    cmd=' '.join(in_list)
     logging.debug("input_cl=" + cmd)
     return cmd
 
@@ -147,13 +229,13 @@ def get_output_cl(output):
 def usage():
     help_msg = '''USAGE:multiscreen.py [OPTIONS]... <stream1> <stream2> ...
    OPTIONS:
-     -i <string|string>/<file>   the input stream file list or multi input streams seperated by '|'
+     -i <string|string>/<file>   the input stream file list or multi input streams separated by '|'
      -o <file>                   output address 
      -s <width>x<height>         output screen size 
      -w <col>x<row>              output windows
      -v <string>                 loglevel
-     -l <string|string>          logos of each window seprated by '|' 
-     -t <string|string>          text of each window sepated by '|'
+     -l <string|string>          logos of each window separated by '|' 
+     -t <string|string>          text of each window separated by '|'
    Example:
      multiscreen.py -i "udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880" -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 
    '''
@@ -179,7 +261,7 @@ if __name__ == '__main__':
 
     FFMPEG_BIN = 'ffmpeg'
 
-    options = 'i:o:s:w:Yv:'
+    options = 'i:o:s:w:Yv:l:t:'
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options)
@@ -191,7 +273,8 @@ if __name__ == '__main__':
 
     input_stream_list_or_file = ''
     output = ''
-    input_list = []
+    logo_input=''
+    text_input=''
     width = -1
     height = -1
     rows = -1
@@ -217,6 +300,10 @@ if __name__ == '__main__':
             do_execute = 1
         elif opt == '-v':
             loglevel = log_map[arg.lower()]
+        elif opt=='-l':
+            logo_input=arg
+        elif opt=='-t':
+            text_input=arg
         else:
             loggging.error("Unrecognized option '%s'" % opt)
             sys.exit()
@@ -227,9 +314,9 @@ if __name__ == '__main__':
     #     for arg in args:
     #          input_list.append(arg)
 
-
+    input_list = []
     if len(input_stream_list_or_file) > 0:
-        if os.path.exist(input_stream_list_or_file):
+        if os.path.exists(input_stream_list_or_file):
             logging.info("Reading input from file '%s'" % input_stream_list_or_file)
 
             f = open(input_stream_list_or_file, 'r')
@@ -241,7 +328,33 @@ if __name__ == '__main__':
                 if not chn.startswith('#'):
                     input_list.append(chn)
         else:
-            input_list.extend(input_stream_list_or_file.split('|'))
+#             for i in input_stream_list_or_file.split('|'):
+#                 if len(i)!=0:
+#                    input_list.append(i)
+             input_list.extend(input_stream_list_or_file.split('|'))
+
+    if len(input_list) == 0:
+        logging.error("No input is set")
+        sys.exit()
+    
+    logo_list=['']*len(input_list)
+    if  len(logo_input)>0:
+        tmp=logo_input.split('|')
+        for i in range(len(tmp)):
+            if i>=len(input_list):
+                break;
+            if len(tmp[i])>0:
+                logo_list[i]=tmp[i]
+
+    text_list=['']*len(input_list)
+    if  len(text_input)>0:
+        tmp=text_input.split('|')
+        for i in range(len(tmp)):
+            if i>=len(input_list):
+                break;
+            if len(tmp[i])>0:
+                text_list[i]=tmp[i]
+    
     
     if width == -1 or height == -1:
         logging.error("Invalid value of width or height")
@@ -252,13 +365,9 @@ if __name__ == '__main__':
 
     win_cnt = rows * cols
 
-    if len(input_list) == 0:
-        logging.error("No input is set")
-        sys.exit()
-
-    if len(input_list) != win_cnt:
-        logging.error("Input stream number does not equal number of windows")
-        sys.exit()
+    if len(input_list) > win_cnt:
+        logging.warning("Input streams are much more than  windows")
+#         sys.exit()
         
     logging.info("input_list:%s" % input_list)
         
@@ -266,8 +375,7 @@ if __name__ == '__main__':
         logging.error("Ouput is not set")
         sys.exit()
 
-    pid_list = [""] * win_cnt
-    
+    pid_list = [''] * len(input_list) 
     # input_list=['udp://235.1.1.1:48880',
     #            'udp://235.1.1.1:48880',
     #            'udp://235.1.1.1:48880',
@@ -281,8 +389,8 @@ if __name__ == '__main__':
     # cmd += get_output_cl(output)
     cl_list = []
     cl_list.append(FFMPEG_BIN)
-    cl_list.append(get_input_cl(input_list[0:win_cnt], pid_list)) 
-    cl_list.append(get_filter_cl(cols, rows, width, height, pid_list)) 
+    cl_list.append(get_input_cl(input_list, pid_list)) 
+    cl_list.append(get_filter_cl(len(input_list),cols, rows, width, height, pid_list,logo_list,text_list)) 
     cl_list.append(get_output_cl(output))
     
     cmd = ' '.join(cl_list)
