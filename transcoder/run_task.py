@@ -140,7 +140,7 @@ def get_input_cl(input):
     return cmd, pid
 
 
-def get_monitor_merge_cl_list(hls_dir, output_dir, logfile, duration=10):
+def get_monitor_merge_cl_list(hls_dir, output_dir, duration=10):
     cl_list = []
     monitor_bin = BIN_DIR + '/monitor_merge'
     # monitor_bin='monitor_upload'
@@ -148,28 +148,29 @@ def get_monitor_merge_cl_list(hls_dir, output_dir, logfile, duration=10):
     cl_list.append(hls_dir)
     cl_list.append(output_dir)
     cl_list.append("%s" % duration)
-    cl_list.append('>' + logfile)
-    cl_list.append('2>&1')
-    cl_list.append('&')
+#     cl_list.append('>' + logfile)
+#     cl_list.append('2>&1')
+#     cl_list.append('&')
     
-#     cmd = ' '.join(cl_list)
-#     return cmd
     return cl_list
     
     
-def get_monitor_upload_cl_list(hls_dir, output_dir, logfile):
+def get_monitor_upload_cl_list(hls_dir, output_dir):
     cl_list = []
     monitor_bin = BIN_DIR + '/monitor_upload'
     cl_list.append(monitor_bin)
     cl_list.append(output_dir)
     cl_list.append(hls_dir)
-    cl_list.append('>' + logfile)
-    cl_list.append('2>&1')
-    cl_list.append('&')
-    
-#     cmd = ' '.join(cl_list)
-#     return cmd
+#     cl_list.append('>' + logfile)
+#     cl_list.append('2>&1')
+#     cl_list.append('&')
     return cl_list
+
+def get_daemon_and_log_cmd(cmd,logfile):
+     cl=cmd+' >%s 2>&1 &'%logfile
+     return cl
+     
+    
 def check_dir(path):
     path = path.strip()  # delete the blankspace before or after the path
     path = path.rstrip('\\')
@@ -217,10 +218,11 @@ def parse_task(task):
 
 def get_pid(cmd):
     pid = ""
-    p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+    p = subprocess.Popen(['ps', '-ef'], stdout=subprocess.PIPE)
     out,err = p.communicate()
     for line in out.splitlines():
         if cmd in line:
+            logging.info('line=%s'+line)
             pid = int(line.split(None, 1)[0])
             logging.info('Find process ' + pid)
             break
@@ -343,22 +345,19 @@ if __name__ == '__main__':
 
     cl_list = []
     monitor_cl_list = []
+    monitor_log_list=[]
     
     FFMPEG_BIN = BIN_DIR + '/lvtranscode'
     cl_list.append(FFMPEG_BIN)
-    cl_list.append('-hide_banner -threads auto -y  -itsoffset 0.5 -async 1')
+    cl_list.append('-hide_banner')
+    cl_list.append('-threads auto')
+    cl_list.append('-y')
+    cl_list.append('-itsoffset 0.5')
+    cl_list.append('-async 1')
 
-#     input = 'udp://235.1.1.1:48880'
     input_cl, pid = get_input_cl(input_stream)
-
     cl_list.append(input_cl)
 
-#     channel_name = 'cctv3_test'
-#     bitrate_list = ['350', '600', '1200']
-
-#     output_dir_list = []
-
-#     do_execute=0
     
     for task in task_list:
         width, height, bitrate, profile, level, abitrate, output_dir_list = parse_task(task)
@@ -370,25 +369,27 @@ if __name__ == '__main__':
             dpath = "%s_%s/%s_%s/%s_%s" % (channel_name , time_start, total_bitrate, time_start, i, time_start) 
             hls_dir_list.append(dpath)
             output_dir = output_dir_list[i]
-            mon_logfile = "monitor_" + channel_name + '_' + str(total_bitrate) + '_' + str(i) + '.log'
             if output_dir.startswith('http://'):
-                type = 1
+                #type = 1
+                mon_cl=get_monitor_merge_cl_list(dpath, output_dir, hls_opts['hls_time'])
+                mon_logfile = "monitor_merge_" + channel_name + '_' + str(total_bitrate) + '_' + str(i) + '.log'
             elif output_dir.startswith('/'):
-                type = 0  # LOCAL_IDX
-            if type == 0:
-               monitor_cl_list.append(get_monitor_merge_cl_list(dpath, output_dir, mon_logfile, hls_opts['hls_time']))
-            else:
-               monitor_cl_list.append(get_monitor_upload_cl_list(dpath, output_dir, mon_logfile))
+                #type = 0  # LOCAL_IDX
+                mon_cl=get_monitor_upload_cl_list(dpath, output_dir)
+                mon_logfile = "monitor_upload_" + channel_name + '_' + str(total_bitrate) + '_' + str(i) + '.log'
+
+            monitor_cl_list.append(mon_cl)
+            monitor_log_list.append(mon_logfile)
 
         task_enc_cl = get_encoding_cl(pid, width, height, logo_map[width],
                                bitrate, profile, level, abitrate, hls_opts, hls_dir_list)
         cl_list.append(task_enc_cl)
                    
-    trans_log = channel_name + '_trans.log'
+    trans_log = 'trans_'+channel_name + '.log'
             
-    cl_list.append('>' + trans_log)
-    cl_list.append('2>&1')
-    cl_list.append('&')
+#     cl_list.append('>' + trans_log)
+#     cl_list.append('2>&1')
+#     cl_list.append('&')
     
 #     all_task_cl=' '.join(task_cl_list)
     
@@ -402,11 +403,11 @@ if __name__ == '__main__':
     
     process_list = []
     
-    for inner_lst in monitor_cl_list:
+    for i in range(len(monitor_cl_list)):
+        inner_lst=monitor_cl_list[i]
         logging.debug(inner_lst)
         mon_cmd = ' '.join(inner_lst)
-        mon_logfile = channel_name + '_monitor.log'
-#         print mon_cmd + "\n"
+        mon_log=monitor_log_list[i]
         logging.info(mon_cmd)
         if do_execute == 0:
             continue
@@ -414,11 +415,11 @@ if __name__ == '__main__':
         if inner_lst[0].endswith('monitor_merge'):
             check_monitor_merge_dirs(inner_lst)
             upload_m3u8(inner_lst[1])
-        elif inne_lst[0].endswith('monitor_upload'):
+        elif inner_lst[0].endswith('monitor_upload'):
             check_monitor_upload_dirs(inner_lst)
             upload_m3u8(inner_lst[2])
         
-        subprocess.call(mon_cmd, shell=True, stdout=None, stderr=None)
+        subprocess.call(get_daemon_and_log_cmd(mon_cmd,mon_log), shell=True, stdout=None, stderr=None)
 #        run_cmd(mon_cmd, do_execute, mon_logfile, 1)
         pid = get_pid(mon_cmd)
         if len(pid) != 0:
@@ -426,12 +427,14 @@ if __name__ == '__main__':
     
     if do_execute == 0:
         sys.exit(0)
-    subprocess.call(full_trans_cmd, shell=True, stdout=None, stderr=None)
+    subprocess.call(get_daemon_and_log_cmd(full_trans_cmd, trans_log), shell=True, stdout=None, stderr=None)
 #    run_cmd(full_trans_cmd, do_execute, trans_log, 1)
     pid = get_pid(full_trans_cmd)
     if len(pid) != 0:
         process_list.append(pid)
+    
+    logging.info('process=%s'%process_list)
 
-    signal.signal(signal.SIGINT, sigint_hander)
-    while True:
-       pass 
+#    signal.signal(signal.SIGINT, sigint_hander)
+#    while True:
+#       pass 
