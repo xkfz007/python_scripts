@@ -6,8 +6,15 @@ import getopt
 # sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import logging
 import platform
+import datetime
+import time
+import signal
 # logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
+FFMPEG_BIN = 'ffmpeg'
+COLOR='yellow'
+BITRATE=''
+TIME_OUT=0
 # ffmpeg -nhb -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
 # -filter_complex "nullsrc=size=640x480 [base]; \
 # [0:p:3801:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
@@ -145,11 +152,11 @@ def get_cell(input, background, output, w, h, x, y, logo='', text='', use_tsrc=0
         texted = 'texted_input'
         sysinfo = platform.system()
         sysinfo = sysinfo.upper()
-        if sysinfo.find("WINDOWS") or sysinfo.find("CYGWIN") >= 0:
+        if sysinfo.find("WINDOWS")>=0 or sysinfo.find("CYGWIN") >= 0:
              font_path = 'C\:/Windows/Fonts/Calibri.ttf'
         elif sysinfo.find("LINUX") >= 0:
              font_path = '/usr/share/fonts/truetype/freefont/FreeSerif.ttf'
-        cmd = "[%s]drawtext=fontfile='%s':text='%s':fontsize=%s:fontcolor=yellow:x=%s:y=%s[%s]" % (tmp_output, font_path, text, w/8,x + 10, y + 10, texted)
+        cmd = "[%s]drawtext=fontfile='%s':text='%s':fontsize=%s:fontcolor=%s:x=%s:y=%s[%s]" % (tmp_output, font_path, text, w/8,COLOR,x + 10, y + 10, texted)
         tmp_output = texted
         cmd_list.append(cmd)
     full_cmd = ';'.join(cmd_list).replace(tmp_output, output)
@@ -193,7 +200,7 @@ def get_input_cl(input_list, pid_list):
     in_list=[]
     cnt = len(input_list)
     for i in range(cnt):
-        input = input_list[i]
+        input = input_list[i].strip(' ')
         logging.debug(input)
         if len(input)==0:
             logging.warning('Empty input found, use testsrc instead')
@@ -209,6 +216,7 @@ def get_input_cl(input_list, pid_list):
                      pid_list[i] = "%s" % pid
             input = "udp://%s?overrun_nonfatal=1&buffer_size=100000000&fifo_size=10000000" % addr
         
+        in_list.append('-thread_queue_size 1024')
         in_list.append('-i "%s"' % input)
             
     cmd=' '.join(in_list)
@@ -216,13 +224,19 @@ def get_input_cl(input_list, pid_list):
     return cmd
 
 def get_output_cl(output):
-    codec = ' -map "[out]" -c:v libx264 '
+    cl_list=[]
+    cl_list.append('-map "[out]" -c:v libx264')
+    if len(BITRATE)>0:
+        cl_list.append('-b:v %s'%BITRATE)
     format = ""
     if output.startswith("udp://"):
         format = "mpegts"
     elif output.startswith("rtmp://"):
         format = "flv"
-    cmd = codec + " " + " -f " + format + " " + output
+    if len(format)>0:
+        cl_list.append('-f %s'%format)
+    cl_list.append(output)
+    cmd=' '.join(cl_list)
     logging.debug("output_cl=" + cmd)
     return cmd
 
@@ -236,6 +250,9 @@ def usage():
      -v <string>                 loglevel
      -l <string|string>          logos of each window separated by '|' 
      -t <string|string>          text of each window separated by '|'
+     -c <string>                 color of text
+     -b <int>M/<int>k            set bitrate of output
+     -T seconds                  Time out
    Example:
      multiscreen.py -i "udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880" -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 
    '''
@@ -259,9 +276,8 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    FFMPEG_BIN = 'ffmpeg'
 
-    options = 'i:o:s:w:Yv:l:t:'
+    options = 'i:o:s:w:Yv:l:t:c:b:T:'
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options)
@@ -304,6 +320,12 @@ if __name__ == '__main__':
             logo_input=arg
         elif opt=='-t':
             text_input=arg
+        elif opt=='-c':
+            COLOR=arg
+        elif opt=='-b':
+            BITRATE=arg
+        elif opt=='-T':
+            TIME_OUT=int(arg)
         else:
             loggging.error("Unrecognized option '%s'" % opt)
             sys.exit()
@@ -401,4 +423,20 @@ if __name__ == '__main__':
     if do_execute == 0:
         sys.exit()
 
-    subprocess.call(cmd, shell=True, stdout=None, stderr=None)
+    if TIME_OUT==0:
+        subprocess.call(cmd, shell=True, stdout=None, stderr=None)
+    else:
+        start = datetime.datetime.now()
+        process = subprocess.Popen(cmd, stdout=None,stderr=None,shell=True,close_fds=True, preexec_fn = os.setsid)
+
+        while process.poll() is None:
+          time.sleep(1)
+          now = datetime.datetime.now()
+          if (now - start).seconds> TIME_OUT:
+              logging.warning("Time out, EXITING......")
+              try:
+                #process.terminate()
+                os.killpg( process.pid,signal.SIGUSR1)
+              except Exception,e:
+                  sys.exit(0)
+        sys.exit(0)
