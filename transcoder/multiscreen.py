@@ -9,12 +9,15 @@ import platform
 import datetime
 import time
 import signal
+import re
 # logging.basicConfig(level=logging.INFO,format='[%(levelname)s]:%(message)s')
 
 FFMPEG_BIN = 'ffmpeg'
+FFPROBE_BIN='ffprobe'
 COLOR='yellow'
 BITRATE=''
 TIME_OUT=0
+DO_DETECT=0
 # ffmpeg -nhb -i "$input1" -i "$input2" -i "$input3" -i "$input4"  \
 # -filter_complex "nullsrc=size=640x480 [base]; \
 # [0:p:3801:v] setpts=PTS-STARTPTS, scale=320x240 [upperleft]; \
@@ -196,16 +199,103 @@ def get_filter_cl(count, col_cnt, row_cnt, width, height, pid_list, logo_list, t
     logging.debug("filter_cl=" + cmd)
     return cmd
 
+class FFStream:
+    def __init__(self, datalines):
+        for a in datalines:
+            try:
+                (key, val) = a.strip().split('=')
+                self.__dict__[key] = val
+            except:
+                b = 1
+
+    def isAudio(self,tag='codec_type'):
+        val = False
+        if self.__dict__[tag]:
+            if str(self.__dict__[tag]) == 'audio':
+                val = True
+        return val
+
+    def isVideo(self,tag='codec_type'):
+        val = False
+        if self.__dict__[tag]:
+            if self.__dict__[tag] == 'video':
+                val = True
+        return val
+
+    def isSubtitle(self,tag='codec_type'):
+        val = False
+        if self.__dict__[tag]:
+            if str(self.__dict__[tag]) == 'subtitle':
+                val = True
+        return val
+
+def get_fftype(streams,lines,tag):
+    datalines=[]
+    start_tag='\['+tag.upper()+'\]'
+    end_tag='\[\/'+tag.upper()+'\]'
+    for a in iter(lines, b''):
+        if re.match(start_tag, a):
+            datalines = []
+        elif re.match(end_tag, a):
+            streams.append(FFStream(datalines))
+            datalines = []
+        else:
+            datalines.append(a)
+
+
+def get_streams2(url, timeout=20):
+    start = datetime.datetime.now()
+    streams=[]
+    cl_list=[]
+    cl_list.append(FFPROBE_BIN)
+    if url.startswith("rtsp://"):
+        cl_list.append("-rtsp_flags prefer_tcp")
+    cl_list.append('-show_streams')
+    cl_list.append('"%s"'%url)
+    cmd=' '.join(cl_list)
+    process = subprocess.Popen(cmd, bufsize=100000, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True, close_fds=True)
+    while process.poll() is None:
+      time.sleep(0.1)
+      now = datetime.datetime.now()
+      if (now - start).seconds> timeout:
+          logging.warning("Time out......")
+          try:
+            process.terminate()
+          except Exception,e:
+            return None
+          return streams
+    logging.info("Analysing streams......")
+    get_fftype(streams,process.stdout.readline,'STREAM')
+    get_fftype(streams,process.stderr.readline,'STREAM')
+    if process.stdout:
+      process.stdout.close()
+    if process.stderr:
+      process.stderr.close()
+    try:
+      process.kill()
+    except OSError:
+      pass
+    return streams
+
 def get_input_cl(input_list, pid_list):
     in_list=[]
     cnt = len(input_list)
     for i in range(cnt):
         input = input_list[i].strip(' ')
         logging.debug(input)
+        if DO_DETECT>0:
+           streams=get_streams2(input,DO_DETECT)
+           if len(streams)<=0:
+               logging.error('Could not detect the stream: %s'%(input))
+               input=''
+           else:
+               logging.info('Stream "%s" is OK'%(input))
         if len(input)==0:
-            logging.warning('Empty input found, use testsrc instead')
+            logging.warning('Empty input found, use "testsrc" instead')
             in_list.append('-f lavfi -i testsrc')
             continue
+        if input.startswith("rtsp://"):
+            in_list.append("-rtsp_flags prefer_tcp")
         if input.startswith("udp://"):
             input = input[6:]
             logging.debug(input)
@@ -253,6 +343,7 @@ def usage():
      -c <string>                 color of text
      -b <int>M/<int>k            set bitrate of output
      -T seconds                  Time out
+     -D seconds                  detect input to decide if use it, time out 'seconds'
    Example:
      multiscreen.py -i "udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880" -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 
    '''
@@ -277,7 +368,7 @@ if __name__ == '__main__':
         sys.exit()
 
 
-    options = 'i:o:s:w:Yv:l:t:c:b:T:'
+    options = 'i:o:s:w:Yv:l:t:c:b:T:D:'
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options)
@@ -326,6 +417,8 @@ if __name__ == '__main__':
             BITRATE=arg
         elif opt=='-T':
             TIME_OUT=int(arg)
+        elif opt=='-D':
+            DO_DETECT=int(arg)
         else:
             loggging.error("Unrecognized option '%s'" % opt)
             sys.exit()
@@ -432,11 +525,15 @@ if __name__ == '__main__':
         while process.poll() is None:
           time.sleep(1)
           now = datetime.datetime.now()
-          if (now - start).seconds> TIME_OUT:
+          time_passed=(now - start).seconds
+          if time_passed> TIME_OUT:
               logging.warning("Time out, EXITING......")
               try:
                 #process.terminate()
                 os.killpg( process.pid,signal.SIGUSR1)
               except Exception,e:
                   sys.exit(0)
+          else:
+              logging.info("Process will be terminated after %s seconds"%(TIME_OUT-time_passed))
+              
         sys.exit(0)
