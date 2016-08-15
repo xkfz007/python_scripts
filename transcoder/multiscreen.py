@@ -344,6 +344,7 @@ def usage():
      -b <int>M/<int>k            set bitrate of output
      -T seconds                  Time out
      -D seconds                  detect input to decide if use it, time out 'seconds'
+     -L <file>                   output transcoder log
    Example:
      multiscreen.py -i "udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880|udp://235.1.1.1:48880" -o "udp://235.1.1.2:48880" -s 640x480 -w 2x2 
    '''
@@ -392,6 +393,7 @@ if __name__ == '__main__':
              'debug':logging.DEBUG,
              'error':logging.ERROR,
              'warning':logging.WARNING}
+    trans_log=''
 
 
     for opt, arg in opts:
@@ -516,11 +518,15 @@ if __name__ == '__main__':
     if do_execute == 0:
         sys.exit()
 
+    pfile = None
+    if len(trans_log)>0:
+       pfile = open(trans_log, "w")
+
     if TIME_OUT==0:
-        subprocess.call(cmd, shell=True, stdout=None, stderr=None)
+        subprocess.call(cmd, shell=True, stdout=pfile, stderr=pfile)
     else:
         start = datetime.datetime.now()
-        process = subprocess.Popen(cmd, stdout=None,stderr=None,shell=True,close_fds=True, preexec_fn = os.setsid)
+        process = subprocess.Popen(cmd, stdout=pfile,stderr=pfile,shell=True,close_fds=True, preexec_fn = os.setsid)
 
         while process.poll() is None:
           time.sleep(1)
@@ -536,4 +542,5 @@ if __name__ == '__main__':
           else:
               logging.info("Process will be terminated after %s seconds"%(TIME_OUT-time_passed))
               
+        pfile.close()
         sys.exit(0)
