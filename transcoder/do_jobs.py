@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from cookielib import logger
 __author__ = 'Felix'
 import subprocess
 import os, sys
@@ -26,7 +25,8 @@ def usage():
     print help_msg
     return
 def signal_handler(signum, frame):
-    #print('Received signal: ', signum)
+    global EXIT
+    print('Received signal: ', signum)
     EXIT=True
 
 if __name__ == '__main__':
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     cmd_cnt=len(cmd_list)
     logging.info('We will execute the following commands(%s):'%cmd_cnt)
     for i in range(0,cmd_cnt):
-        logging.info('\t%s >%s'%cmd_list[i],log_list[i])
+        logging.info('\t%s >%s'%(cmd_list[i],log_list[i]))
 
     if do_execute == 0:
         sys.exit()
@@ -101,17 +101,21 @@ if __name__ == '__main__':
        pfile_list.append(pfile)
        process_list.append(process)
 
+    signal.signal(signal.SIGHUP, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     if TIME_OUT==0:
         #subprocess.call(cmd, shell=True, stdout=pfile, stderr=pfile)
-        while EXIT==False:
-            signal.signal(signal.SIGINT, signal_handler)
+        while True:
+            if EXIT:
+               print 'EXIT2=%s'%EXIT
+	       break
         
     else:
         start = datetime.datetime.now()
         time_passed=0
         #process = subprocess.Popen(cmd, stdout=pfile,stderr=pfile,shell=True,close_fds=True, preexec_fn = os.setsid)
         while EXIT==False and time_passed<TIME_OUT:
-          signal.signal(signal.SIGINT, signal_handler)
           time.sleep(1)
           now = datetime.datetime.now()
           time_passed=(now - start).seconds

@@ -369,7 +369,7 @@ if __name__ == '__main__':
         sys.exit()
 
 
-    options = 'i:o:s:w:Yv:l:t:c:b:T:D:'
+    options = 'i:o:s:w:Yv:l:t:c:b:T:D:L:'
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options)
