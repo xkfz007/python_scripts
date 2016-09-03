@@ -116,12 +116,13 @@ if __name__ == '__main__':
             elif mode>1:
                 intermediate_sub_file='intermediate.ass'
                 cmd+=' -y -sub_charenc %s -i "%s" -f ass "%s";'%(encoding_type,subtitle_file,intermediate_sub_file)
+                cmd+=FFMPEG_BIN
 
         if mode<3:# use subtitle stream
             cmd+=' -y -i "%s" -sub_charenc %s  -i "%s" -c copy "%s"'%(video_file,encoding_type,intermediate_sub_file,output_file)
         elif mode==3:# hard code
             pass
-            cmd+=' -y -i "%s" -vf \'ass="%s"\' -c:a copy "%s"'%(video_file,intermediate_sub_file,output_file)
+            cmd+=' -y -i "%s" -vf "ass=%s" -c:a copy "%s"'%(video_file,intermediate_sub_file,output_file)
         #if mode==1:#use pipe
         #    cmd+=' -y -i "%s" -sub_charenc gbk -i %s -c copy "%s"'%(video_file,tmp_sub_file,output_file)
         #elif mode>1:#chinese subtitle, need convert to ass first

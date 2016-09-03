@@ -19,7 +19,13 @@ def usage():
      -I <filname>  merge the input media files to one, only mp4 and mkv is supported
                    When the filename contains Chinese characters, this option is used
      -o <string>  output filename
-     -m <mode/method>
+     -m <mode/method>  set the concat mode,
+                       0:auto to generate script
+                       1:use pipe
+                       2:use sub proces
+                       3:use tempfiles
+                       4:use filter
+                       
      -T <int> thread number
    ARGUMENTS:
      <files> or <directory>  support pattern globbing,these are the input files that will be processed
@@ -250,19 +256,19 @@ if __name__ == '__main__':
         else:
             if ext=='.rmvb':
                 ext='.mkv'
-                if mode==0:
-                    enc_cmd='-c:v copy'#'-c:v libx264'
-                    cmd=get_cmd_with_tempfiles(global_cmd,input_list)
-                elif mode==1:
-                    enc_cmd=''#-c:v copy'#'-c:v libx264'
-                    cmd=get_cmd_with_filter(global_cmd,input_list)
-            else:
-                if mode==0:#auto to generate script
-                    cmd=get_cmd_with_script(global_cmd,input_list,help.get_do_execute())
-                elif mode==1:#use pipe
-                    cmd=get_cmd_with_pipe(global_cmd,input_list)
-                elif mode==2:#use sub process
-                    cmd=get_cmd_with_procsub2(global_cmd,input_list)
+
+            if mode==0:#auto to generate script
+                cmd=get_cmd_with_script(global_cmd,input_list,help.get_do_execute())
+            elif mode==1:#use pipe
+                cmd=get_cmd_with_pipe(global_cmd,input_list)
+            elif mode==2:#use sub process
+                cmd=get_cmd_with_procsub2(global_cmd,input_list)
+            elif mode==3:
+                enc_cmd='-c:v copy'#'-c:v libx264'
+                cmd=get_cmd_with_tempfiles(global_cmd,input_list)
+            elif mode==4:
+                enc_cmd='-c:v libx264'#-c:v copy'#'-c:v libx264'
+                cmd=get_cmd_with_filter(global_cmd,input_list)
 
     if len(output_arg)>0:
         if output_arg.startswith('.'):
