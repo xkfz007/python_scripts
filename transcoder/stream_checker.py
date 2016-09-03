@@ -7,8 +7,11 @@ import sys
 import os
 import datetime
 import hashlib
+#import warnings
 
 import logging
+import getopt
+import signal
 
 
 import smtplib  
@@ -83,16 +86,19 @@ def get_streams2(channel,url, timeout=5):
     streams=[]
     logging.info("Checking %s:%s"%(channel,url))
     cmd= 'ffprobe -show_streams "%s"'%url
-    process = subprocess.Popen(cmd, bufsize=100000, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True, close_fds=True)
+    process = subprocess.Popen(cmd, bufsize=100000, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True, close_fds=True,preexec_fn = os.setsid)
+    #logging.info("Analyzing stream......")
     while process.poll() is None:
       time.sleep(0.1)
       now = datetime.datetime.now()
       if (now - start).seconds> timeout:
           logging.warning("Time out......")
           try:
-            process.terminate()
+            #porcess.terminate()
+            os.killpg( process.pid,signal.SIGTERM)
           except Exception,e:
-            return None
+            #warnings.warn(e)
+            return streams
           return streams
     #out = process.communicate()[0]
     #print out
@@ -108,7 +114,8 @@ def get_streams2(channel,url, timeout=5):
     if process.stderr:
       process.stderr.close()
     try:
-      process.kill()
+      os.killpg( process.pid,signal.SIGTERM)
+      #process.kill()
     except OSError:
       pass
     return streams
@@ -219,9 +226,9 @@ if __name__ == '__main__':
             loggging.error("Unrecognized option '%s'" % opt)
             sys.exit()
     if len(log_file)>0:
-       logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='[%Y-%m-%d %H:%M:%S]', filename=log_file)
+       logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='%Y-%m-%d %H:%M:%S', filename=log_file)
     else:
-       logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='[%Y-%m-%d %H:%M:%S]')
+       logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='%Y-%m-%d %H:%M:%S')
            
     input_file=''
     channel_list={}
@@ -231,10 +238,10 @@ if __name__ == '__main__':
         else:
             for i in input_stream_list_or_file.split('|'):
                 add_channel(channel_list, i)
+            if len(channel_list) == 0:
+                logging.error("No input is set")
+                sys.exit()
 
-    if len(channel_list) == 0:
-         logging.error("No input is set")
-         sys.exit()
 
     counter=0
     while True:
