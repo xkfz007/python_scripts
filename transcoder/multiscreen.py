@@ -542,5 +542,6 @@ if __name__ == '__main__':
           else:
               logging.info("Process will be terminated after %s seconds"%(TIME_OUT-time_passed))
               
-        pfile.close()
+        if len(trans_log)>0:
+           pfile.close()
         sys.exit(0)

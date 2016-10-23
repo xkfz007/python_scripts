@@ -81,11 +81,14 @@ def get_streams(channel,url,tag='STREAM'):
     logging.info("Done......")
     return streams
 
-def get_streams2(channel,url, timeout=5):
+def get_streams2(channel,url, timeout=10):
     start = datetime.datetime.now()
     streams=[]
-    logging.info("Checking %s:%s"%(channel,url))
-    cmd= 'ffprobe -show_streams "%s"'%url
+    #logging.info("Checking %s:%s"%(channel,url))
+    cmd= 'ffprobe -show_streams '
+    if url.startswith("rtsp://"):
+       cmd+=" -rtsp_flags prefer_tcp "
+    cmd+='"%s"'%url
     process = subprocess.Popen(cmd, bufsize=100000, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True, close_fds=True,preexec_fn = os.setsid)
     #logging.info("Analyzing stream......")
     while process.poll() is None:
@@ -156,13 +159,17 @@ def notify_channel_disconnection(channel,url):
 def add_channel(chn_dict,str):
     chn = str.strip('\n')
     chn = chn.strip(' ')
+    chn = re.sub(' +',' ',chn)
+    #print chn
+    delim=' '
     if len(chn)>0 and not chn.startswith('#'):
-        if ' ' not in chn:
-            logging.warning('No channel name of stream "%s"'%chn)
+        if delim not in chn:
+            logging.warning('No channel of stream "%s"'%chn)
             url=chn
             name=hashlib.new("md5",url).hexdigest()[0:8].upper()
         else:
-            name,url=chn.split(' ')
+            name,url=chn.split(delim)
+        #print "%s:%s"%(name,url)
         channel_list[name.strip(' ')]=url.strip(' ')
     return 
 
@@ -172,8 +179,10 @@ def usage():
                         stream_ckecker.py -i <stream_list_file>
     OPTIONS:
      -i <name string|name string>/<file>   the input stream file list or multi input streams separated by '|'
-     -T seconds                  Time out
+     -T seconds                  Every T seconds to detect the channel lsit
      -L <file>                   output transcoder log
+     -l                          loop to detect the channel list
+     -r                          generate report for channel after each round
     If the stream is disconnected, an email will be send to wondertek_test@163.com(123456@wd)
    Example:
      stream_checker.py -i "CCTV1 udp://235.1.1.1:48880/2801|CCTV2 udp://235.1.1.1:48880/2802"
@@ -197,7 +206,7 @@ if __name__ == '__main__':
         usage()
         sys.exit(0)
 
-    options = 'L:i:hT:'
+    options = 'L:i:hT:rl'
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options)
@@ -209,7 +218,9 @@ if __name__ == '__main__':
 
     input_stream_list_or_file=''
     log_file=''
+    gen_report=False
     TIME_OUT=10
+    LOOP=False
 
 
     for opt, arg in opts:
@@ -217,6 +228,10 @@ if __name__ == '__main__':
             input_stream_list_or_file = arg
         elif opt=='-L':
             log_file=arg
+        elif opt=='-r':
+            gen_report=True
+        elif opt=='-l':
+            LOOP=True
         elif opt=='-T':
             TIME_OUT=int(arg)
         elif opt=='-h':
@@ -225,11 +240,14 @@ if __name__ == '__main__':
         else:
             loggging.error("Unrecognized option '%s'" % opt)
             sys.exit()
+
     if len(log_file)>0:
        logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='%Y-%m-%d %H:%M:%S', filename=log_file)
     else:
        logging.basicConfig(level=logging.INFO,format='[%(asctime)s][%(levelname)s]:%(message)s',datefmt='%Y-%m-%d %H:%M:%S')
+       
            
+    #print input_stream_list_or_file
     input_file=''
     channel_list={}
     if len(input_stream_list_or_file) > 0:
@@ -245,6 +263,10 @@ if __name__ == '__main__':
 
     counter=0
     while True:
+        if gen_report:
+            report_filename="report_%s.log"%(time.time())
+            report_f=open(report_filename,'w')
+            
         counter=counter+1
         logging.info('=======Begin the round %s checking======='%counter)
         #channel_list={
@@ -262,15 +284,25 @@ if __name__ == '__main__':
 
         for (channel,url) in channel_list.items():
             streams=get_streams2(channel,url)
+            stat='OK'
             if len(streams)<=0:
-                logging.error("Could not detect the channel %s(%s)"%(channel,url))
+                logging.error("Could not detect the channel %s:%s"%(channel,url))
+                stat='ERROR'
                 #notify_channel_disconnection(channel, url)
             else:
-                logging.info("Channel %s is in normal status:%s"%(channel,url))
+                logging.info("Channel %s is OK:%s"%(channel,url))
+                stat='OK'
     
-        logging.info('=======Finish the round %s checking======='%counter)
+            if gen_report:
+                report_f.write("%s\t%s\t%s\n"%(channel,url,stat))
+                report_f.flush()
+        
+        if gen_report:
+            report_f.close()
+        #logging.info('=======Finish the round %s checking======='%counter)
+        if not LOOP:
+           break
 
         time.sleep(TIME_OUT)
-
 
 
